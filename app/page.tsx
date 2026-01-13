@@ -1,162 +1,328 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
-export default function Home() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [message, setMessage] = useState("");
+const fadeUp = {
+  initial: { opacity: 0, y: 18 },
+  animate: { opacity: 1, y: 0 },
+};
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmedEmail = email.trim();
+const features = [
+  {
+    title: "Verified Sources",
+    description:
+      "Every alert is backed by a credited source so you can apply with confidence.",
+  },
+  {
+    title: "Smart Filters",
+    description:
+      "Target roles, locations, and timelines with precision filters that do the sorting.",
+  },
+  {
+    title: "Weekly Digest",
+    description:
+      "One clean briefing each week plus instant alerts when new roles drop.",
+  },
+];
 
-    if (!emailRegex.test(trimmedEmail)) {
-      setStatus("error");
-      setMessage("Enter a valid email.");
-      return;
-    }
+const steps = [
+  {
+    number: "01",
+    title: "Connect",
+    description: "Pick your roles, locations, and graduation year.",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6">
+        <path
+          d="M4 7h16M4 12h10M4 17h7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    number: "02",
+    title: "Verify",
+    description:
+      "We collect postings only from credited sources and dedupe repeats.",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6">
+        <path
+          d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M9 12l2 2 4-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+  {
+    number: "03",
+    title: "Notify",
+    description: "Get email alerts instantly or as a weekly digest.",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6">
+        <path
+          d="M6 16V10a6 6 0 1 1 12 0v6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M4 16h16l-2 3H6l-2-3z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
+];
 
-    try {
-      setStatus("loading");
-      setMessage("");
-      const response = await fetch("/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmedEmail }),
-      });
-      const data = await response.json().catch(() => null);
+const marqueeLabels = [
+  "FAANG",
+  "Big Tech",
+  "Startups",
+  "Fortune 500",
+  "Research Labs",
+  "Fintech",
+  "Aerospace",
+  "Healthcare",
+];
 
-      if (!response.ok || !data?.ok) {
-        setStatus("error");
-        setMessage(data?.error ?? "Something went wrong. Try again.");
-        return;
-      }
-
-      setStatus("success");
-      setMessage("You're in — watch your inbox.");
-      setEmail("");
-    } catch (error) {
-      setStatus("error");
-      setMessage("Network error. Try again.");
-    }
-  };
+export default function HomePage() {
+  const [marqueeDuration, setMarqueeDuration] = useState(30);
 
   return (
-    <div className="landing">
-      <div className="floater floater-1" aria-hidden="true" />
-      <div className="floater floater-2" aria-hidden="true" />
-      <div className="floater floater-3" aria-hidden="true" />
-      <div className="floater floater-4" aria-hidden="true" />
-      <div className="floater floater-5" aria-hidden="true" />
+    <div className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-400/20 blur-[120px]" />
+        <div className="absolute right-10 top-24 h-64 w-64 rounded-full bg-indigo-500/20 blur-[130px]" />
+        <div className="absolute bottom-10 left-8 h-64 w-64 rounded-full bg-emerald-400/10 blur-[120px]" />
+      </div>
 
-      <main className="frame">
-        <div className="content">
-          <span className="kicker fade-up delay-1">
-            Verified internship alerts
-          </span>
-          <h1 className="title fade-up delay-2">Rezoomind®</h1>
-          <p className="subtitle fade-up delay-3">
-            Get internship alerts from verified, credited sources. We filter the
-            noise so you only see real opportunities.
-          </p>
+      <section className="relative mx-auto flex max-w-6xl flex-col gap-16 px-6 py-20">
+        <div className="grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <motion.span
+              {...fadeUp}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200/80"
+            >
+              Verified internship signals
+            </motion.span>
+            <motion.h1
+              {...fadeUp}
+              transition={{ duration: 0.6, delay: 0.08 }}
+              className="text-4xl font-semibold leading-tight text-white sm:text-5xl"
+            >
+              Verified internship alerts delivered to your inbox.
+            </motion.h1>
+            <motion.p
+              {...fadeUp}
+              transition={{ duration: 0.6, delay: 0.16 }}
+              className="max-w-xl text-base leading-relaxed text-white/70"
+            >
+              Rezoomind curates openings from credited sources and sends real-time
+              alerts so you can focus on applying, not searching.
+            </motion.p>
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.6, delay: 0.24 }}
+              className="flex flex-col gap-4 sm:flex-row"
+            >
+              <Button href="/sign-up" variant="primary">
+                Get Started
+              </Button>
+              <Button href="/pricing" variant="secondary">
+                View Pricing
+              </Button>
+            </motion.div>
+          </div>
 
-          <form className="email-form fade-up delay-4" onSubmit={handleSubmit}>
-            <label className="sr-only" htmlFor="email">
-              Email address
-            </label>
-            <div className="input-shell">
-              <input
-                id="email"
-                type="email"
-                name="email"
-                placeholder="you@school.edu"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                aria-invalid={status === "error"}
-              />
-              <button
-                className="submit-button"
-                type="submit"
-                aria-label="Submit email"
-                disabled={status === "loading"}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    d="M5 12h14M13 5l6 7-6 7"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+          <motion.div
+            {...fadeUp}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-8 shadow-[0_30px_80px_rgba(0,0,0,0.45)]"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-[0.32em] text-white/50">
+                Next Alert
+              </span>
+              <span className="text-xs font-semibold text-cyan-200">Live</span>
             </div>
-            {message ? (
-              <p className={`form-message ${status}`} role="status">
-                {message}
-              </p>
-            ) : null}
-          </form>
+            <div className="mt-6 space-y-4">
+              {[
+                "Product Design Intern · Stripe",
+                "Software Engineering Intern · Notion",
+                "Growth Analyst Intern · Ramp",
+              ].map((item, index) => (
+                <div
+                  key={item}
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                >
+                  <span className="text-sm text-white/80">{item}</span>
+                  <span className="text-xs text-white/50">{index + 1}h</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex items-center justify-between text-xs text-white/50">
+              <span>Weekly digest every Friday</span>
+              <span className="rounded-full border border-white/10 px-3 py-1">
+                Verified only
+              </span>
+            </div>
+          </motion.div>
+        </div>
 
-          <div className="cta-row fade-up delay-5">
-            <button className="cta-button" type="button">
-              Join the verified list
-            </button>
+        <div className="grid gap-6 md:grid-cols-3">
+          {features.map((feature, index) => (
+            <Card
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+            >
+              <h3 className="text-lg font-semibold text-white">
+                {feature.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/60">
+                {feature.description}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-24">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-3"
+        >
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+            How it works
+          </h2>
+          <p className="text-base text-white/70">
+            Set filters once. Get verified internships automatically.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.1 + index * 0.1 }}
+              whileHover={{
+                y: -4,
+                boxShadow: "0 28px 60px rgba(34,211,238,0.18)",
+              }}
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition-colors hover:border-cyan-300/40"
+            >
+              <span className="pointer-events-none absolute right-5 top-4 text-6xl font-semibold text-white/10">
+                {step.number}
+              </span>
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-cyan-200">
+                  {step.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  {step.title}
+                </h3>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-white/60">
+                {step.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <section className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 pb-24">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-3"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200/70">
+            Inspired by engineers from top tech teams
+          </p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+            Trusted by engineers like you
+          </h2>
+          <p className="text-sm text-white/60">
+            From students to early-career engineers
+          </p>
+        </motion.div>
+
+        <div className="relative rounded-3xl border border-white/10 bg-white/5 px-4 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-8 rounded-3xl bg-gradient-to-b from-slate-950/80 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 rounded-3xl bg-gradient-to-t from-slate-950/80 to-transparent" />
+
+          <div className="hidden md:block">
+            <motion.div
+              className="flex w-max items-center gap-12 pr-12 text-xs font-semibold uppercase tracking-[0.4em] text-white/40"
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{
+                duration: marqueeDuration,
+                ease: "linear",
+                repeat: Infinity,
+              }}
+              onHoverStart={() => setMarqueeDuration(60)}
+              onHoverEnd={() => setMarqueeDuration(30)}
+            >
+              {[...marqueeLabels, ...marqueeLabels].map((label, index) => (
+                <span
+                  key={`${label}-${index}`}
+                  className="flex items-center gap-2"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                  {label}
+                </span>
+              ))}
+            </motion.div>
+          </div>
+
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:hidden">
+            {marqueeLabels.map((label) => (
+              <div
+                key={label}
+                className="snap-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40"
+              >
+                {label}
+              </div>
+            ))}
           </div>
         </div>
-      </main>
-
-      <div className="socials fade-up delay-6">
-        <a
-          className="social-button"
-          href="https://github.com"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M12 2C6.47 2 2 6.58 2 12.26c0 4.54 2.87 8.38 6.85 9.74.5.1.68-.22.68-.49 0-.24-.01-1.04-.01-1.88-2.5.47-3.15-.62-3.35-1.18-.11-.29-.6-1.18-1.02-1.42-.35-.2-.85-.7-.01-.71.79-.01 1.35.74 1.54 1.05.9 1.53 2.34 1.1 2.91.84.09-.67.35-1.1.63-1.35-2.22-.26-4.55-1.13-4.55-5.02 0-1.11.39-2.02 1.03-2.73-.1-.26-.45-1.33.1-2.77 0 0 .84-.27 2.75 1.04.79-.22 1.64-.33 2.49-.33.85 0 1.7.11 2.49.33 1.91-1.31 2.75-1.04 2.75-1.04.55 1.44.2 2.51.1 2.77.64.71 1.03 1.61 1.03 2.73 0 3.9-2.34 4.76-4.57 5.02.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49 3.98-1.36 6.85-5.2 6.85-9.74C22 6.58 17.53 2 12 2z"
-            />
-          </svg>
-        </a>
-        <a
-          className="social-button"
-          href="https://x.com"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="X"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M4 4h4.3l4.37 6.1L17.7 4H21l-6.88 8.94L21 20h-4.3l-4.62-6.54L7.3 20H4l7.34-9.64L4 4z"
-            />
-          </svg>
-        </a>
-        <a
-          className="social-button"
-          href="https://linkedin.com"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="LinkedIn"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM3 8.98h3.96V21H3V8.98zM9.5 8.98H13v1.64h.05c.49-.93 1.69-1.92 3.49-1.92 3.74 0 4.43 2.46 4.43 5.66V21h-3.96v-4.96c0-1.18-.02-2.7-1.64-2.7-1.65 0-1.9 1.29-1.9 2.62V21H9.5V8.98z"
-            />
-          </svg>
-        </a>
-      </div>
+      </section>
     </div>
   );
 }
