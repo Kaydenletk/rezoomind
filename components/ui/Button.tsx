@@ -6,8 +6,10 @@ import { motion } from "framer-motion";
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
+  HTMLAttributes,
   ReactNode,
 } from "react";
+import type { LinkProps } from "next/link";
 
 import { cn } from "@/lib/utils";
 
@@ -22,10 +24,14 @@ type CommonProps = {
 };
 
 type ButtonAsLink = CommonProps &
-  Omit<
-    AnchorHTMLAttributes<HTMLAnchorElement>,
+  Partial<Pick<LinkProps, "prefetch" | "replace" | "scroll" | "shallow" | "locale">> & {
+    href: LinkProps["href"];
+    target?: string;
+    rel?: string;
+  } & Omit<
+    HTMLAttributes<HTMLSpanElement>,
     | "className"
-    | "href"
+    | "children"
     | "onAnimationStart"
     | "onAnimationEnd"
     | "onDrag"
@@ -36,9 +42,7 @@ type ButtonAsLink = CommonProps &
     | "onDragOver"
     | "onDragExit"
     | "onDragCapture"
-  > & {
-    href: string;
-  };
+  >;
 
 type ButtonAsButton = CommonProps &
   Omit<
@@ -86,18 +90,27 @@ export function Button({
   const classes = cn(baseStyles, variantStyles[variant], sizeStyles[size], className);
 
   if ("href" in props && props.href) {
-    const { href, ...rest } = props;
+    const { href, prefetch, replace, scroll, shallow, locale, target, rel, ...rest } = props;
     return (
-      <Link href={href} legacyBehavior passHref>
-        <motion.a
-          className={classes}
+      <Link
+        href={href}
+        prefetch={prefetch}
+        replace={replace}
+        scroll={scroll}
+        shallow={shallow}
+        locale={locale}
+        className={classes}
+        target={target}
+        rel={rel}
+      >
+        <motion.span
           whileHover={{ y: -2 }}
           whileTap={{ y: 1, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 260, damping: 18 }}
           {...rest}
         >
           {children}
-        </motion.a>
+        </motion.span>
       </Link>
     );
   }
