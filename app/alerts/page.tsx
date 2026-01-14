@@ -72,29 +72,29 @@ export default function AlertsPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
       <div>
-        <h1 className="text-3xl font-semibold text-white sm:text-4xl">Alerts</h1>
-        <p className="mt-2 text-sm text-white/70">
+        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Alerts</h1>
+        <p className="mt-2 text-sm text-slate-600">
           Control how often Rezoomind emails you about new matches.
         </p>
       </div>
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
             <div>
-              <p className="text-sm font-semibold text-white">Email alerts</p>
-              <p className="text-xs text-white/60">Toggle internship alert emails.</p>
+              <p className="text-sm font-semibold text-slate-900">Email alerts</p>
+              <p className="text-xs text-slate-500">Toggle internship alert emails.</p>
             </div>
             <button
               type="button"
               onClick={() => setEnabled((prev) => !prev)}
               className={`relative h-8 w-14 rounded-full transition ${
-                enabled ? "bg-cyan-300" : "bg-white/20"
+                enabled ? "bg-[rgb(var(--brand-rgb))]" : "bg-slate-200"
               }`}
               disabled={loading}
             >
               <span
-                className={`absolute top-1 h-6 w-6 rounded-full bg-slate-900 transition ${
+                className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
                   enabled ? "left-7" : "left-1"
                 }`}
               />
@@ -102,7 +102,7 @@ export default function AlertsPage() {
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Frequency
             </p>
             <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -115,8 +115,8 @@ export default function AlertsPage() {
                     onClick={() => setFrequency(option)}
                     className={`rounded-2xl border px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition ${
                       selected
-                        ? "border-cyan-300/60 bg-cyan-500/10 text-cyan-100"
-                        : "border-white/10 text-white/70 hover:border-white/30"
+                        ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-slate-900"
+                        : "border-slate-200 text-slate-600 hover:border-[rgba(var(--brand-rgb),0.4)]"
                     }`}
                     disabled={loading}
                   >
@@ -130,7 +130,7 @@ export default function AlertsPage() {
           {note ? (
             <p
               className={`text-sm ${
-                status === "success" ? "text-emerald-300" : "text-rose-300"
+                status === "success" ? "text-emerald-600" : "text-rose-500"
               }`}
             >
               {note}

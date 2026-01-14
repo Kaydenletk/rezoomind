@@ -118,8 +118,8 @@ export default function ResumePage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
       <div>
-        <h1 className="text-3xl font-semibold text-white sm:text-4xl">Resume</h1>
-        <p className="mt-2 text-sm text-white/70">
+        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Resume</h1>
+        <p className="mt-2 text-sm text-slate-600">
           Upload a PDF or paste your resume text for smarter matching.
         </p>
       </div>
@@ -127,7 +127,7 @@ export default function ResumePage() {
       <Card>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Resume PDF
             </label>
             <Input
@@ -138,21 +138,21 @@ export default function ResumePage() {
               disabled={loading}
             />
             {existing?.file_url ? (
-              <p className="mt-2 text-xs text-white/50">
+              <p className="mt-2 text-xs text-slate-500">
                 Stored file: {existing.file_url}
               </p>
             ) : null}
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Resume Text
             </label>
             <textarea
               value={resumeText}
               onChange={(event) => setResumeText(event.target.value)}
               rows={8}
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-300/50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
+              className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]"
               placeholder="Paste your resume text here..."
               disabled={loading}
             />
@@ -161,7 +161,7 @@ export default function ResumePage() {
           {note ? (
             <p
               className={`text-sm ${
-                status === "success" ? "text-emerald-300" : "text-rose-300"
+                status === "success" ? "text-emerald-600" : "text-rose-500"
               }`}
             >
               {note}

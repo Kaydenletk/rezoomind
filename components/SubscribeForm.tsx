@@ -55,9 +55,9 @@ export function SubscribeForm() {
   return (
     <motion.form
       onSubmit={handleSubmit}
-      whileHover={{ scale: 1.01, boxShadow: "0 26px 70px rgba(34,211,238,0.22)" }}
+      whileHover={{ scale: 1.01, boxShadow: "0 26px 70px var(--brand-glow)" }}
       transition={{ type: "spring", stiffness: 200, damping: 18 }}
-      className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_22px_60px_rgba(0,0,0,0.35)] backdrop-blur"
+      className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
     >
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
         <Input
@@ -94,8 +94,8 @@ export function SubscribeForm() {
               }
               className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] transition ${
                 selected
-                  ? "border-cyan-300/60 bg-cyan-500/10 text-cyan-100"
-                  : "border-white/10 text-white/60 hover:border-white/30"
+                  ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-slate-900"
+                  : "border-slate-200 text-slate-500 hover:border-[rgba(var(--brand-rgb),0.5)]"
               }`}
               disabled={status === "loading"}
             >
@@ -108,7 +108,7 @@ export function SubscribeForm() {
       {note ? (
         <p
           className={`mt-3 text-sm ${
-            status === "success" ? "text-emerald-300" : "text-rose-300"
+            status === "success" ? "text-emerald-600" : "text-rose-500"
           }`}
         >
           {note}

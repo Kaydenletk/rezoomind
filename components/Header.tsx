@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { useAuth } from "@/components/AuthProvider";
 
 const navLinks = [
   { href: "/about", label: "About" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "/#pricing", label: "Pricing" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -31,8 +31,8 @@ function NavItem({ href, label, onClick }: NavItemProps) {
       href={href}
       onClick={onClick}
       className={cn(
-        "relative px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-white/70 transition-colors hover:text-white",
-        isActive && "text-white"
+        "relative px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500 transition-colors hover:text-[rgb(var(--brand-rgb))]",
+        isActive && "text-slate-900"
       )}
       initial="rest"
       animate={isActive ? "active" : "rest"}
@@ -40,7 +40,7 @@ function NavItem({ href, label, onClick }: NavItemProps) {
     >
       <span>{label}</span>
       <motion.span
-        className="absolute left-0 right-0 -bottom-2 h-[2px] origin-left bg-cyan-300"
+        className="absolute left-0 right-0 -bottom-2 h-[2px] origin-left bg-[rgb(var(--brand-rgb))]"
         variants={{
           rest: { scaleX: 0, opacity: 0 },
           hover: { scaleX: 1, opacity: 1 },
@@ -70,13 +70,23 @@ export default function Header() {
     router.refresh();
   };
 
+  const handlePricingClick = (event?: MouseEvent) => {
+    event?.preventDefault();
+    if (pathname === "/") {
+      document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      router.push("/#pricing");
+    }
+    setMenuOpen(false);
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-slate-950/75 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur">
       <div className="mx-auto grid h-20 max-w-6xl grid-cols-[1fr_auto_1fr] items-center px-6">
         <div className="flex items-center">
           <MotionLink
             href="/"
-            className="flex items-center gap-3 text-lg font-semibold text-white"
+            className="flex items-center gap-3 text-lg font-semibold text-slate-900"
             initial="rest"
             whileHover="hover"
             animate="rest"
@@ -86,9 +96,9 @@ export default function Header() {
               variants={{ rest: { rotate: 0 }, hover: { rotate: 6 } }}
               transition={{ type: "spring", stiffness: 220, damping: 12 }}
             >
-              <span className="absolute left-0 top-0 h-3 w-3 bg-cyan-300" />
-              <span className="absolute right-0 top-0 h-3 w-3 bg-white/70" />
-              <span className="absolute left-0 bottom-0 h-3 w-3 bg-white/40" />
+              <span className="absolute left-0 top-0 h-3 w-3 bg-[rgb(var(--brand-rgb))]" />
+              <span className="absolute right-0 top-0 h-3 w-3 bg-slate-400" />
+              <span className="absolute left-0 bottom-0 h-3 w-3 bg-slate-300" />
             </motion.span>
             <span>Rezoomind</span>
           </MotionLink>
@@ -96,7 +106,12 @@ export default function Header() {
 
         <nav className="hidden items-center justify-center gap-8 md:flex">
           {navLinks.map((link) => (
-            <NavItem key={link.href} href={link.href} label={link.label} />
+            <NavItem
+              key={link.href}
+              href={link.href}
+              label={link.label}
+              onClick={link.href === "/#pricing" ? handlePricingClick : undefined}
+            />
           ))}
         </nav>
 
@@ -104,13 +119,13 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
                   {`Welcome, ${displayName}`.toUpperCase()}
                 </span>
                 <motion.button
                   type="button"
                   onClick={handleSignOut}
-                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/70 hover:border-white/30 hover:text-white"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-[rgb(var(--brand-rgb))]"
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 1 }}
                   transition={{ type: "spring", stiffness: 260, damping: 18 }}
@@ -122,10 +137,10 @@ export default function Header() {
               <MotionLink
                 href="/login"
                 className={cn(
-                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200 transition",
+                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-900 transition",
                   signInActive
-                    ? "bg-cyan-300/15 text-cyan-100"
-                    : "hover:bg-cyan-300/15 hover:text-cyan-100"
+                    ? "bg-[rgb(var(--brand-rgb))]"
+                    : "bg-[rgb(var(--brand-rgb))] hover:bg-[rgb(var(--brand-hover-rgb))]"
                 )}
                 whileHover={{ y: -1 }}
                 whileTap={{ y: 1 }}
@@ -137,15 +152,15 @@ export default function Header() {
           </div>
 
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 md:hidden"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-label="Toggle menu"
           >
             <span className="flex flex-col gap-1.5">
-              <span className="h-0.5 w-5 bg-white" />
-              <span className="h-0.5 w-5 bg-white/70" />
-              <span className="h-0.5 w-5 bg-white/40" />
+              <span className="h-0.5 w-5 bg-slate-900" />
+              <span className="h-0.5 w-5 bg-slate-500" />
+              <span className="h-0.5 w-5 bg-slate-300" />
             </span>
           </button>
         </div>
@@ -159,11 +174,11 @@ export default function Header() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="overflow-hidden border-t border-white/5 bg-slate-950/95 md:hidden"
+            className="overflow-hidden border-t border-slate-200 bg-white md:hidden"
           >
             <div className="flex flex-col gap-4 px-6 py-6">
               {user ? (
-                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
                   {`Welcome, ${displayName}`.toUpperCase()}
                 </span>
               ) : null}
@@ -172,7 +187,11 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   label={link.label}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={
+                    link.href === "/#pricing"
+                      ? handlePricingClick
+                      : () => setMenuOpen(false)
+                  }
                 />
               ))}
               {user ? (
@@ -182,7 +201,7 @@ export default function Header() {
                     setMenuOpen(false);
                     handleSignOut();
                   }}
-                  className="mt-2 inline-flex items-center justify-center rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/80"
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-[rgb(var(--brand-rgb))]"
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 1 }}
                   transition={{ type: "spring", stiffness: 240, damping: 18 }}
@@ -192,7 +211,7 @@ export default function Header() {
               ) : (
                 <MotionLink
                   href="/login"
-                  className="mt-2 inline-flex items-center justify-center rounded-full border border-cyan-300/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100"
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-[rgba(var(--brand-rgb),0.4)] bg-[rgb(var(--brand-rgb))] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-900"
                   onClick={() => setMenuOpen(false)}
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 1 }}

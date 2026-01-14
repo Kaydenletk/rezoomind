@@ -110,16 +110,16 @@ export default async function MatchesPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
       <div>
-        <h1 className="text-3xl font-semibold text-white sm:text-4xl">Matches</h1>
-        <p className="mt-2 text-sm text-white/70">
+        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Matches</h1>
+        <p className="mt-2 text-sm text-slate-600">
           Top internships based on your resume and interests.
         </p>
       </div>
 
       {needsProfile ? (
         <Card>
-          <h2 className="text-lg font-semibold text-white">Add your signals</h2>
-          <p className="mt-2 text-sm text-white/70">
+          <h2 className="text-lg font-semibold text-slate-900">Add your signals</h2>
+          <p className="mt-2 text-sm text-slate-600">
             Upload a resume or set interests to see personalized matches.
           </p>
         </Card>
@@ -127,8 +127,8 @@ export default async function MatchesPage() {
 
       {ranked.length === 0 ? (
         <Card>
-          <h2 className="text-lg font-semibold text-white">No matches yet</h2>
-          <p className="mt-2 text-sm text-white/70">
+          <h2 className="text-lg font-semibold text-slate-900">No matches yet</h2>
+          <p className="mt-2 text-sm text-slate-600">
             Add more keywords or roles, or seed internships in the database.
           </p>
         </Card>
@@ -137,15 +137,15 @@ export default async function MatchesPage() {
           {ranked.map(({ internship, score }) => (
             <Card key={internship.id} highlighted={score >= 5}>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white">{internship.title}</h2>
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
+                <h2 className="text-lg font-semibold text-slate-900">{internship.title}</h2>
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[rgb(var(--brand-rgb))]">
                   {score} pts
                 </span>
               </div>
-              <p className="mt-2 text-sm text-white/70">
+              <p className="mt-2 text-sm text-slate-600">
                 {internship.company ?? "Unknown company"}
               </p>
-              <p className="mt-1 text-xs text-white/50">
+              <p className="mt-1 text-xs text-slate-500">
                 {internship.location ?? "Location flexible"}
               </p>
               {internship.tags?.length ? (
@@ -153,7 +153,7 @@ export default async function MatchesPage() {
                   {internship.tags.slice(0, 6).map((tag) => (
                     <span
                       key={`${internship.id}-${tag}`}
-                      className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60"
+                      className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
                     >
                       {tag}
                     </span>
@@ -165,7 +165,7 @@ export default async function MatchesPage() {
                   href={internship.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200"
+                  className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-[rgb(var(--brand-rgb))] hover:text-[rgb(var(--brand-hover-rgb))]"
                 >
                   View posting
                 </a>

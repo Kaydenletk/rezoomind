@@ -24,7 +24,7 @@ export default function AboutPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl font-semibold text-white sm:text-4xl"
+        className="text-3xl font-semibold text-slate-900 sm:text-4xl"
       >
         About Rezoomind
       </motion.h1>
@@ -32,7 +32,7 @@ export default function AboutPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-4 max-w-2xl text-base leading-relaxed text-white/70"
+        className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600"
       >
         We believe every student should have access to trustworthy internship
         opportunities, without spending hours on unreliable listings.
@@ -45,12 +45,12 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 + index * 0.1 }}
-            className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)]"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
           >
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-xl font-semibold text-slate-900">
               {section.title}
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/60">
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">
               {section.body}
             </p>
           </motion.div>

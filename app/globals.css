@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --brand-rgb: 102 227 249;
+  --brand-hover-rgb: 63 214 243;
+  --brand-tint: rgba(102, 227, 249, 0.12);
+  --brand-ring: rgba(102, 227, 249, 0.35);
+  --brand-glow: rgba(102, 227, 249, 0.25);
 }
 
 @theme inline {
@@ -20,20 +25,316 @@ body {
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: var(--font-inter), "Segoe UI", sans-serif;
-  background: #0b0f14;
-  color: #e2e8f0;
+  background: #ffffff;
+  color: #0b1220;
 }
 
 ::selection {
-  background: rgba(34, 211, 238, 0.28);
-  color: #f8fafc;
+  background: var(--brand-tint);
+  color: #0b1220;
 }
 
 input,
 textarea,
 button {
   font-family: inherit;
+}
+
+.logo-marquee {
+  overflow: hidden;
+}
+
+.logo-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  padding: 0.25rem 0;
+  animation: marquee 22s linear infinite;
+}
+
+.logo-marquee:hover .logo-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .logo-track {
+    animation-duration: 28s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-track {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+.bg-blob-inner {
+  animation: blobFloat 32s ease-in-out infinite;
+}
+
+.bg-blob-slow {
+  animation-duration: 44s;
+}
+
+.bg-blob-fast {
+  animation-duration: 26s;
+}
+
+.bg-tile-drift {
+  --tile-rotate: 0deg;
+  --tile-x: 8px;
+  --tile-y: -8px;
+  animation: tileDrift 24s ease-in-out infinite;
+  transform: translate3d(0, 0, 0) rotate(var(--tile-rotate));
+}
+
+.mascot-float {
+  transform-origin: center;
+  animation: mascotFloat 5s ease-in-out infinite;
+}
+
+.mascot-envelope {
+  transform-origin: center;
+  animation: mascotEnvelope 3s ease-in-out infinite;
+}
+
+.mascot-spark {
+  transform-origin: center;
+  animation: mascotSpark 1.8s ease-in-out infinite;
+  opacity: 0.2;
+}
+
+.mascot-shadow {
+  transform-origin: center;
+  animation: mascotShadow 5s ease-in-out infinite;
+}
+
+.mascot-live-ping {
+  background: var(--brand-tint);
+  box-shadow: 0 0 16px var(--brand-glow);
+  animation: mascotLive 1.2s ease-in-out infinite;
+}
+
+@keyframes blobFloat {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(6deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes tileDrift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--tile-rotate));
+  }
+  50% {
+    transform: translate3d(var(--tile-x), var(--tile-y), 0)
+      rotate(calc(var(--tile-rotate) + 4deg));
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--tile-rotate));
+  }
+}
+
+@keyframes mascotFloat {
+  0% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+  100% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes mascotEnvelope {
+  0% {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(3px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+}
+
+@keyframes mascotSpark {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes mascotShadow {
+  0%,
+  100% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes mascotLive {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.signal-radar {
+  background: conic-gradient(
+    from 0deg,
+    rgba(102, 227, 249, 0.2),
+    rgba(102, 227, 249, 0) 55%,
+    rgba(102, 227, 249, 0.18)
+  );
+  mask: radial-gradient(transparent 62%, #000 64%);
+  -webkit-mask: radial-gradient(transparent 62%, #000 64%);
+  animation: radarSpin 10s linear infinite;
+  opacity: 0.7;
+}
+
+.signal-live-ping {
+  background: var(--brand-tint);
+  box-shadow: 0 0 16px var(--brand-glow);
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+
+.signal-chips {
+  position: relative;
+}
+
+.signal-chip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: signalChip 6s infinite;
+}
+
+.signal-chip-0 {
+  animation-delay: 0s;
+}
+
+.signal-chip-1 {
+  animation-delay: 2s;
+}
+
+.signal-chip-2 {
+  animation-delay: 4s;
+}
+
+@keyframes radarSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes livePulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes signalChip {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  5% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob-inner {
+    animation: none;
+  }
+
+  .bg-tile-drift,
+  .mascot-float,
+  .mascot-envelope,
+  .mascot-spark,
+  .mascot-shadow,
+  .mascot-live-ping,
+  .signal-radar,
+  .signal-chip,
+  .signal-live-ping {
+    animation: none;
+  }
+
+  .signal-chips {
+    height: auto;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .signal-chip {
+    position: static;
+    opacity: 1;
+    transform: none;
+  }
 }
