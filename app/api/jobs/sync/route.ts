@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendJobAlertEmail } from "@/lib/email/resend";
 
+export const dynamic = "force-dynamic";
+
 const JOBS_SOURCE_URL =
   "https://raw.githubusercontent.com/speedyapply/2026-SWE-College-Jobs/main/README.md";
 
