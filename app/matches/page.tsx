@@ -62,15 +62,25 @@ export default async function MatchesPage() {
     supabase.from("internships").select("id,title,company,location,url,tags,created_at"),
   ]);
 
-  const interestKeywords = uniqueList((interests?.keywords ?? []).map((value) => value.toLowerCase()));
-  const resumeKeywords = resume?.resume_text ? uniqueList(toKeywords(resume.resume_text)) : [];
+  const typedResume = resume as { resume_text: string | null; file_url: string | null } | null;
+  const typedInterests = interests as Interests | null;
+  const typedInternships = internships as Internship[] | null;
+
+  const interestKeywords = uniqueList(
+    (typedInterests?.keywords ?? []).map((value) => value.toLowerCase())
+  );
+  const resumeKeywords = typedResume?.resume_text
+    ? uniqueList(toKeywords(typedResume.resume_text))
+    : [];
   const keywordSet = new Set([...interestKeywords, ...resumeKeywords]);
   const roleKeywords = uniqueList(
-    (interests?.roles ?? []).flatMap((role) => roleKeywordMap[role] ?? [])
+    (typedInterests?.roles ?? []).flatMap((role) => roleKeywordMap[role] ?? [])
   );
-  const locationPreferences = (interests?.locations ?? []).map((value) => value.toLowerCase());
+  const locationPreferences = (typedInterests?.locations ?? []).map((value) =>
+    value.toLowerCase()
+  );
 
-  const scored = (internships ?? []).map((internship) => {
+  const scored = (typedInternships ?? []).map((internship) => {
     const tags = (internship.tags ?? []).map((tag) => tag.toLowerCase());
     const title = internship.title.toLowerCase();
     const location = internship.location?.toLowerCase() ?? "";
