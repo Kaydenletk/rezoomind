@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { SubscribeForm } from "@/components/SubscribeForm";
 
 const fadeUp = {
   initial: { opacity: 0, y: 18 },
@@ -152,7 +153,7 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.24 }}
               className="flex flex-col gap-4 sm:flex-row"
             >
-              <Button href="/sign-up" variant="primary">
+              <Button href="/signup" variant="primary">
                 Get Started
               </Button>
               <Button href="/pricing" variant="secondary">
@@ -213,6 +214,28 @@ export default function HomePage() {
             </Card>
           ))}
         </div>
+      </section>
+
+      <section className="relative mx-auto flex max-w-5xl flex-col gap-8 px-6 pb-24">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-3"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200/70">
+            Email updates
+          </p>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+            Get new internships delivered weekly.
+          </h2>
+          <p className="text-sm text-white/60">
+            Subscribe for verified alerts and never miss a fresh listing.
+          </p>
+        </motion.div>
+
+        <SubscribeForm />
       </section>
 
       <section className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-24">
