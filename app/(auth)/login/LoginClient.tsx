@@ -64,10 +64,10 @@ export default function LoginClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
           Sign in to Rezoomind
         </h1>
-        <p className="mt-3 text-base text-white/70">
+        <p className="mt-3 text-base text-slate-600">
           Access your verified alert settings and saved filters.
         </p>
       </motion.div>
@@ -77,7 +77,7 @@ export default function LoginClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
         onSubmit={handleSubmit}
-        className="max-w-md space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)]"
+        className="max-w-md space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
       >
         <Input
           type="email"
@@ -99,7 +99,7 @@ export default function LoginClient() {
         {note ? (
           <p
             className={`text-sm ${
-              status === "success" ? "text-emerald-300" : "text-rose-300"
+              status === "success" ? "text-emerald-600" : "text-rose-500"
             }`}
           >
             {note}
@@ -124,9 +124,12 @@ export default function LoginClient() {
           Continue with Google
         </Button>
 
-        <p className="text-xs text-white/50">
+        <p className="text-xs text-slate-500">
           New here?{" "}
-          <Link href="/signup" className="text-cyan-200">
+          <Link
+            href="/signup"
+            className="text-[rgb(var(--brand-rgb))] hover:text-[rgb(var(--brand-hover-rgb))]"
+          >
             Create an account
           </Link>
           .

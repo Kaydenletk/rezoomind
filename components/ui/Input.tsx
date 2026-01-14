@@ -10,7 +10,7 @@ export function Input({ className, ...props }: InputProps) {
   return (
     <input
       className={cn(
-        "w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 transition focus:border-cyan-300/50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30",
+        "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]",
         className
       )}
       {...props}

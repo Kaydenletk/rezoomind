@@ -55,7 +55,7 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl font-semibold text-white sm:text-4xl"
+        className="text-3xl font-semibold text-slate-900 sm:text-4xl"
       >
         Contact us
       </motion.h1>
@@ -63,7 +63,7 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-3 text-base text-white/70"
+        className="mt-3 text-base text-slate-600"
       >
         Let us know how we can help with verified internship alerts.
       </motion.p>
@@ -73,7 +73,7 @@ export default function ContactPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         onSubmit={handleSubmit}
-        className="mt-10 space-y-5 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_25px_60px_rgba(0,0,0,0.35)]"
+        className="mt-10 space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
       >
         <Input
           placeholder="Name"
@@ -93,7 +93,7 @@ export default function ContactPage() {
         <textarea
           placeholder="Message"
           rows={5}
-          className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 transition focus:border-cyan-300/50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
+          className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]"
           value={form.message}
           onChange={(event) =>
             setForm((prev) => ({ ...prev, message: event.target.value }))
@@ -103,7 +103,7 @@ export default function ContactPage() {
         {note ? (
           <p
             className={`text-sm ${
-              status === "success" ? "text-emerald-300" : "text-rose-300"
+              status === "success" ? "text-emerald-600" : "text-rose-500"
             }`}
           >
             {note}

@@ -65,14 +65,14 @@ type ButtonAsButton = CommonProps &
 export type ButtonProps = ButtonAsLink | ButtonAsButton;
 
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/40 focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60";
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-cyan-200 text-slate-900 shadow-[0_12px_30px_rgba(34,211,238,0.25)] hover:bg-cyan-100",
+    "bg-[rgb(var(--brand-rgb))] text-slate-900 shadow-[0_12px_30px_var(--brand-glow)] hover:bg-[rgb(var(--brand-hover-rgb))]",
   secondary:
-    "border border-white/20 bg-white/5 text-white hover:border-white/40 hover:bg-white/10",
-  ghost: "text-white/70 hover:text-white",
+    "border border-[rgba(var(--brand-rgb),0.4)] bg-white text-[rgb(var(--brand-rgb))] hover:border-[rgba(var(--brand-rgb),0.6)] hover:bg-[var(--brand-tint)]",
+  ghost: "text-slate-600 hover:text-[rgb(var(--brand-rgb))]",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

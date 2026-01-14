@@ -14,9 +14,9 @@ export function Card({ highlighted, className, ...props }: CardProps) {
       whileHover={{ y: highlighted ? -6 : -4 }}
       transition={{ type: "spring", stiffness: 220, damping: 18 }}
       className={cn(
-        "rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)] backdrop-blur transition-shadow hover:shadow-[0_32px_70px_rgba(0,0,0,0.45)]",
+        "rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition-shadow hover:shadow-[0_28px_70px_rgba(15,23,42,0.12)]",
         highlighted &&
-          "border-cyan-300/60 bg-cyan-500/10 shadow-[0_28px_70px_rgba(34,211,238,0.2)] hover:shadow-[0_34px_90px_rgba(34,211,238,0.28)] md:scale-[1.03]",
+          "border-[rgba(var(--brand-rgb),0.4)] bg-[var(--brand-tint)] shadow-[0_28px_70px_var(--brand-glow)] hover:shadow-[0_34px_90px_var(--brand-glow)] md:scale-[1.02]",
         className
       )}
       {...props}
