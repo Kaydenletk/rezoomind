@@ -1,5 +1,6 @@
 "use client";
 
+// NOTE: Use motion.a inside Link to avoid motion(Link) prop conflicts.
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type {
@@ -48,8 +49,6 @@ const sizeStyles: Record<ButtonSize, string> = {
   md: "px-6 py-3 text-sm",
 };
 
-const MotionLink = motion(Link) as any;
-
 export function Button({
   variant = "primary",
   size = "md",
@@ -62,16 +61,17 @@ export function Button({
   if ("href" in props && props.href) {
     const { href, ...rest } = props;
     return (
-      <MotionLink
-        href={href}
-        className={classes}
-        whileHover={{ y: -2 }}
-        whileTap={{ y: 1, scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 260, damping: 18 }}
-        {...rest}
-      >
-        {children}
-      </MotionLink>
+      <Link href={href} legacyBehavior passHref>
+        <motion.a
+          className={classes}
+          whileHover={{ y: -2 }}
+          whileTap={{ y: 1, scale: 0.98 }}
+          transition={{ type: "spring", stiffness: 260, damping: 18 }}
+          {...rest}
+        >
+          {children}
+        </motion.a>
+      </Link>
     );
   }
 
