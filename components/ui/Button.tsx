@@ -22,12 +22,39 @@ type CommonProps = {
 };
 
 type ButtonAsLink = CommonProps &
-  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "className" | "href"> & {
+  Omit<
+    AnchorHTMLAttributes<HTMLAnchorElement>,
+    | "className"
+    | "href"
+    | "onAnimationStart"
+    | "onAnimationEnd"
+    | "onDrag"
+    | "onDragStart"
+    | "onDragEnd"
+    | "onDragEnter"
+    | "onDragLeave"
+    | "onDragOver"
+    | "onDragExit"
+    | "onDragCapture"
+  > & {
     href: string;
   };
 
 type ButtonAsButton = CommonProps &
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {
+  Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    | "className"
+    | "onAnimationStart"
+    | "onAnimationEnd"
+    | "onDrag"
+    | "onDragStart"
+    | "onDragEnd"
+    | "onDragEnter"
+    | "onDragLeave"
+    | "onDragOver"
+    | "onDragExit"
+    | "onDragCapture"
+  > & {
     href?: undefined;
   };
 
@@ -75,7 +102,7 @@ export function Button({
     );
   }
 
-  const { type, ...rest } = props;
+  const { type, ...rest } = props as ButtonAsButton;
   return (
     <motion.button
       type={type ?? "button"}
