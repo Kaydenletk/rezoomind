@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type {
@@ -46,7 +48,7 @@ const sizeStyles: Record<ButtonSize, string> = {
   md: "px-6 py-3 text-sm",
 };
 
-const MotionLink = motion(Link);
+const MotionLink = motion(Link) as any;
 
 export function Button({
   variant = "primary",

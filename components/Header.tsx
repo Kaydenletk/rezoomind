@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/AuthProvider";
 
 const navLinks = [
   { href: "/about", label: "About" },
@@ -13,7 +14,7 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-const MotionLink = motion(Link);
+const MotionLink = motion(Link) as any;
 
 type NavItemProps = {
   href: string;
@@ -54,7 +55,20 @@ function NavItem({ href, label, onClick }: NavItemProps) {
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
-  const signInActive = pathname === "/sign-in" || pathname === "/sign-up";
+  const router = useRouter();
+  const { user, loading, signOut } = useAuth();
+  const signInActive = pathname === "/login" || pathname === "/signup";
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "there";
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-slate-950/75 backdrop-blur">
@@ -87,21 +101,39 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center justify-end gap-3">
-          <div className="hidden md:flex">
-            <MotionLink
-              href="/sign-in"
-              className={cn(
-                "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200 transition",
-                signInActive
-                  ? "bg-cyan-300/15 text-cyan-100"
-                  : "hover:bg-cyan-300/15 hover:text-cyan-100"
-              )}
-              whileHover={{ y: -1 }}
-              whileTap={{ y: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 18 }}
-            >
-              Sign In
-            </MotionLink>
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <>
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+                  {`Welcome, ${displayName}`.toUpperCase()}
+                </span>
+                <motion.button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/70 hover:border-white/30 hover:text-white"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ y: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                >
+                  Log Out
+                </motion.button>
+              </>
+            ) : (
+              <MotionLink
+                href="/login"
+                className={cn(
+                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200 transition",
+                  signInActive
+                    ? "bg-cyan-300/15 text-cyan-100"
+                    : "hover:bg-cyan-300/15 hover:text-cyan-100"
+                )}
+                whileHover={{ y: -1 }}
+                whileTap={{ y: 1 }}
+                transition={{ type: "spring", stiffness: 260, damping: 18 }}
+              >
+                {loading ? "Loading" : "Sign In"}
+              </MotionLink>
+            )}
           </div>
 
           <button
@@ -130,6 +162,11 @@ export default function Header() {
             className="overflow-hidden border-t border-white/5 bg-slate-950/95 md:hidden"
           >
             <div className="flex flex-col gap-4 px-6 py-6">
+              {user ? (
+                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+                  {`Welcome, ${displayName}`.toUpperCase()}
+                </span>
+              ) : null}
               {navLinks.map((link) => (
                 <NavItem
                   key={link.href}
@@ -138,16 +175,32 @@ export default function Header() {
                   onClick={() => setMenuOpen(false)}
                 />
               ))}
-              <MotionLink
-                href="/sign-in"
-                className="mt-2 inline-flex items-center justify-center rounded-full border border-cyan-300/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100"
-                onClick={() => setMenuOpen(false)}
-                whileHover={{ y: -1 }}
-                whileTap={{ y: 1 }}
-                transition={{ type: "spring", stiffness: 240, damping: 18 }}
-              >
-                Sign In
-              </MotionLink>
+              {user ? (
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/80"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ y: 1 }}
+                  transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                >
+                  Log Out
+                </motion.button>
+              ) : (
+                <MotionLink
+                  href="/login"
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-cyan-300/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100"
+                  onClick={() => setMenuOpen(false)}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ y: 1 }}
+                  transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                >
+                  {loading ? "Loading" : "Sign In"}
+                </MotionLink>
+              )}
             </div>
           </motion.div>
         ) : null}

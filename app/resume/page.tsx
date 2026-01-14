@@ -1,0 +1,183 @@
+"use client";
+
+import { useMemo, useState, useEffect, type FormEvent } from "react";
+
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { useAuth } from "@/components/AuthProvider";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+type ResumeRecord = {
+  resume_text: string | null;
+  file_url: string | null;
+  created_at: string;
+};
+
+export default function ResumePage() {
+  const { user, loading } = useAuth();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const [resumeText, setResumeText] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [existing, setExisting] = useState<ResumeRecord | null>(null);
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+
+    fetch("/api/resume", { credentials: "include" })
+      .then(async (response) => {
+        if (!active) return;
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.ok) return;
+        setExisting(data.resume);
+        if (data.resume?.resume_text) {
+          setResumeText(data.resume.resume_text);
+        }
+      })
+      .catch(() => null);
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!user) {
+      setStatus("error");
+      setNote("Sign in to save your resume.");
+      return;
+    }
+
+    if (!file && resumeText.trim().length === 0) {
+      setStatus("error");
+      setNote("Upload a PDF or paste your resume text.");
+      return;
+    }
+
+    try {
+      setStatus("loading");
+      setNote("");
+
+      let fileUrl = existing?.file_url ?? null;
+
+      if (file) {
+        if (file.type !== "application/pdf") {
+          setStatus("error");
+          setNote("Please upload a PDF file.");
+          return;
+        }
+
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filePath = `${user.id}/${Date.now()}-${safeName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("resumes")
+          .upload(filePath, file, { upsert: true });
+
+        if (uploadError) {
+          setStatus("error");
+          setNote(uploadError.message);
+          return;
+        }
+
+        fileUrl = filePath;
+      }
+
+      const response = await fetch("/api/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          resumeText: resumeText.trim() || null,
+          fileUrl,
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) {
+        setStatus("error");
+        setNote(data?.error ?? "Unable to save resume.");
+        return;
+      }
+
+      setExisting(data.resume);
+      setFile(null);
+      setStatus("success");
+      setNote("Resume saved.");
+    } catch {
+      setStatus("error");
+      setNote("Network error. Try again.");
+    }
+  };
+
+  return (
+    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
+      <div>
+        <h1 className="text-3xl font-semibold text-white sm:text-4xl">Resume</h1>
+        <p className="mt-2 text-sm text-white/70">
+          Upload a PDF or paste your resume text for smarter matching.
+        </p>
+      </div>
+
+      <Card>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+              Resume PDF
+            </label>
+            <Input
+              type="file"
+              accept="application/pdf"
+              className="mt-3"
+              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              disabled={loading}
+            />
+            {existing?.file_url ? (
+              <p className="mt-2 text-xs text-white/50">
+                Stored file: {existing.file_url}
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
+              Resume Text
+            </label>
+            <textarea
+              value={resumeText}
+              onChange={(event) => setResumeText(event.target.value)}
+              rows={8}
+              className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-cyan-300/50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
+              placeholder="Paste your resume text here..."
+              disabled={loading}
+            />
+          </div>
+
+          {note ? (
+            <p
+              className={`text-sm ${
+                status === "success" ? "text-emerald-300" : "text-rose-300"
+              }`}
+            >
+              {note}
+            </p>
+          ) : null}
+
+          <Button
+            type="submit"
+            variant="primary"
+            className="w-full"
+            disabled={status === "loading" || loading}
+          >
+            {status === "loading" ? "Saving..." : "Save Resume"}
+          </Button>
+        </form>
+      </Card>
+    </div>
+  );
+}

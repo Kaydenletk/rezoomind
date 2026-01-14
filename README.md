@@ -1,41 +1,21 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rezoomind
 
-## Getting Started
+1. Create or edit `.env.local` at the repo root.
+2. Edit with nano: `nano .env.local`.
+3. Paste `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `RESEND_API_KEY`, `RESEND_FROM`, and `EMAIL_SIGNING_SECRET`.
+4. Optional: add `APP_URL` (ex: `http://localhost:3000`) for email links.
+5. Add `JOBS_SYNC_SECRET` and `DIGEST_SECRET` for admin endpoints.
+6. Save in nano: Ctrl+O, then Enter.
+7. Exit nano: Ctrl+X.
+8. Optional: open in VS Code with `code .env.local`.
+9. Install deps: `npm install`.
+10. Generate Prisma client: `npm run prisma:generate`.
+11. Run migrations: `npm run prisma:migrate`.
 
-First, run the development server:
+### Jobs sync
+- Trigger manually with:
+  `curl -X POST http://localhost:3000/api/jobs/sync -H "x-sync-secret: $JOBS_SYNC_SECRET"`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# rezoomind
->>>>>>> 1b72933d9d59e3707b17ee2592156d2692fe3c00
-# rezoomind
+### Weekly digest
+- Trigger manually with:
+  `curl -X POST http://localhost:3000/api/digest -H "x-digest-secret: $DIGEST_SECRET"`
