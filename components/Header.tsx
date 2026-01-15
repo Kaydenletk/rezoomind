@@ -31,7 +31,7 @@ function NavItem({ href, label, onClick }: NavItemProps) {
       href={href}
       onClick={onClick}
       className={cn(
-        "relative px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500 transition-colors hover:text-[rgb(var(--brand-rgb))]",
+        "relative px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500 transition-colors hover:text-brand",
         isActive && "text-slate-900"
       )}
       initial="rest"
@@ -125,7 +125,7 @@ export default function Header() {
                 <motion.button
                   type="button"
                   onClick={handleSignOut}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-[rgb(var(--brand-rgb))]"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-brand"
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 1 }}
                   transition={{ type: "spring", stiffness: 260, damping: 18 }}
@@ -201,7 +201,7 @@ export default function Header() {
                     setMenuOpen(false);
                     handleSignOut();
                   }}
-                  className="mt-2 inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-[rgb(var(--brand-rgb))]"
+                  className="mt-2 inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-brand"
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 1 }}
                   transition={{ type: "spring", stiffness: 240, damping: 18 }}

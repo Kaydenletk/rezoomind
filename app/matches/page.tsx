@@ -138,7 +138,7 @@ export default async function MatchesPage() {
             <Card key={internship.id} highlighted={score >= 5}>
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900">{internship.title}</h2>
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[rgb(var(--brand-rgb))]">
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
                   {score} pts
                 </span>
               </div>
@@ -165,7 +165,7 @@ export default async function MatchesPage() {
                   href={internship.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-[rgb(var(--brand-rgb))] hover:text-[rgb(var(--brand-hover-rgb))]"
+                  className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-brand hover:text-brand-hover"
                 >
                   View posting
                 </a>

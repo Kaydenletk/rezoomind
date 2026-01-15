@@ -54,7 +54,7 @@ export function Footer() {
             {footerLinks.map((link) => (
               <li key={link.label}>
                 <Link
-                  className="transition hover:text-[rgb(var(--brand-rgb))]"
+                  className="transition hover:text-brand"
                   href={link.href}
                 >
                   {link.label}
@@ -72,7 +72,7 @@ export function Footer() {
             {resources.map((resource) => (
               <li key={resource.label}>
                 <Link
-                  className="transition hover:text-[rgb(var(--brand-rgb))]"
+                  className="transition hover:text-brand"
                   href={resource.href}
                 >
                   {resource.label}
@@ -114,7 +114,7 @@ export function Footer() {
                 key={social.label}
                 href={social.href}
                 aria-label={social.label}
-                className="transition hover:text-[rgb(var(--brand-rgb))]"
+                className="transition hover:text-brand"
               >
                 <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden="true">
                   <path d={social.path} fill="currentColor" />

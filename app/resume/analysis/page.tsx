@@ -90,7 +90,7 @@ export default function ResumeAnalysisPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-20">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgb(var(--brand-rgb))]">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
           AI Resume Analysis
         </p>
         <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">

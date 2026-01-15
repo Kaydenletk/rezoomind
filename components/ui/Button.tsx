@@ -71,8 +71,8 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     "bg-[rgb(var(--brand-rgb))] text-slate-900 shadow-[0_12px_30px_var(--brand-glow)] hover:bg-[rgb(var(--brand-hover-rgb))]",
   secondary:
-    "border border-[rgba(var(--brand-rgb),0.4)] bg-white text-[rgb(var(--brand-rgb))] hover:border-[rgba(var(--brand-rgb),0.6)] hover:bg-[var(--brand-tint)]",
-  ghost: "text-slate-600 hover:text-[rgb(var(--brand-rgb))]",
+    "border border-[rgba(var(--brand-rgb),0.4)] bg-white text-brand hover:border-[rgba(var(--brand-rgb),0.6)] hover:bg-[var(--brand-tint)]",
+  ghost: "text-slate-600 hover:text-brand",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

@@ -20,7 +20,13 @@ const knownExistingUserMessages = [
 export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || "/dashboard";
+  const nextPath = useMemo(() => {
+    const candidate = searchParams.get("next");
+    if (candidate?.startsWith("/") && !candidate.startsWith("//")) {
+      return candidate;
+    }
+    return "/dashboard";
+  }, [searchParams]);
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [form, setForm] = useState({
     email: "",
@@ -177,11 +183,11 @@ export default function SignupPage() {
           Continue with Google
         </Button>
 
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-slate-600">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-[rgb(var(--brand-rgb))] hover:text-[rgb(var(--brand-hover-rgb))]"
+            className="text-brand hover:text-brand-hover"
           >
             Sign in
           </Link>
