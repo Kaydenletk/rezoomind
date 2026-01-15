@@ -36,9 +36,11 @@ export function LogoMarquee() {
               key={`${logo.name}-${index}`}
               className="flex h-14 min-w-[140px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 shadow-sm transition hover:border-[rgba(var(--brand-rgb),0.5)] hover:shadow-[0_12px_30px_var(--brand-glow)]"
             >
-              <img
+              <Image
                 src={logo.file}
                 alt={logo.name}
+                width={120}
+                height={28}
                 loading="lazy"
                 className="h-7 w-auto max-w-[140px] opacity-80"
               />
@@ -49,3 +51,4 @@ export function LogoMarquee() {
     </div>
   );
 }
+import Image from "next/image";

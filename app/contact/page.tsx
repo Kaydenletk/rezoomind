@@ -43,7 +43,7 @@ export default function ContactPage() {
       setStatus("success");
       setNote("Thanks! We'll get back to you shortly.");
       setForm({ name: "", email: "", message: "" });
-    } catch (error) {
+    } catch {
       setStatus("error");
       setNote("Network error. Try again.");
     }
