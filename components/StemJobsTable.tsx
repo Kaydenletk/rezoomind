@@ -118,7 +118,7 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                     href={job.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs font-semibold uppercase tracking-[0.24em] text-[rgb(var(--brand-rgb))] hover:text-[rgb(var(--brand-hover-rgb))]"
+                    className="text-xs font-semibold uppercase tracking-[0.24em] text-brand hover:text-brand-hover"
                   >
                     View
                   </a>

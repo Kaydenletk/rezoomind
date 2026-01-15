@@ -71,7 +71,7 @@ export function Pricing() {
   return (
     <section id="pricing" className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 py-20">
       <div className="max-w-2xl space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgb(var(--brand-rgb))]">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
           Pricing
         </p>
         <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
@@ -121,7 +121,7 @@ export function Pricing() {
             <ul className="mt-6 space-y-2 text-sm text-slate-600">
               {tier.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand-tint)] text-[rgb(var(--brand-rgb))]">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand-tint)] text-brand">
                     <svg viewBox="0 0 20 20" className="h-3 w-3" aria-hidden="true">
                       <path
                         d="M5 10.5l3 3 7-7"

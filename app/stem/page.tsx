@@ -39,7 +39,7 @@ export default async function StemJobsPage() {
   return (
     <div className="relative mx-auto flex max-w-6xl flex-col gap-10 px-6 py-20">
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgb(var(--brand-rgb))]">
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
           STEM Jobs Preview
         </p>
         <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">

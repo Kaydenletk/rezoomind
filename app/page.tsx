@@ -50,7 +50,7 @@ export default function HomePage() {
               <motion.span
                 {...fadeUp}
                 transition={{ duration: 0.6 }}
-                className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-[rgb(var(--brand-rgb))]"
+                className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.32em] text-brand"
               >
                 Verified internship signals
               </motion.span>
@@ -120,7 +120,7 @@ export default function HomePage() {
           transition={{ duration: 0.6 }}
           className="space-y-3"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgb(var(--brand-rgb))]">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
             Email updates
           </p>
           <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
@@ -142,7 +142,7 @@ export default function HomePage() {
           transition={{ duration: 0.6 }}
           className="space-y-3"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[rgb(var(--brand-rgb))]">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
             Apply faster with verified sources
           </p>
           <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
