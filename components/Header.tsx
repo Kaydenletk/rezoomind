@@ -14,7 +14,7 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-const MotionLink = motion(Link) as any;
+const MotionLink = motion(Link);
 
 type NavItemProps = {
   href: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { FeatureGate } from "@/components/FeatureGate";
 import { Button } from "@/components/ui/Button";
@@ -32,41 +32,32 @@ const storageKeyForUser = (userId: string) => `stem-tracking:${userId}`;
 
 export function StemJobsTable({ jobs }: StemJobsTableProps) {
   const { user, isAuthenticated } = useAuth();
-  const [tracking, setTracking] = useState<Record<string, JobTracking>>({});
+  const [trackingVersion, setTrackingVersion] = useState(0);
   const [openNoteId, setOpenNoteId] = useState<string | null>(null);
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
 
-  const storageKey = useMemo(() => {
-    if (!user?.id) return null;
-    return storageKeyForUser(user.id);
-  }, [user?.id]);
+  const storageKey = user?.id ? storageKeyForUser(user.id) : null;
 
-  useEffect(() => {
-    if (!isAuthenticated || !storageKey) {
-      setTracking({});
-      return;
-    }
-
+  const tracking = useMemo<Record<string, JobTracking>>(() => {
+    void trackingVersion;
+    if (!isAuthenticated || !storageKey) return {};
     try {
       const raw = window.localStorage.getItem(storageKey);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Record<string, JobTracking>;
-      setTracking(parsed ?? {});
+      if (!raw) return {};
+      return (JSON.parse(raw) as Record<string, JobTracking>) ?? {};
     } catch {
-      setTracking({});
+      return {};
     }
-  }, [isAuthenticated, storageKey]);
-
-  useEffect(() => {
-    if (!isAuthenticated || !storageKey) return;
-    window.localStorage.setItem(storageKey, JSON.stringify(tracking));
-  }, [isAuthenticated, storageKey, tracking]);
+  }, [isAuthenticated, storageKey, trackingVersion]);
 
   const updateTracking = (jobId: string, updates: Partial<JobTracking>) => {
-    setTracking((prev) => ({
-      ...prev,
-      [jobId]: { ...prev[jobId], ...updates },
-    }));
+    if (!isAuthenticated || !storageKey) return;
+    const next = {
+      ...tracking,
+      [jobId]: { ...tracking[jobId], ...updates },
+    };
+    window.localStorage.setItem(storageKey, JSON.stringify(next));
+    setTrackingVersion((prev) => prev + 1);
   };
 
   const toggleNote = (jobId: string) => {
