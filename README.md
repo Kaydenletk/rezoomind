@@ -1,21 +1,31 @@
 # Rezoomind
+# Website: https://rezoomind.vercel.app/
+<img width="1494" height="760" alt="Screenshot 2026-01-19 at 8 48 41 PM" src="https://github.com/user-attachments/assets/86376ca6-dc6c-42cf-8410-15ac979b7060" />
 
-1. Create or edit `.env.local` at the repo root.
-2. Edit with nano: `nano .env.local`.
-3. Paste `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `RESEND_API_KEY`, `RESEND_FROM`, and `EMAIL_SIGNING_SECRET`.
-4. Optional: add `APP_URL` (ex: `http://localhost:3000`) for email links.
-5. Add `JOBS_SYNC_SECRET` and `DIGEST_SECRET` for admin endpoints.
-6. Save in nano: Ctrl+O, then Enter.
-7. Exit nano: Ctrl+X.
-8. Optional: open in VS Code with `code .env.local`.
-9. Install deps: `npm install`.
-10. Generate Prisma client: `npm run prisma:generate`.
-11. Run migrations: `npm run prisma:migrate`.
+Rezoomind is a full-stack platform that curates verified internship openings from credited sources and delivers real-time alerts and weekly digests to students. It reduces manual job searching by 90% and tracks over 1 million postings.   
 
-### Jobs sync
-- Trigger manually with:
-  `curl -X POST http://localhost:3000/api/jobs/sync -H "x-sync-secret: $JOBS_SYNC_SECRET"`
+#🛠 Tech Stack
+Frontend: Next.js (React), Tailwind CSS
 
-### Weekly digest
-- Trigger manually with:
-  `curl -X POST http://localhost:3000/api/digest -H "x-digest-secret: $DIGEST_SECRET"`
+Backend: Next.js API Routes, Prisma (ORM)
+
+Database: PostgreSQL (Supabase)
+
+Communications: Resend API
+
+Deployment: Vercel
+
+#🚀 Key Features
+Verified Signal Sourcing: Automatically curates openings from credited sources to ensure high-signal application opportunities.   
+
+Granular Filtering: Targeted alerts for specific roles including SWE, ML, Data, Frontend, and Backend.   
+
+Automated Digests: Scheduled weekly briefings and instant notifications when new roles drop.   
+
+Scalable Tracking: Monitors 1M+ postings across major tech companies (Google, Meta, NVIDIA, etc.).   
+
+#💻 Getting Started
+1. Prerequisites
+Node.js (v18+)
+
+PostgreSQL instance (or Supabase account)
