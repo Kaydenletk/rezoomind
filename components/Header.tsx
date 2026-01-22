@@ -8,10 +8,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/AuthProvider";
 
-const navLinks = [
-  { href: "/about", label: "About" },
+const publicNavLinks = [
+  { href: "/jobs", label: "Browse Jobs" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About" },
+];
+
+const authenticatedNavLinks = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/jobs", label: "Jobs" },
+  { href: "/preferences", label: "Preferences" },
+  { href: "/resume", label: "Resume" },
 ];
 
 const MotionLink = motion(Link);
@@ -105,7 +112,7 @@ export default function Header() {
         </div>
 
         <nav className="hidden items-center justify-center gap-8 md:flex">
-          {navLinks.map((link) => (
+          {(user ? authenticatedNavLinks : publicNavLinks).map((link) => (
             <NavItem
               key={link.href}
               href={link.href}
@@ -182,7 +189,7 @@ export default function Header() {
                   {`Welcome, ${displayName}`.toUpperCase()}
                 </span>
               ) : null}
-              {navLinks.map((link) => (
+              {(user ? authenticatedNavLinks : publicNavLinks).map((link) => (
                 <NavItem
                   key={link.href}
                   href={link.href}
