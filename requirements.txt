@@ -1,0 +1,3 @@
+python-jobspy>=1.1.82
+supabase>=2.0.0
+pandas>=2.1.0

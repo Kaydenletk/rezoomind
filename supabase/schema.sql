@@ -139,3 +139,226 @@ create policy "resumes_storage_delete_own" on storage.objects
     bucket_id = 'resumes'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
+
+-- ============================================
+-- AI Features Schema Enhancement
+-- ============================================
+
+-- Add columns to resumes table for AI analysis
+alter table public.resumes
+add column if not exists title text default 'Untitled Resume',
+add column if not exists improved_text text,
+add column if not exists score integer check (score >= 0 and score <= 100),
+add column if not exists analysis jsonb,
+add column if not exists target_role text,
+add column if not exists version integer default 1,
+add column if not exists is_active boolean default true,
+add column if not exists updated_at timestamp with time zone default now();
+
+-- Cover letters table
+create table if not exists public.cover_letters (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  resume_id uuid references public.resumes(id) on delete set null,
+  job_title text not null,
+  company_name text not null,
+  job_description text,
+  generated_letter text not null,
+  tone text default 'professional' check (tone in ('professional', 'enthusiastic', 'creative', 'technical')),
+  created_at timestamp with time zone default now()
+);
+
+-- Usage logs table for tracking AI feature usage
+create table if not exists public.usage_logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  action_type text not null,
+  credits_used integer default 1,
+  metadata jsonb,
+  created_at timestamp with time zone default now()
+);
+
+-- Resume improvements tracking table
+create table if not exists public.resume_improvements (
+  id uuid primary key default gen_random_uuid(),
+  resume_id uuid references public.resumes(id) on delete cascade not null,
+  section text not null,
+  before_text text not null,
+  after_text text not null,
+  improvement_type text not null,
+  ai_reasoning text,
+  accepted boolean default null,
+  created_at timestamp with time zone default now()
+);
+
+-- Enable RLS on new tables
+alter table public.cover_letters enable row level security;
+alter table public.usage_logs enable row level security;
+alter table public.resume_improvements enable row level security;
+
+-- Cover letters policies
+create policy "cover_letters_select_own" on public.cover_letters
+  for select using (auth.uid() = user_id);
+
+create policy "cover_letters_insert_own" on public.cover_letters
+  for insert with check (auth.uid() = user_id);
+
+create policy "cover_letters_update_own" on public.cover_letters
+  for update using (auth.uid() = user_id);
+
+create policy "cover_letters_delete_own" on public.cover_letters
+  for delete using (auth.uid() = user_id);
+
+-- Usage logs policies
+create policy "usage_logs_select_own" on public.usage_logs
+  for select using (auth.uid() = user_id);
+
+create policy "usage_logs_insert" on public.usage_logs
+  for insert with check (true);
+
+-- Resume improvements policies
+create policy "resume_improvements_select_own" on public.resume_improvements
+  for select using (
+    exists (
+      select 1 from public.resumes
+      where resumes.id = resume_improvements.resume_id
+      and resumes.user_id = auth.uid()
+    )
+  );
+
+create policy "resume_improvements_insert_own" on public.resume_improvements
+  for insert with check (
+    exists (
+      select 1 from public.resumes
+      where resumes.id = resume_improvements.resume_id
+      and resumes.user_id = auth.uid()
+    )
+  );
+
+create policy "resume_improvements_update_own" on public.resume_improvements
+  for update using (
+    exists (
+      select 1 from public.resumes
+      where resumes.id = resume_improvements.resume_id
+      and resumes.user_id = auth.uid()
+    )
+  );
+
+-- Indexes for performance
+create index if not exists idx_cover_letters_user_id on public.cover_letters(user_id);
+create index if not exists idx_usage_logs_user_id on public.usage_logs(user_id);
+create index if not exists idx_usage_logs_created_at on public.usage_logs(created_at desc);
+create index if not exists idx_resume_improvements_resume_id on public.resume_improvements(resume_id);
+create index if not exists idx_resumes_updated_at on public.resumes(updated_at desc);
+
+-- Trigger to update updated_at timestamp on resumes
+create or replace function public.update_updated_at_column()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists update_resumes_updated_at on public.resumes;
+create trigger update_resumes_updated_at
+before update on public.resumes
+for each row execute procedure public.update_updated_at_column();
+
+-- ============================================
+-- JobSpy Integration Schema
+-- ============================================
+
+-- Job postings table (scraped from JobSpy)
+create table if not exists public.job_postings (
+  id uuid primary key default gen_random_uuid(),
+  source_id text unique not null,
+  company text not null,
+  role text not null,
+  location text,
+  url text,
+  description text,
+  date_posted timestamp with time zone,
+  source text not null,
+  tags text[],
+  salary_min numeric,
+  salary_max numeric,
+  salary_interval text,
+  created_at timestamp with time zone default now()
+);
+
+-- User job preferences table
+create table if not exists public.user_job_preferences (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null unique,
+  interested_roles text[],
+  preferred_locations text[],
+  keywords text[],
+  email_frequency text default 'weekly' check (email_frequency in ('daily', 'weekly', 'never')),
+  last_email_sent timestamp with time zone,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+-- Job matches table (tracks which jobs match which users)
+create table if not exists public.job_matches (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  job_id uuid references public.job_postings(id) on delete cascade not null,
+  match_score numeric check (match_score >= 0 and match_score <= 100),
+  is_viewed boolean default false,
+  is_applied boolean default false,
+  is_saved boolean default false,
+  created_at timestamp with time zone default now(),
+  unique(user_id, job_id)
+);
+
+-- Enable RLS on new tables
+alter table public.job_postings enable row level security;
+alter table public.user_job_preferences enable row level security;
+alter table public.job_matches enable row level security;
+
+-- Job postings policies (everyone can read, only service role can insert)
+create policy "job_postings_read_all" on public.job_postings
+  for select using (true);
+
+-- User job preferences policies
+create policy "user_job_preferences_select_own" on public.user_job_preferences
+  for select using (auth.uid() = user_id);
+
+create policy "user_job_preferences_insert_own" on public.user_job_preferences
+  for insert with check (auth.uid() = user_id);
+
+create policy "user_job_preferences_update_own" on public.user_job_preferences
+  for update using (auth.uid() = user_id);
+
+create policy "user_job_preferences_delete_own" on public.user_job_preferences
+  for delete using (auth.uid() = user_id);
+
+-- Job matches policies
+create policy "job_matches_select_own" on public.job_matches
+  for select using (auth.uid() = user_id);
+
+create policy "job_matches_insert_own" on public.job_matches
+  for insert with check (auth.uid() = user_id);
+
+create policy "job_matches_update_own" on public.job_matches
+  for update using (auth.uid() = user_id);
+
+-- Indexes for performance
+create index if not exists idx_job_postings_source_id on public.job_postings(source_id);
+create index if not exists idx_job_postings_created_at on public.job_postings(created_at desc);
+create index if not exists idx_job_postings_company on public.job_postings(company);
+create index if not exists idx_job_postings_location on public.job_postings(location);
+create index if not exists idx_job_postings_tags on public.job_postings using gin(tags);
+create index if not exists idx_user_job_preferences_user_id on public.user_job_preferences(user_id);
+create index if not exists idx_job_matches_user_id on public.job_matches(user_id);
+create index if not exists idx_job_matches_job_id on public.job_matches(job_id);
+
+-- Trigger to update updated_at timestamp on user_job_preferences
+drop trigger if exists update_user_job_preferences_updated_at on public.user_job_preferences;
+create trigger update_user_job_preferences_updated_at
+before update on public.user_job_preferences
+for each row execute procedure public.update_updated_at_column();
