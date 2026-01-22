@@ -7,7 +7,14 @@ Scrapes jobs from multiple boards and saves to Supabase
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import List, Dict
+
+# Load environment variables from .env.local
+from dotenv import load_dotenv
+env_path = Path(__file__).resolve().parent.parent / '.env.local'
+load_dotenv(env_path)
+
 import pandas as pd
 from jobspy import scrape_jobs
 from supabase import create_client, Client
@@ -17,7 +24,7 @@ SUPABASE_URL = os.getenv('NEXT_PUBLIC_SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("Missing Supabase credentials")
+    raise ValueError("Missing Supabase credentials. Make sure .env.local exists with NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
