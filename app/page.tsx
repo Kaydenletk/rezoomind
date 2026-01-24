@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Mail, CheckCircle, Sparkles, TrendingUp, ArrowRight } from "lucide-react";
 
 import { BackgroundMotion } from "@/components/BackgroundMotion";
 import { Button } from "@/components/ui/Button";
@@ -102,9 +103,41 @@ const testimonials = [
 ];
 
 export default function HomePage() {
+  const [email, setEmail] = useState('');
+  const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [subscribeMessage, setSubscribeMessage] = useState('');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubscribeStatus('loading');
+    setSubscribeMessage('');
+
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setSubscribeStatus('success');
+        setSubscribeMessage('Check your email to confirm your subscription!');
+        setEmail('');
+      } else {
+        setSubscribeStatus('error');
+        setSubscribeMessage(data.error || 'Something went wrong');
+      }
+    } catch {
+      setSubscribeStatus('error');
+      setSubscribeMessage('Failed to subscribe. Please try again.');
+    }
+  };
+
   return (
     <div className="relative overflow-hidden bg-white">
-      {/* Hero Section */}
+      {/* Hero Section with Email Capture */}
       <section className="relative mx-auto flex max-w-6xl flex-col gap-16 px-6 pt-24 pb-20">
         <div className="relative overflow-hidden">
           <BackgroundMotion />
@@ -113,13 +146,10 @@ export default function HomePage() {
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.6 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-2 text-sm font-medium text-cyan-700 ring-1 ring-cyan-200"
+              className="mb-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-cyan-700 shadow-lg"
             >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-500"></span>
-              </span>
-              AI-Powered Resume Analysis
+              <Sparkles className="w-4 h-4" />
+              <span>100% Free - 10 Jobs Per Week - No Credit Card</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -128,42 +158,96 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.08 }}
               className="max-w-4xl text-4xl font-bold leading-tight text-slate-900 sm:text-5xl lg:text-6xl"
             >
-              Stop getting{" "}
-              <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                rejected
-              </span>
-              .{" "}
+              Get Your Dream Internship{" "}
               <br className="hidden sm:block" />
-              Start getting{" "}
-              <span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-                interviews
+              <span className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Delivered to Your Inbox
               </span>
-              .
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p
               {...fadeUp}
               transition={{ duration: 0.6, delay: 0.16 }}
-              className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600"
+              className="mt-6 max-w-3xl text-xl leading-relaxed text-slate-600"
             >
-              Rezoomind analyzes your resume with AI, scores it against ATS
-              systems, and gives you specific fixes to land more interviews.
-              Join 10,000+ students who improved their resumes.
+              Subscribe for free and get <span className="font-bold text-slate-900">10 personalized internships</span> every Monday.
+              Plus <span className="font-bold text-slate-900">3 free AI resume analyses</span> when you sign up.
             </motion.p>
 
-            {/* CTAs */}
+            {/* Email Subscription Form */}
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.6, delay: 0.24 }}
-              className="mt-8 flex flex-col gap-4 sm:flex-row"
+              className="mt-10 w-full max-w-2xl"
             >
-              <Button href="/signup" variant="primary" className="text-base px-8 py-4">
-                Analyze My Resume Free
-              </Button>
-              <Button href="#how-it-works" variant="secondary" className="text-base px-8 py-4">
-                See How It Works
-              </Button>
+              <form onSubmit={handleSubscribe} className="relative">
+                <div className="flex flex-col sm:flex-row gap-4 bg-white rounded-2xl p-3 shadow-2xl border-2 border-slate-200">
+                  <div className="flex-1 relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@school.edu"
+                      required
+                      disabled={subscribeStatus === 'loading' || subscribeStatus === 'success'}
+                      className="w-full pl-12 pr-4 py-4 text-lg border-0 focus:outline-none rounded-xl bg-slate-50"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={subscribeStatus === 'loading' || subscribeStatus === 'success'}
+                    className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
+                  >
+                    {subscribeStatus === 'loading' ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Subscribing...</span>
+                      </>
+                    ) : subscribeStatus === 'success' ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Subscribed!</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Get Free Jobs</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* Subscribe Message */}
+              {subscribeMessage && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`mt-4 text-sm font-medium ${
+                    subscribeStatus === 'success' ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
+                  {subscribeMessage}
+                </motion.p>
+              )}
+
+              {/* Trust Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-6 mt-6 text-sm text-slate-600">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>No credit card</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>Unsubscribe anytime</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span>10,000+ subscribers</span>
+                </div>
+              </div>
             </motion.div>
 
             {/* Social Proof */}
@@ -172,18 +256,31 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.32 }}
               className="mt-10 flex flex-col items-center gap-3 sm:flex-row"
             >
-              <div className="flex -space-x-2">
+              <div className="flex -space-x-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
-                    className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 ring-2 ring-white"
-                  />
+                    className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 border-2 border-white flex items-center justify-center text-white font-bold text-sm"
+                  >
+                    {String.fromCharCode(64 + i)}
+                  </div>
                 ))}
               </div>
               <p className="text-sm text-slate-600">
-                <span className="font-semibold text-slate-900">10,000+</span>{" "}
-                students improved their resumes this month
+                <span className="font-bold text-slate-900">2,847 students</span>{" "}
+                got jobs this month
               </p>
+            </motion.div>
+
+            {/* Secondary CTAs */}
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="mt-8 flex flex-col gap-4 sm:flex-row"
+            >
+              <Button href="/signup" variant="secondary" className="text-base px-6 py-3">
+                Or create free account for AI tools
+              </Button>
             </motion.div>
           </div>
         </div>
@@ -586,8 +683,8 @@ export default function HomePage() {
         <Pricing />
       </Suspense>
 
-      {/* Final CTA */}
-      <section className="bg-gradient-to-r from-cyan-600 to-blue-700 py-20">
+      {/* Final CTA with Email Form */}
+      <section className="bg-gradient-to-br from-cyan-600 via-blue-600 to-purple-700 py-20">
         <div className="mx-auto max-w-4xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -595,25 +692,37 @@ export default function HomePage() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Ready to stop getting rejected?
+            <h2 className="text-3xl font-bold text-white sm:text-4xl md:text-5xl">
+              Ready to Find Your Dream Internship?
             </h2>
-            <p className="mt-4 text-lg text-cyan-100">
-              Join 10,000+ students who improved their resumes with AI.
-              <br />
-              Your dream internship is waiting.
+            <p className="mt-4 text-xl text-cyan-100">
+              Join 10,000+ students getting personalized job alerts every week
             </p>
-            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link
-                href="/signup"
-                className="inline-flex items-center justify-center rounded-lg bg-white px-8 py-4 text-base font-semibold text-cyan-700 shadow-lg transition-all hover:bg-cyan-50 hover:shadow-xl"
-              >
-                Analyze My Resume Free
-              </Link>
-              <p className="text-sm text-cyan-200">
-                No credit card required
-              </p>
-            </div>
+
+            {/* Email Form */}
+            <form onSubmit={handleSubscribe} className="mt-8 max-w-2xl mx-auto">
+              <div className="flex flex-col sm:flex-row gap-4 bg-white rounded-2xl p-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@school.edu"
+                  required
+                  className="flex-1 px-6 py-4 text-lg border-0 focus:outline-none rounded-xl"
+                />
+                <button
+                  type="submit"
+                  disabled={subscribeStatus === 'loading'}
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-xl hover:scale-105 transition-all whitespace-nowrap"
+                >
+                  Get Free Jobs
+                </button>
+              </div>
+            </form>
+
+            <p className="mt-6 text-cyan-100 text-sm">
+              100% free - No credit card - Unsubscribe anytime
+            </p>
           </motion.div>
         </div>
       </section>

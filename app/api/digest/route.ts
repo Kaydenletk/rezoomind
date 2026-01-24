@@ -25,13 +25,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const subscribers = await prisma.subscriber.findMany({
+    const subscribers = await prisma.email_subscribers.findMany({
       where: { status: "active" },
       select: { email: true },
     });
 
-    const jobs = await prisma.jobPosting.findMany({
-      orderBy: [{ datePosted: "desc" }, { createdAt: "desc" }],
+    const jobs = await prisma.job_postings.findMany({
+      orderBy: [{ date_posted: "desc" }, { created_at: "desc" }],
       take: 8,
     });
 

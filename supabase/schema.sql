@@ -362,3 +362,100 @@ drop trigger if exists update_user_job_preferences_updated_at on public.user_job
 create trigger update_user_job_preferences_updated_at
 before update on public.user_job_preferences
 for each row execute procedure public.update_updated_at_column();
+
+-- ============================================
+-- Free Tier Subscription Schema
+-- ============================================
+
+-- Resume usage tracking for free tier limits (3 analyses/month)
+create table if not exists public.resume_usage (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  analysis_type text not null check (analysis_type in ('full_analysis', 'bullet_improvement', 'ats_optimization', 'cover_letter', 'linkedin')),
+  created_at timestamp with time zone default now()
+);
+
+alter table public.resume_usage enable row level security;
+
+create policy "resume_usage_select_own" on public.resume_usage
+  for select using (auth.uid() = user_id);
+
+create policy "resume_usage_insert_own" on public.resume_usage
+  for insert with check (auth.uid() = user_id);
+
+create index if not exists idx_resume_usage_user_id on public.resume_usage(user_id);
+create index if not exists idx_resume_usage_created_at on public.resume_usage(created_at desc);
+create index if not exists idx_resume_usage_user_month on public.resume_usage(user_id, created_at desc);
+
+-- Sent job alerts tracking for authenticated users
+create table if not exists public.sent_user_job_alerts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade not null,
+  job_id uuid references public.job_postings(id) on delete cascade not null,
+  sent_at timestamp with time zone default now(),
+  unique(user_id, job_id)
+);
+
+alter table public.sent_user_job_alerts enable row level security;
+
+create policy "sent_user_job_alerts_select_own" on public.sent_user_job_alerts
+  for select using (auth.uid() = user_id);
+
+create policy "sent_user_job_alerts_insert" on public.sent_user_job_alerts
+  for insert with check (true);
+
+create index if not exists idx_sent_user_job_alerts_user_id on public.sent_user_job_alerts(user_id);
+create index if not exists idx_sent_user_job_alerts_job_id on public.sent_user_job_alerts(job_id);
+create index if not exists idx_sent_user_job_alerts_sent_at on public.sent_user_job_alerts(sent_at desc);
+
+-- ============================================
+-- Email Subscribers Schema (Free Tier - No Account)
+-- ============================================
+
+-- Email subscribers table (for users without accounts)
+create table if not exists public.email_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text unique not null,
+  status text default 'pending' check (status in ('pending', 'active', 'unsubscribed')),
+  interests jsonb,
+  created_at timestamp with time zone default now(),
+  confirmed_at timestamp with time zone,
+  confirm_token_hash text,
+  confirm_token_expires_at timestamp with time zone,
+  unsubscribe_token_hash text,
+  updated_at timestamp with time zone default now(),
+
+  -- Job preference fields for free tier
+  interested_roles text[] default '{}',
+  preferred_locations text[] default '{}',
+  keywords text[] default '{}',
+  weekly_limit integer default 10,
+  last_email_sent timestamp with time zone,
+  preferences_token text unique
+);
+
+-- Sent job alerts for email subscribers (avoid duplicates)
+create table if not exists public.sent_subscriber_job_alerts (
+  id uuid primary key default gen_random_uuid(),
+  subscriber_id uuid references public.email_subscribers(id) on delete cascade not null,
+  job_id uuid references public.job_postings(id) on delete cascade not null,
+  sent_at timestamp with time zone default now(),
+  unique(subscriber_id, job_id)
+);
+
+-- No RLS for email_subscribers - managed via API with token auth
+-- These tables are accessed by server-side code only
+
+-- Indexes for performance
+create index if not exists idx_email_subscribers_email on public.email_subscribers(email);
+create index if not exists idx_email_subscribers_status on public.email_subscribers(status);
+create index if not exists idx_email_subscribers_preferences_token on public.email_subscribers(preferences_token);
+create index if not exists idx_email_subscribers_confirm_token_hash on public.email_subscribers(confirm_token_hash);
+create index if not exists idx_sent_subscriber_job_alerts_subscriber_id on public.sent_subscriber_job_alerts(subscriber_id);
+create index if not exists idx_sent_subscriber_job_alerts_job_id on public.sent_subscriber_job_alerts(job_id);
+
+-- Trigger to update updated_at timestamp
+drop trigger if exists update_email_subscribers_updated_at on public.email_subscribers;
+create trigger update_email_subscribers_updated_at
+before update on public.email_subscribers
+for each row execute procedure public.update_updated_at_column();

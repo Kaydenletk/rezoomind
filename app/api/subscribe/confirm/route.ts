@@ -42,15 +42,15 @@ export async function GET(request: Request) {
 
   try {
     const confirmTokenHash = hashToken(token, secret);
-    const subscriber = await prisma.subscriber.findFirst({
-      where: { confirmTokenHash },
+    const subscriber = await prisma.email_subscribers.findFirst({
+      where: { confirm_token_hash: confirmTokenHash },
     });
 
-    if (!subscriber || subscriber.status !== "pending" || !subscriber.confirmTokenExpiresAt) {
+    if (!subscriber || subscriber.status !== "pending" || !subscriber.confirm_token_expires_at) {
       return NextResponse.redirect(new URL("/subscribe/unsubscribed?status=invalid", request.url));
     }
 
-    if (subscriber.confirmTokenExpiresAt.getTime() < Date.now()) {
+    if (subscriber.confirm_token_expires_at.getTime() < Date.now()) {
       return NextResponse.redirect(new URL("/subscribe/unsubscribed?status=invalid", request.url));
     }
 
@@ -64,14 +64,14 @@ export async function GET(request: Request) {
       .update(`${unsubscribeToken}${secret}`)
       .digest("hex");
 
-    await prisma.subscriber.update({
+    await prisma.email_subscribers.update({
       where: { email },
       data: {
         status: "active",
-        confirmedAt: new Date(),
-        confirmTokenHash: null,
-        confirmTokenExpiresAt: null,
-        unsubscribeTokenHash,
+        confirmed_at: new Date(),
+        confirm_token_hash: null,
+        confirm_token_expires_at: null,
+        unsubscribe_token_hash: unsubscribeTokenHash,
       },
     });
 
@@ -80,6 +80,12 @@ export async function GET(request: Request) {
     const unsubscribeUrl = `${origin}/api/unsubscribe?token=${unsubscribeToken}`;
 
     await sendWelcomeEmail(email, unsubscribeUrl);
+
+    // Redirect to preferences page with the subscriber's preferences token
+    const preferencesToken = subscriber.preferences_token;
+    if (preferencesToken) {
+      return NextResponse.redirect(new URL(`/preferences?token=${preferencesToken}`, request.url));
+    }
 
     return NextResponse.redirect(new URL("/subscribe/success", request.url));
   } catch (error) {

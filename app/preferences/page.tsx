@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Briefcase, MapPin, Tags, Save, CheckCircle,
-  Loader2, ArrowLeft, Sparkles
+  Loader2, ArrowLeft, Sparkles, Mail
 } from 'lucide-react';
 
 const ROLE_OPTIONS = [
@@ -33,8 +33,16 @@ const LOCATION_OPTIONS = [
   { value: 'Hybrid', emoji: '🏠', label: 'Hybrid' },
 ];
 
-export default function PreferencesPage() {
+function PreferencesContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const token = searchParams.get('token');
+
+  // Auth mode: 'authenticated' (Supabase user) or 'subscriber' (email token)
+  const [authMode, setAuthMode] = useState<'authenticated' | 'subscriber' | 'loading'>('loading');
   const [user, setUser] = useState<any>(null);
+  const [subscriberEmail, setSubscriberEmail] = useState<string>('');
+
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [keywords, setKeywords] = useState<string>('');
@@ -43,38 +51,62 @@ export default function PreferencesPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
-  const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
-    loadUserAndPreferences();
-  }, []);
+    loadUserOrSubscriber();
+  }, [token]);
 
-  const loadUserAndPreferences = async () => {
+  const loadUserOrSubscriber = async () => {
     setLoading(true);
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // First, check for authenticated Supabase user
+    const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
 
-    if (userError || !user) {
-      router.push('/login?redirect=/preferences');
+    if (authUser && !userError) {
+      // Authenticated user mode
+      setAuthMode('authenticated');
+      setUser(authUser);
+
+      // Load preferences from Supabase user_job_preferences table
+      const { data: prefs } = await supabase
+        .from('user_job_preferences')
+        .select('*')
+        .eq('user_id', authUser.id)
+        .single();
+
+      if (prefs) {
+        setSelectedRoles(prefs.interested_roles || []);
+        setSelectedLocations(prefs.preferred_locations || []);
+        setKeywords((prefs.keywords || []).join(', '));
+      }
+
+      setLoading(false);
       return;
     }
 
-    setUser(user);
+    // If not authenticated, check for email subscriber token
+    if (token) {
+      try {
+        const res = await fetch(`/api/subscriber/preferences?token=${token}`);
+        const data = await res.json();
 
-    const { data: prefs, error: prefsError } = await supabase
-      .from('user_job_preferences')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (prefs && !prefsError) {
-      setSelectedRoles(prefs.interested_roles || []);
-      setSelectedLocations(prefs.preferred_locations || []);
-      setKeywords((prefs.keywords || []).join(', '));
+        if (data.ok) {
+          setAuthMode('subscriber');
+          setSubscriberEmail(data.preferences.email);
+          setSelectedRoles(data.preferences.roles || []);
+          setSelectedLocations(data.preferences.locations || []);
+          setKeywords((data.preferences.keywords || []).join(', '));
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to load subscriber preferences:', err);
+      }
     }
 
-    setLoading(false);
+    // Neither authenticated nor valid token - redirect to home
+    router.push('/?subscribe=true');
   };
 
   const handleSave = async () => {
@@ -97,28 +129,56 @@ export default function PreferencesPage() {
       .map(k => k.trim())
       .filter(k => k.length > 0);
 
-    const { error: saveError } = await supabase
-      .from('user_job_preferences')
-      .upsert({
-        user_id: user.id,
-        interested_roles: selectedRoles,
-        preferred_locations: selectedLocations,
-        keywords: keywordArray,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: 'user_id'
-      });
+    if (authMode === 'authenticated' && user) {
+      // Save to Supabase user_job_preferences
+      const { error: saveError } = await supabase
+        .from('user_job_preferences')
+        .upsert({
+          user_id: user.id,
+          interested_roles: selectedRoles,
+          preferred_locations: selectedLocations,
+          keywords: keywordArray,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
+        });
 
-    setSaving(false);
+      setSaving(false);
 
-    if (saveError) {
-      console.error('Save error:', saveError);
-      setError('Failed to save preferences. Please try again.');
-    } else {
-      setSaved(true);
-      setTimeout(() => {
-        router.push('/jobs');
-      }, 2000);
+      if (saveError) {
+        console.error('Save error:', saveError);
+        setError('Failed to save preferences. Please try again.');
+      } else {
+        setSaved(true);
+        setTimeout(() => router.push('/jobs'), 2000);
+      }
+    } else if (authMode === 'subscriber' && token) {
+      // Save via API for email subscribers
+      try {
+        const res = await fetch(`/api/subscriber/preferences?token=${token}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roles: selectedRoles,
+            locations: selectedLocations,
+            keywords: keywordArray,
+          }),
+        });
+
+        const data = await res.json();
+
+        setSaving(false);
+
+        if (data.ok) {
+          setSaved(true);
+          setTimeout(() => router.push('/jobs'), 2000);
+        } else {
+          setError(data.error || 'Failed to save preferences');
+        }
+      } catch (err) {
+        setSaving(false);
+        setError('Failed to save preferences. Please try again.');
+      }
     }
   };
 
@@ -140,7 +200,7 @@ export default function PreferencesPage() {
     setError('');
   };
 
-  if (loading) {
+  if (loading || authMode === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
         <div className="text-center">
@@ -183,6 +243,14 @@ export default function PreferencesPage() {
           <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
             Tell us what you&apos;re looking for and we&apos;ll match you with the perfect internships every week
           </p>
+
+          {/* Show subscriber email if in subscriber mode */}
+          {authMode === 'subscriber' && subscriberEmail && (
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full text-sm font-medium text-green-700">
+              <Mail className="w-4 h-4" />
+              <span>Logged in as: {subscriberEmail}</span>
+            </div>
+          )}
         </motion.div>
 
         {/* Roles Section */}
@@ -381,8 +449,41 @@ export default function PreferencesPage() {
               Selected: {selectedRoles.length} roles, {selectedLocations.length} locations
             </p>
           </div>
+
+          {/* Upsell for email subscribers */}
+          {authMode === 'subscriber' && (
+            <div className="mt-8 p-6 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border-2 border-cyan-200 text-center">
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                Want 3 Free AI Resume Analyses?
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">
+                Create a free account to unlock AI-powered resume analysis, cover letter generation, and more.
+              </p>
+              <button
+                onClick={() => router.push('/signup')}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+              >
+                Create Free Account
+              </button>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function PreferencesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Loading preferences...</p>
+        </div>
+      </div>
+    }>
+      <PreferencesContent />
+    </Suspense>
   );
 }
