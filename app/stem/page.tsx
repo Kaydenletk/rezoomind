@@ -7,8 +7,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export default async function StemJobsPage() {
-  const jobs = await prisma.jobPosting.findMany({
-    orderBy: [{ datePosted: "desc" }, { createdAt: "desc" }],
+  const jobs = await prisma.job_postings.findMany({
+    orderBy: [{ date_posted: "desc" }, { created_at: "desc" }],
     take: 60,
     select: {
       id: true,
@@ -17,7 +17,7 @@ export default async function StemJobsPage() {
       location: true,
       url: true,
       tags: true,
-      datePosted: true,
+      date_posted: true,
     },
   });
 
@@ -33,7 +33,7 @@ export default async function StemJobsPage() {
     location: job.location,
     url: job.url,
     tags: job.tags,
-    datePosted: job.datePosted?.toISOString() ?? null,
+    datePosted: job.date_posted?.toISOString() ?? null,
   }));
 
   return (
@@ -58,7 +58,7 @@ export default async function StemJobsPage() {
               AI Resume Analysis
             </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Get ATS-friendly bullets + match score for roles you’re applying to.
+              Get ATS-friendly bullets + match score for roles you're applying to.
             </p>
           </div>
           <Button href="/resume/analysis">Analyze my resume</Button>

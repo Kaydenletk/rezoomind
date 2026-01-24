@@ -8,42 +8,63 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
+// Email subscribers table (for free tier users without accounts)
+model email_subscribers {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                   String    @unique
+  status                  String    @default("pending")
+  interests               Json?
+  created_at              DateTime  @default(now()) @db.Timestamptz
+  confirmed_at            DateTime? @db.Timestamptz
+  confirm_token_hash      String?
+  confirm_token_expires_at DateTime? @db.Timestamptz
+  unsubscribe_token_hash  String?
+  updated_at              DateTime  @default(now()) @updatedAt @db.Timestamptz
+
+  // Job preference fields for free tier
+  interested_roles        String[]  @default([])
+  preferred_locations     String[]  @default([])
+  keywords                String[]  @default([])
+  weekly_limit            Int       @default(10)
+  last_email_sent         DateTime? @db.Timestamptz
+  preferences_token       String?   @unique
+
+  // Relation to track sent jobs
+  sent_alerts             sent_subscriber_job_alerts[]
 }
 
-enum SubscriberStatus {
-  pending
-  active
-  unsubscribed
+// Sent job alerts for email subscribers (avoid duplicates)
+model sent_subscriber_job_alerts {
+  id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subscriber_id String              @db.Uuid
+  job_id        String              @db.Uuid
+  sent_at       DateTime            @default(now()) @db.Timestamptz
+
+  subscriber    email_subscribers   @relation(fields: [subscriber_id], references: [id], onDelete: Cascade)
+  job           job_postings        @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@unique([subscriber_id, job_id])
+  @@index([subscriber_id])
+  @@index([job_id])
 }
 
-model Subscriber {
-  id                    String           @id @default(cuid())
-  email                 String           @unique
-  status                SubscriberStatus @default(pending)
-  interests             Json?
-  createdAt             DateTime         @default(now())
-  confirmedAt           DateTime?
-  confirmTokenHash      String?
-  confirmTokenExpiresAt DateTime?
-  unsubscribeTokenHash  String?
-  updatedAt             DateTime         @updatedAt
-}
+// Job postings table (scraped from JobSpy)
+model job_postings {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  source_id       String    @unique
+  company         String
+  role            String
+  location        String?
+  url             String?
+  description     String?
+  date_posted     DateTime? @db.Timestamptz
+  source          String
+  tags            String[]
+  salary_min      Decimal?
+  salary_max      Decimal?
+  salary_interval String?
+  created_at      DateTime  @default(now()) @db.Timestamptz
 
-model JobPosting {
-  id         String   @id @default(cuid())
-  sourceId   String   @unique
-  company    String
-  role       String
-  location   String?
-  url        String?
-  datePosted DateTime?
-  source     String
-  tags       String[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  // Relation to track sent alerts
+  sent_alerts     sent_subscriber_job_alerts[]
 }

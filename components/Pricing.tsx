@@ -8,33 +8,53 @@ import { useAuth } from "@/hooks/useAuth";
 
 const tiers = [
   {
-    id: "starter",
-    name: "Starter",
+    id: "free",
+    name: "Free",
     price: "$0",
-    period: "/mo",
-    description: "Everything you need to get started.",
-    features: ["Basic tracking", "5 email alerts", "Weekly digest"],
-    cta: "Start Free",
+    period: "/forever",
+    description: "Get started with job alerts, no account needed.",
+    features: [
+      "10 personalized jobs/week",
+      "Weekly Monday digest",
+      "Set role & location preferences",
+      "Unsubscribe anytime",
+    ],
+    cta: "Subscribe Free",
+    ctaAction: "subscribe" as const,
+  },
+  {
+    id: "upgraded",
+    name: "Upgraded",
+    price: "$0",
+    period: "/forever",
+    description: "Create a free account for more features.",
+    features: [
+      "Everything in Free",
+      "3 AI resume analyses/month",
+      "Browse unlimited jobs",
+      "Save favorite jobs",
+      "Track applications",
+    ],
+    cta: "Create Free Account",
+    ctaAction: "signup" as const,
+    highlighted: true,
   },
   {
     id: "pro",
     name: "Pro",
-    price: "$9.99",
+    price: "$15",
     period: "/mo",
-    description: "For focused applicants who want speed.",
-    trial: "7-day free trial, then $9.99/mo",
-    features: ["25 companies", "Priority alerts", "Smart filters"],
-    cta: "Start Free Trial",
-    highlighted: true,
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: "$19.99",
-    period: "/mo",
-    description: "Best for power users and teams.",
-    features: ["Unlimited tracking", "Dedicated support", "Advanced matching"],
-    cta: "Contact Sales",
+    description: "For serious job seekers who want every advantage.",
+    features: [
+      "Everything in Upgraded",
+      "Unlimited AI analyses",
+      "Cover letter generator",
+      "LinkedIn optimizer",
+      "Daily job alerts",
+      "Priority support",
+    ],
+    cta: "Go Pro",
+    ctaAction: "checkout" as const,
   },
 ];
 
@@ -53,18 +73,37 @@ export function Pricing() {
     return () => window.clearTimeout(timer);
   }, [selectedPlan]);
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPlan = (planId: string, action?: string) => {
     setPendingPlan(planId);
     setNote("");
 
-    if (!isAuthenticated) {
-      const nextUrl = `/?plan=${planId}#pricing`;
-      const authUrl = `/signup?next=${encodeURIComponent(nextUrl)}&plan=${planId}`;
-      window.setTimeout(() => router.push(authUrl), 400);
+    if (action === "subscribe") {
+      // Scroll to email form at top of page
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.setTimeout(() => setPendingPlan(null), 500);
       return;
     }
 
-    setNote("Checkout is coming soon. We will notify you.");
+    if (action === "signup") {
+      window.setTimeout(() => router.push("/signup"), 400);
+      return;
+    }
+
+    if (action === "checkout") {
+      if (!isAuthenticated) {
+        const nextUrl = `/?plan=${planId}#pricing`;
+        const authUrl = `/signup?next=${encodeURIComponent(nextUrl)}&plan=${planId}`;
+        window.setTimeout(() => router.push(authUrl), 400);
+        return;
+      }
+
+      setNote("Checkout is coming soon. We will notify you.");
+      window.setTimeout(() => setPendingPlan(null), 500);
+      return;
+    }
+
+    // Default fallback
+    setNote("Coming soon!");
     window.setTimeout(() => setPendingPlan(null), 500);
   };
 
@@ -115,9 +154,6 @@ export function Pricing() {
               </span>
               <span className="text-xs text-slate-500">{tier.period}</span>
             </div>
-            {tier.trial ? (
-              <p className="mt-2 text-xs text-slate-500">{tier.trial}</p>
-            ) : null}
             <ul className="mt-6 space-y-2 text-sm text-slate-600">
               {tier.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-2">
@@ -140,7 +176,7 @@ export function Pricing() {
             <div className="mt-8">
               <Button
                 variant={tier.highlighted ? "primary" : "secondary"}
-                onClick={() => handleSelectPlan(tier.id)}
+                onClick={() => handleSelectPlan(tier.id, tier.ctaAction)}
                 disabled={pendingPlan === tier.id}
               >
                 {pendingPlan === tier.id ? "Loading..." : tier.cta}

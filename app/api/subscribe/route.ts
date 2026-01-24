@@ -8,6 +8,10 @@ import { sendConfirmEmail } from "@/lib/email/resend";
 const subscribeSchema = z.object({
   email: z.string().email(),
   interests: z.array(z.string()).optional(),
+  // New fields for job preferences
+  roles: z.array(z.string()).optional(),
+  locations: z.array(z.string()).optional(),
+  keywords: z.array(z.string()).optional(),
 });
 
 const hashToken = (token: string, secret: string) =>
@@ -65,35 +69,51 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = await prisma.subscriber.findUnique({ where: { email } });
+    const existing = await prisma.email_subscribers.findUnique({ where: { email } });
     if (existing?.status === "active") {
       return NextResponse.json({ ok: true });
     }
 
     const token = randomBytes(32).toString("hex");
     const confirmTokenHash = hashToken(token, secret);
+    const preferencesToken = randomBytes(32).toString("hex");
 
     const confirmTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
+    // Extract job preferences from request
+    const roles = parsed.data.roles ?? [];
+    const locations = parsed.data.locations ?? [];
+    const keywords = parsed.data.keywords ?? [];
+
     if (existing) {
-      await prisma.subscriber.update({
+      await prisma.email_subscribers.update({
         where: { email },
         data: {
           status: "pending",
-          confirmTokenHash,
-          confirmTokenExpiresAt,
-          confirmedAt: null,
-          interests,
+          confirm_token_hash: confirmTokenHash,
+          confirm_token_expires_at: confirmTokenExpiresAt,
+          confirmed_at: null,
+          interests: interests.length > 0 ? interests : undefined,
+          // Update job preferences
+          interested_roles: roles,
+          preferred_locations: locations,
+          keywords: keywords,
+          preferences_token: preferencesToken,
         },
       });
     } else {
-      await prisma.subscriber.create({
+      await prisma.email_subscribers.create({
         data: {
           email,
           status: "pending",
-          confirmTokenHash,
-          confirmTokenExpiresAt,
-          interests,
+          confirm_token_hash: confirmTokenHash,
+          confirm_token_expires_at: confirmTokenExpiresAt,
+          interests: interests.length > 0 ? interests : undefined,
+          // Add job preferences
+          interested_roles: roles,
+          preferred_locations: locations,
+          keywords: keywords,
+          preferences_token: preferencesToken,
         },
       });
     }

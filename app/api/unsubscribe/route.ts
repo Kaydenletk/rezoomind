@@ -42,8 +42,8 @@ export async function GET(request: Request) {
   }
 
   const tokenHash = createHash("sha256").update(`${token}${secret}`).digest("hex");
-  const subscriber = await prisma.subscriber.findFirst({
-    where: { unsubscribeTokenHash: tokenHash },
+  const subscriber = await prisma.email_subscribers.findFirst({
+    where: { unsubscribe_token_hash: tokenHash },
   });
 
   if (!subscriber || !isValidToken(subscriber.email, token, secret)) {
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    await prisma.subscriber.update({
+    await prisma.email_subscribers.update({
       where: { id: subscriber.id },
       data: { status: "unsubscribed" },
     });

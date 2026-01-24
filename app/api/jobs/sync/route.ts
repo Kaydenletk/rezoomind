@@ -102,22 +102,22 @@ export async function POST(request: Request) {
     const jobs = parseJobsFromMarkdown(markdown);
     const existingSourceIds = new Set(
       (
-        await prisma.jobPosting.findMany({
-          select: { sourceId: true },
+        await prisma.job_postings.findMany({
+          select: { source_id: true },
         })
-      ).map((job) => job.sourceId)
+      ).map((job) => job.source_id)
     );
 
     const newJobs = jobs.filter((job) => !existingSourceIds.has(job.sourceId));
 
-    const result = await prisma.jobPosting.createMany({
+    const result = await prisma.job_postings.createMany({
       data: newJobs.map((job) => ({
-        sourceId: job.sourceId,
+        source_id: job.sourceId,
         company: job.company,
         role: job.role,
         location: job.location,
         url: job.url,
-        datePosted: job.datePosted,
+        date_posted: job.datePosted,
         source: job.source,
         tags: job.tags,
       })),
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const subscribers = await prisma.subscriber.findMany({
+    const subscribers = await prisma.email_subscribers.findMany({
       where: { status: "active" },
       select: { email: true, interests: true },
     });
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
       if (emailed >= maxEmails) break;
 
       const interestList = Array.isArray(subscriber.interests)
-        ? subscriber.interests.map((value) => String(value).toLowerCase())
+        ? (subscriber.interests as string[]).map((value) => String(value).toLowerCase())
         : [];
 
       const matches = newJobs.filter((job) => {
