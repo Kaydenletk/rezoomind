@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local script outputs/state
+scripts/jobs.db
+scripts/jobs_export.csv
+scripts/.last_commit_hash
