@@ -51,45 +51,59 @@ alter table public.interests enable row level security;
 alter table public.alerts enable row level security;
 alter table public.internships enable row level security;
 
+drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own" on public.profiles
   for select using (auth.uid() = id);
 
+drop policy if exists "profiles_update_own" on public.profiles;
 create policy "profiles_update_own" on public.profiles
   for update using (auth.uid() = id);
 
+drop policy if exists "profiles_insert_own" on public.profiles;
 create policy "profiles_insert_own" on public.profiles
   for insert with check (auth.uid() = id);
 
+drop policy if exists "resumes_select_own" on public.resumes;
 create policy "resumes_select_own" on public.resumes
   for select using (auth.uid() = user_id);
 
+drop policy if exists "resumes_insert_own" on public.resumes;
 create policy "resumes_insert_own" on public.resumes
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "resumes_update_own" on public.resumes;
 create policy "resumes_update_own" on public.resumes
   for update using (auth.uid() = user_id);
 
+drop policy if exists "resumes_delete_own" on public.resumes;
 create policy "resumes_delete_own" on public.resumes
   for delete using (auth.uid() = user_id);
 
+drop policy if exists "interests_select_own" on public.interests;
 create policy "interests_select_own" on public.interests
   for select using (auth.uid() = user_id);
 
+drop policy if exists "interests_insert_own" on public.interests;
 create policy "interests_insert_own" on public.interests
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "interests_update_own" on public.interests;
 create policy "interests_update_own" on public.interests
   for update using (auth.uid() = user_id);
 
+drop policy if exists "alerts_select_own" on public.alerts;
 create policy "alerts_select_own" on public.alerts
   for select using (auth.uid() = user_id);
 
+drop policy if exists "alerts_insert_own" on public.alerts;
 create policy "alerts_insert_own" on public.alerts
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "alerts_update_own" on public.alerts;
 create policy "alerts_update_own" on public.alerts
   for update using (auth.uid() = user_id);
 
+drop policy if exists "internships_read_all" on public.internships;
 create policy "internships_read_all" on public.internships
   for select using (auth.role() = 'authenticated');
 
@@ -116,24 +130,28 @@ insert into storage.buckets (id, name, public)
 values ('resumes', 'resumes', false)
 on conflict (id) do nothing;
 
+drop policy if exists "resumes_storage_select_own" on storage.objects;
 create policy "resumes_storage_select_own" on storage.objects
   for select using (
     bucket_id = 'resumes'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
+drop policy if exists "resumes_storage_insert_own" on storage.objects;
 create policy "resumes_storage_insert_own" on storage.objects
   for insert with check (
     bucket_id = 'resumes'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
+drop policy if exists "resumes_storage_update_own" on storage.objects;
 create policy "resumes_storage_update_own" on storage.objects
   for update using (
     bucket_id = 'resumes'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
 
+drop policy if exists "resumes_storage_delete_own" on storage.objects;
 create policy "resumes_storage_delete_own" on storage.objects
   for delete using (
     bucket_id = 'resumes'
@@ -197,26 +215,33 @@ alter table public.usage_logs enable row level security;
 alter table public.resume_improvements enable row level security;
 
 -- Cover letters policies
+drop policy if exists "cover_letters_select_own" on public.cover_letters;
 create policy "cover_letters_select_own" on public.cover_letters
   for select using (auth.uid() = user_id);
 
+drop policy if exists "cover_letters_insert_own" on public.cover_letters;
 create policy "cover_letters_insert_own" on public.cover_letters
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "cover_letters_update_own" on public.cover_letters;
 create policy "cover_letters_update_own" on public.cover_letters
   for update using (auth.uid() = user_id);
 
+drop policy if exists "cover_letters_delete_own" on public.cover_letters;
 create policy "cover_letters_delete_own" on public.cover_letters
   for delete using (auth.uid() = user_id);
 
 -- Usage logs policies
+drop policy if exists "usage_logs_select_own" on public.usage_logs;
 create policy "usage_logs_select_own" on public.usage_logs
   for select using (auth.uid() = user_id);
 
+drop policy if exists "usage_logs_insert" on public.usage_logs;
 create policy "usage_logs_insert" on public.usage_logs
   for insert with check (true);
 
 -- Resume improvements policies
+drop policy if exists "resume_improvements_select_own" on public.resume_improvements;
 create policy "resume_improvements_select_own" on public.resume_improvements
   for select using (
     exists (
@@ -226,6 +251,7 @@ create policy "resume_improvements_select_own" on public.resume_improvements
     )
   );
 
+drop policy if exists "resume_improvements_insert_own" on public.resume_improvements;
 create policy "resume_improvements_insert_own" on public.resume_improvements
   for insert with check (
     exists (
@@ -235,6 +261,7 @@ create policy "resume_improvements_insert_own" on public.resume_improvements
     )
   );
 
+drop policy if exists "resume_improvements_update_own" on public.resume_improvements;
 create policy "resume_improvements_update_own" on public.resume_improvements
   for update using (
     exists (
@@ -321,29 +348,37 @@ alter table public.user_job_preferences enable row level security;
 alter table public.job_matches enable row level security;
 
 -- Job postings policies (everyone can read, only service role can insert)
+drop policy if exists "job_postings_read_all" on public.job_postings;
 create policy "job_postings_read_all" on public.job_postings
   for select using (true);
 
 -- User job preferences policies
+drop policy if exists "user_job_preferences_select_own" on public.user_job_preferences;
 create policy "user_job_preferences_select_own" on public.user_job_preferences
   for select using (auth.uid() = user_id);
 
+drop policy if exists "user_job_preferences_insert_own" on public.user_job_preferences;
 create policy "user_job_preferences_insert_own" on public.user_job_preferences
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "user_job_preferences_update_own" on public.user_job_preferences;
 create policy "user_job_preferences_update_own" on public.user_job_preferences
   for update using (auth.uid() = user_id);
 
+drop policy if exists "user_job_preferences_delete_own" on public.user_job_preferences;
 create policy "user_job_preferences_delete_own" on public.user_job_preferences
   for delete using (auth.uid() = user_id);
 
 -- Job matches policies
+drop policy if exists "job_matches_select_own" on public.job_matches;
 create policy "job_matches_select_own" on public.job_matches
   for select using (auth.uid() = user_id);
 
+drop policy if exists "job_matches_insert_own" on public.job_matches;
 create policy "job_matches_insert_own" on public.job_matches
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "job_matches_update_own" on public.job_matches;
 create policy "job_matches_update_own" on public.job_matches
   for update using (auth.uid() = user_id);
 
@@ -377,9 +412,11 @@ create table if not exists public.resume_usage (
 
 alter table public.resume_usage enable row level security;
 
+drop policy if exists "resume_usage_select_own" on public.resume_usage;
 create policy "resume_usage_select_own" on public.resume_usage
   for select using (auth.uid() = user_id);
 
+drop policy if exists "resume_usage_insert_own" on public.resume_usage;
 create policy "resume_usage_insert_own" on public.resume_usage
   for insert with check (auth.uid() = user_id);
 
@@ -398,9 +435,11 @@ create table if not exists public.sent_user_job_alerts (
 
 alter table public.sent_user_job_alerts enable row level security;
 
+drop policy if exists "sent_user_job_alerts_select_own" on public.sent_user_job_alerts;
 create policy "sent_user_job_alerts_select_own" on public.sent_user_job_alerts
   for select using (auth.uid() = user_id);
 
+drop policy if exists "sent_user_job_alerts_insert" on public.sent_user_job_alerts;
 create policy "sent_user_job_alerts_insert" on public.sent_user_job_alerts
   for insert with check (true);
 
@@ -459,3 +498,67 @@ drop trigger if exists update_email_subscribers_updated_at on public.email_subsc
 create trigger update_email_subscribers_updated_at
 before update on public.email_subscribers
 for each row execute procedure public.update_updated_at_column();
+
+-- ============================================
+-- Scraper Logs Schema (Monitoring)
+-- ============================================
+
+-- Scraper logs table for monitoring scraper runs
+create table if not exists public.scraper_logs (
+  id uuid primary key default gen_random_uuid(),
+  status text not null check (status in ('success', 'error')),
+  scraped integer,
+  saved integer,
+  duplicates integer,
+  duration_seconds decimal,
+  error_message text,
+  error_stack text,
+  sources jsonb,
+  created_at timestamp with time zone default now()
+);
+
+create index if not exists idx_scraper_logs_created_at on public.scraper_logs(created_at desc);
+create index if not exists idx_scraper_logs_status on public.scraper_logs(status);
+
+-- ============================================
+-- Job Postings INSERT Policy
+-- ============================================
+
+-- Allow service role to insert jobs (bypasses RLS when using service role key)
+-- This policy also enables future client-side inserts with proper authentication
+drop policy if exists "job_postings_insert_service" on public.job_postings;
+create policy "job_postings_insert_service" on public.job_postings
+  for insert with check (true);
+
+-- Allow updates for UPSERT support (refresh timestamps on sync)
+drop policy if exists "job_postings_update_all" on public.job_postings;
+create policy "job_postings_update_all" on public.job_postings
+  for update using (true) with check (true);
+
+-- Allow deletes for job clearing
+drop policy if exists "job_postings_delete_all" on public.job_postings;
+create policy "job_postings_delete_all" on public.job_postings
+  for delete using (true);
+
+-- RPC function to clear GitHub jobs (security definer bypasses RLS)
+create or replace function clear_github_jobs(sync_secret text)
+returns json
+language plpgsql
+security definer
+as $$
+declare
+  deleted_count integer;
+begin
+  if sync_secret is null or sync_secret = '' then
+    return json_build_object('ok', false, 'error', 'Missing sync secret');
+  end if;
+
+  select count(*) into deleted_count
+  from public.job_postings
+  where source = 'github';
+
+  delete from public.job_postings where source = 'github';
+
+  return json_build_object('ok', true, 'deleted', deleted_count);
+end;
+$$;

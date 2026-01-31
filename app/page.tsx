@@ -251,26 +251,6 @@ export default function HomePage() {
             </motion.div>
 
             {/* Social Proof */}
-            <motion.div
-              {...fadeUp}
-              transition={{ duration: 0.6, delay: 0.32 }}
-              className="mt-10 flex flex-col items-center gap-3 sm:flex-row"
-            >
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 border-2 border-white flex items-center justify-center text-white font-bold text-sm"
-                  >
-                    {String.fromCharCode(64 + i)}
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-slate-600">
-                <span className="font-bold text-slate-900">2,847 students</span>{" "}
-                got jobs this month
-              </p>
-            </motion.div>
 
             {/* Secondary CTAs */}
             <motion.div
