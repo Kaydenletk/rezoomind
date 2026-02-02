@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 // POST: Sync jobs from GitHub
 export async function POST() {
   try {
-    const syncUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/jobs/sync`;
+    const syncUrl = `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/api/jobs/sync`;
 
     const response = await fetch(syncUrl, {
       method: 'POST',
@@ -27,7 +27,7 @@ export async function POST() {
 // DELETE: Clear all GitHub jobs (uses POST with x-action header)
 export async function DELETE() {
   try {
-    const syncUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/jobs/sync`;
+    const syncUrl = `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/api/jobs/sync`;
 
     const response = await fetch(syncUrl, {
       method: 'POST',
@@ -50,7 +50,7 @@ export async function DELETE() {
 // POST: Delete ALL jobs and refetch fresh from GitHub (clear-and-sync)
 export async function PUT() {
   try {
-    const syncUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/jobs/sync`;
+    const syncUrl = `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/api/jobs/sync`;
 
     const response = await fetch(syncUrl, {
       method: 'POST',
