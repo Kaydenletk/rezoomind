@@ -70,7 +70,7 @@ export async function GET(request: Request) {
 
       if (latest) {
         const lastSyncAge = Date.now() - new Date(latest.created_at).getTime();
-        const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+        const COOLDOWN_MS = 1 * 60 * 1000; // 1 minute
         if (lastSyncAge < COOLDOWN_MS) {
           return NextResponse.json({
             ok: true,

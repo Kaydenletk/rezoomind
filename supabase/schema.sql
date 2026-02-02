@@ -540,7 +540,9 @@ drop policy if exists "job_postings_delete_all" on public.job_postings;
 create policy "job_postings_delete_all" on public.job_postings
   for delete using (true);
 
--- RPC function to clear GitHub jobs (security definer bypasses RLS)
+-- RPC function to clear all jobs (security definer bypasses RLS)
+-- Deletes ALL job_postings rows (not just source='github') to purge
+-- stale data from old scrapers (Indeed, ZipRecruiter, etc.)
 create or replace function clear_github_jobs(sync_secret text)
 returns json
 language plpgsql
@@ -554,10 +556,9 @@ begin
   end if;
 
   select count(*) into deleted_count
-  from public.job_postings
-  where source = 'github';
+  from public.job_postings;
 
-  delete from public.job_postings where source = 'github';
+  delete from public.job_postings;
 
   return json_build_object('ok', true, 'deleted', deleted_count);
 end;
