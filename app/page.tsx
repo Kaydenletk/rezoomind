@@ -553,7 +553,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">500+ New Jobs Daily</p>
-                    <p className="text-sm text-slate-600">Scraped from LinkedIn, Indeed, ZipRecruiter & more</p>
+                    <p className="text-sm text-slate-600">Sourced from verified company career pages</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
