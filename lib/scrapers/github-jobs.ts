@@ -7,19 +7,93 @@ import { createHash } from 'crypto';
 import { JobScraper, ScrapedJob, ScraperResult } from './types';
 import { GITHUB_JOB_REPOS } from './config';
 
-const stripHtml = (value: string) => value.replace(/<[^>]+>/g, '').trim();
-
-const extractHref = (value: string) => {
-  const matches = [...value.matchAll(/href="([^"]+)"/g)];
-  return matches.length ? matches[matches.length - 1][1] : undefined;
+const stripMarkup = (value: string) => {
+  if (!value) return '';
+  let text = value;
+  text = text.replace(/<br\s*\/?>/gi, ' ');
+  text = text.replace(/&nbsp;/gi, ' ');
+  text = text.replace(/&amp;/gi, '&');
+  text = text.replace(/&quot;/gi, '"');
+  text = text.replace(/&#39;/gi, "'");
+  text = text.replace(/<[^>]+>/g, ' ');
+  text = text.replace(/!\[[^\]]*]\([^)]+\)/g, ' ');
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  text = text.replace(/`([^`]+)`/g, '$1');
+  text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
+  text = text.replace(/\*([^*]+)\*/g, '$1');
+  return text.replace(/\s+/g, ' ').trim();
 };
 
-const parseAge = (value: string): Date | null => {
-  const match = value.match(/(\d+)\s*d/i);
-  if (!match) return null;
-  const days = Number(match[1]);
-  if (Number.isNaN(days)) return null;
-  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+const extractLinks = (value: string): string[] => {
+  if (!value) return [];
+  const links: string[] = [];
+
+  for (const match of value.matchAll(/\[\s*!\[[^\]]*]\([^)]+\)\s*]\((https?:\/\/[^)\s]+)\)/g)) {
+    links.push(match[1]);
+  }
+
+  for (const match of value.matchAll(/href="([^"]+)"/g)) {
+    links.push(match[1]);
+  }
+
+  const withoutImages = value.replace(/!\[[^\]]*]\([^)]+\)/g, '');
+  for (const match of withoutImages.matchAll(/\[[^\]]+]\((https?:\/\/[^)\s]+)\)/g)) {
+    links.push(match[1]);
+  }
+
+  for (const match of value.matchAll(/<\s*(https?:\/\/[^>\s]+)\s*>/g)) {
+    links.push(match[1]);
+  }
+
+  for (const match of value.matchAll(/https?:\/\/[^\s)]+/g)) {
+    links.push(match[0]);
+  }
+
+  const seen = new Set<string>();
+  return links
+    .map((link) => link.replace(/[),.;]+$/g, ''))
+    .filter((link) => {
+      if (seen.has(link)) return false;
+      seen.add(link);
+      return true;
+    });
+};
+
+const isLikelyImageUrl = (url: string) =>
+  /\.(png|jpe?g|gif|svg)(\?|$)/i.test(url) ||
+  /img\.shields\.io|camo\.githubusercontent\.com/i.test(url);
+
+const pickFirstJobUrl = (value: string): string | undefined => {
+  const links = extractLinks(value);
+  return links.find((link) => !isLikelyImageUrl(link));
+};
+
+const parsePostedDate = (value: string): Date | null => {
+  if (!value) return null;
+  const normalized = stripMarkup(value).toLowerCase();
+  if (!normalized) return null;
+
+  if (normalized.includes('today') || normalized.includes('just')) {
+    return new Date();
+  }
+  if (normalized.includes('yesterday')) {
+    return new Date(Date.now() - 24 * 60 * 60 * 1000);
+  }
+
+  const relativeMatch = normalized.match(/(\d+)\s*(d|day|days)\b/);
+  if (relativeMatch) {
+    const days = Number(relativeMatch[1]);
+    if (!Number.isNaN(days)) {
+      return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  const parsed = Date.parse(normalized);
+  if (!Number.isNaN(parsed)) {
+    return new Date(parsed);
+  }
+
+  return null;
 };
 
 const buildSourceId = (source: string, input: string) =>
@@ -47,6 +121,7 @@ function parseSalary(salaryStr: string): { min: number | null; max: number | nul
 interface FileMetadata {
   jobType: 'internship' | 'new-grad';
   region: 'usa' | 'international';
+  file: string;
 }
 
 function parseJobsFromMarkdown(markdown: string, meta: FileMetadata): ScrapedJob[] {
@@ -61,6 +136,14 @@ function parseJobsFromMarkdown(markdown: string, meta: FileMetadata): ScrapedJob
     if (line.includes('TABLE_FAANG_START')) { currentCategory = 'faang'; continue; }
     if (line.includes('TABLE_QUANT_START')) { currentCategory = 'quant'; continue; }
     if (line.includes('TABLE_START')) { currentCategory = 'other'; continue; }
+
+    // Detect headings as a fallback when HTML comments are missing
+    const heading = line.trim().toLowerCase();
+    if (heading.startsWith('#')) {
+      if (heading.includes('faang')) currentCategory = 'faang';
+      else if (heading.includes('quant')) currentCategory = 'quant';
+      else if (heading.includes('other') || heading.includes('all')) currentCategory = 'other';
+    }
 
     // Check for table header to determine format
     const normalizedLine = line.toLowerCase();
@@ -96,23 +179,23 @@ function parseJobsFromMarkdown(markdown: string, meta: FileMetadata): ScrapedJob
     let salary = { min: null as number | null, max: null as number | null, interval: null as string | null };
 
     if (currentTableHasSalary && columns.length >= 6) {
-      company = stripHtml(columns[0] || '');
-      role = stripHtml(columns[1] || '');
-      location = stripHtml(columns[2] || '') || null;
+      company = stripMarkup(columns[0] || '');
+      role = stripMarkup(columns[1] || '');
+      location = stripMarkup(columns[2] || '') || null;
       salary = parseSalary(columns[3] || '');
-      postingUrl = extractHref(columns[4] || '');
-      datePosted = parseAge(columns[5] ?? '');
+      postingUrl = pickFirstJobUrl(columns[4] || '');
+      datePosted = parsePostedDate(columns[5] ?? '');
     } else if (columns.length >= 5) {
-      company = stripHtml(columns[0] || '');
-      role = stripHtml(columns[1] || '');
-      location = stripHtml(columns[2] || '') || null;
-      postingUrl = extractHref(columns[3] || '');
-      datePosted = parseAge(columns[4] ?? '');
+      company = stripMarkup(columns[0] || '');
+      role = stripMarkup(columns[1] || '');
+      location = stripMarkup(columns[2] || '') || null;
+      postingUrl = pickFirstJobUrl(columns[3] || '');
+      datePosted = parsePostedDate(columns[4] ?? '');
     } else if (columns.length >= 4) {
-      company = stripHtml(columns[0] || '');
-      role = stripHtml(columns[1] || '');
-      location = stripHtml(columns[2] || '') || null;
-      postingUrl = extractHref(columns[3] || '');
+      company = stripMarkup(columns[0] || '');
+      role = stripMarkup(columns[1] || '');
+      location = stripMarkup(columns[2] || '') || null;
+      postingUrl = pickFirstJobUrl(columns[3] || '');
       datePosted = null;
     } else {
       continue;
@@ -120,20 +203,26 @@ function parseJobsFromMarkdown(markdown: string, meta: FileMetadata): ScrapedJob
 
     if (!company || !role || company.length === 0 || role.length === 0) continue;
 
+    const fallbackUrl =
+      postingUrl ??
+      pickFirstJobUrl(columns[1] || '') ??
+      pickFirstJobUrl(columns[0] || '');
+
+    const applyKey = fallbackUrl ?? meta.file;
     const sourceId = buildSourceId(
       'github',
-      `${company}|${role}|${location ?? ''}|${postingUrl ?? ''}`
+      `${company}|${role}|${location ?? ''}|${applyKey}`
     );
 
     // Build tags from file metadata and section category
-    const tags: string[] = [meta.jobType, meta.region, currentCategory, '2026-swe'];
+    const tags: string[] = [meta.jobType, meta.region, currentCategory, '2026-swe', 'date:repo'];
 
     jobs.push({
       sourceId,
       company,
       role,
       location,
-      url: postingUrl ?? null,
+      url: fallbackUrl ?? null,
       description: null,
       datePosted,
       source: 'github',
@@ -167,6 +256,7 @@ export class GitHubJobsScraper implements JobScraper {
             'User-Agent': 'Rezoomind Job Scraper',
             'Accept': 'text/plain',
           },
+          cache: 'no-store',
           signal: AbortSignal.timeout(30000),
         });
 
@@ -186,7 +276,7 @@ export class GitHubJobsScraper implements JobScraper {
           continue;
         }
 
-        const meta: FileMetadata = { jobType: repo.jobType, region: repo.region };
+        const meta: FileMetadata = { jobType: repo.jobType, region: repo.region, file: repo.file };
         const jobs = parseJobsFromMarkdown(markdown, meta);
 
         allJobs.push(...jobs);

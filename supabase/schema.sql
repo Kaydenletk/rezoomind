@@ -11,6 +11,8 @@ create table if not exists public.resumes (
   user_id uuid references auth.users(id) on delete cascade,
   resume_text text,
   file_url text,
+  resume_keywords text[],
+  parsed_at timestamp with time zone,
   created_at timestamp with time zone default now(),
   unique (user_id)
 );
@@ -173,6 +175,11 @@ add column if not exists version integer default 1,
 add column if not exists is_active boolean default true,
 add column if not exists updated_at timestamp with time zone default now();
 
+-- Resume keyword extraction
+alter table public.resumes
+add column if not exists resume_keywords text[],
+add column if not exists parsed_at timestamp with time zone;
+
 -- Cover letters table
 create table if not exists public.cover_letters (
   id uuid primary key default gen_random_uuid(),
@@ -307,6 +314,8 @@ create table if not exists public.job_postings (
   location text,
   url text,
   description text,
+  job_keywords text[],
+  description_fetched_at timestamp with time zone,
   date_posted timestamp with time zone,
   source text not null,
   tags text[],
@@ -315,6 +324,10 @@ create table if not exists public.job_postings (
   salary_interval text,
   created_at timestamp with time zone default now()
 );
+
+alter table public.job_postings
+add column if not exists job_keywords text[],
+add column if not exists description_fetched_at timestamp with time zone;
 
 -- User job preferences table
 create table if not exists public.user_job_preferences (
@@ -335,12 +348,18 @@ create table if not exists public.job_matches (
   user_id uuid references auth.users(id) on delete cascade not null,
   job_id uuid references public.job_postings(id) on delete cascade not null,
   match_score numeric check (match_score >= 0 and match_score <= 100),
+  match_reasons text[],
+  matched_at timestamp with time zone,
   is_viewed boolean default false,
   is_applied boolean default false,
   is_saved boolean default false,
   created_at timestamp with time zone default now(),
   unique(user_id, job_id)
 );
+
+alter table public.job_matches
+add column if not exists match_reasons text[],
+add column if not exists matched_at timestamp with time zone;
 
 -- Enable RLS on new tables
 alter table public.job_postings enable row level security;
@@ -388,6 +407,8 @@ create index if not exists idx_job_postings_created_at on public.job_postings(cr
 create index if not exists idx_job_postings_company on public.job_postings(company);
 create index if not exists idx_job_postings_location on public.job_postings(location);
 create index if not exists idx_job_postings_tags on public.job_postings using gin(tags);
+create index if not exists idx_job_postings_job_keywords on public.job_postings using gin(job_keywords);
+create index if not exists idx_resumes_resume_keywords on public.resumes using gin(resume_keywords);
 create index if not exists idx_user_job_preferences_user_id on public.user_job_preferences(user_id);
 create index if not exists idx_job_matches_user_id on public.job_matches(user_id);
 create index if not exists idx_job_matches_job_id on public.job_matches(job_id);

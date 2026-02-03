@@ -2,6 +2,7 @@ import { createHash, createHmac } from "crypto";
 import { NextResponse } from "next/server";
 
 import { createClient } from '@supabase/supabase-js';
+import { enrichJobsWithPostedDate, enrichJobsWithDescription, type ScrapedJob } from '@/lib/scrapers';
 import { sendJobAlertEmail } from "@/lib/email/resend";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,9 @@ type JobRecord = {
   role: string;
   location?: string;
   url?: string;
+  description?: string | null;
+  jobKeywords?: string[] | null;
+  descriptionFetchedAt?: Date | null;
   datePosted?: Date;
   tags: string[];
   sourceId: string;
@@ -32,19 +36,127 @@ type JobRecord = {
   salaryInterval?: string;
 };
 
-const stripHtml = (value: string) => value.replace(/<[^>]+>/g, "").trim();
+const toScrapedJob = (job: JobRecord): ScrapedJob => ({
+  sourceId: job.sourceId,
+  company: job.company,
+  role: job.role,
+  location: job.location ?? null,
+  url: job.url ?? null,
+  description: job.description ?? null,
+  jobKeywords: job.jobKeywords ?? null,
+  descriptionFetchedAt: job.descriptionFetchedAt ?? null,
+  datePosted: job.datePosted ?? null,
+  source: job.source,
+  tags: job.tags,
+  salaryMin: job.salaryMin ?? null,
+  salaryMax: job.salaryMax ?? null,
+  salaryInterval: job.salaryInterval ?? null,
+});
 
-const extractHref = (value: string) => {
-  const matches = [...value.matchAll(/href="([^"]+)"/g)];
-  return matches.length ? matches[matches.length - 1][1] : undefined;
+const fromScrapedJob = (job: ScrapedJob): JobRecord => ({
+  sourceId: job.sourceId,
+  company: job.company,
+  role: job.role,
+  location: job.location ?? undefined,
+  url: job.url ?? undefined,
+  description: job.description ?? null,
+  jobKeywords: job.jobKeywords ?? null,
+  descriptionFetchedAt: job.descriptionFetchedAt ?? null,
+  datePosted: job.datePosted ?? undefined,
+  source: job.source,
+  tags: job.tags,
+  salaryMin: job.salaryMin ?? undefined,
+  salaryMax: job.salaryMax ?? undefined,
+  salaryInterval: job.salaryInterval ?? undefined,
+});
+
+const stripMarkup = (value: string) => {
+  if (!value) return "";
+  let text = value;
+  text = text.replace(/<br\s*\/?>/gi, " ");
+  text = text.replace(/&nbsp;/gi, " ");
+  text = text.replace(/&amp;/gi, "&");
+  text = text.replace(/&quot;/gi, "\"");
+  text = text.replace(/&#39;/gi, "'");
+  text = text.replace(/<[^>]+>/g, " ");
+  text = text.replace(/!\[[^\]]*]\([^)]+\)/g, " ");
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  text = text.replace(/`([^`]+)`/g, "$1");
+  text = text.replace(/\*\*([^*]+)\*\*/g, "$1");
+  text = text.replace(/\*([^*]+)\*/g, "$1");
+  return text.replace(/\s+/g, " ").trim();
 };
 
-const parseAge = (value: string) => {
-  const match = value.match(/(\d+)\s*d/i);
-  if (!match) return undefined;
-  const days = Number(match[1]);
-  if (Number.isNaN(days)) return undefined;
-  return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+const extractLinks = (value: string): string[] => {
+  if (!value) return [];
+  const links: string[] = [];
+
+  for (const match of value.matchAll(/\[\s*!\[[^\]]*]\([^)]+\)\s*]\((https?:\/\/[^)\s]+)\)/g)) {
+    links.push(match[1]);
+  }
+
+  for (const match of value.matchAll(/href="([^"]+)"/g)) {
+    links.push(match[1]);
+  }
+
+  const withoutImages = value.replace(/!\[[^\]]*]\([^)]+\)/g, "");
+  for (const match of withoutImages.matchAll(/\[[^\]]+]\((https?:\/\/[^)\s]+)\)/g)) {
+    links.push(match[1]);
+  }
+
+  for (const match of value.matchAll(/<\s*(https?:\/\/[^>\s]+)\s*>/g)) {
+    links.push(match[1]);
+  }
+
+  for (const match of value.matchAll(/https?:\/\/[^\s)]+/g)) {
+    links.push(match[0]);
+  }
+
+  const seen = new Set<string>();
+  return links
+    .map((link) => link.replace(/[),.;]+$/g, ""))
+    .filter((link) => {
+      if (seen.has(link)) return false;
+      seen.add(link);
+      return true;
+    });
+};
+
+const isLikelyImageUrl = (url: string) =>
+  /\.(png|jpe?g|gif|svg)(\?|$)/i.test(url) ||
+  /img\.shields\.io|camo\.githubusercontent\.com/i.test(url);
+
+const pickFirstJobUrl = (value: string) => {
+  const links = extractLinks(value);
+  return links.find((link) => !isLikelyImageUrl(link));
+};
+
+const parsePostedDate = (value: string) => {
+  if (!value) return undefined;
+  const normalized = stripMarkup(value).toLowerCase();
+  if (!normalized) return undefined;
+
+  if (normalized.includes("today") || normalized.includes("just")) {
+    return new Date();
+  }
+  if (normalized.includes("yesterday")) {
+    return new Date(Date.now() - 24 * 60 * 60 * 1000);
+  }
+
+  const relativeMatch = normalized.match(/(\d+)\s*(d|day|days)\b/);
+  if (relativeMatch) {
+    const days = Number(relativeMatch[1]);
+    if (!Number.isNaN(days)) {
+      return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  const parsed = Date.parse(normalized);
+  if (!Number.isNaN(parsed)) {
+    return new Date(parsed);
+  }
+
+  return undefined;
 };
 
 const parseSalary = (salaryStr: string) => {
@@ -65,7 +177,7 @@ const parseSalary = (salaryStr: string) => {
 const buildSourceId = (input: string) =>
   `github|${createHash("sha256").update(input).digest("hex").slice(0, 16)}`;
 
-const parseJobsFromMarkdown = (markdown: string, meta: { jobType: string; region: string }) => {
+const parseJobsFromMarkdown = (markdown: string, meta: { jobType: string; region: string; file: string }) => {
   const lines = markdown.split(/\r?\n/);
   const jobs: JobRecord[] = [];
 
@@ -77,6 +189,13 @@ const parseJobsFromMarkdown = (markdown: string, meta: { jobType: string; region
     if (line.includes('TABLE_FAANG_START')) { currentCategory = 'faang'; continue; }
     if (line.includes('TABLE_QUANT_START')) { currentCategory = 'quant'; continue; }
     if (line.includes('TABLE_START')) { currentCategory = 'other'; continue; }
+
+    const heading = line.trim().toLowerCase();
+    if (heading.startsWith("#")) {
+      if (heading.includes("faang")) currentCategory = "faang";
+      else if (heading.includes("quant")) currentCategory = "quant";
+      else if (heading.includes("other") || heading.includes("all")) currentCategory = "other";
+    }
 
     const normalizedLine = line.toLowerCase();
     if (normalizedLine.includes("company") && normalizedLine.includes("position") && normalizedLine.includes("salary")) {
@@ -109,23 +228,23 @@ const parseJobsFromMarkdown = (markdown: string, meta: { jobType: string; region
     let salary = { min: undefined as number | undefined, max: undefined as number | undefined, interval: undefined as string | undefined };
 
     if (currentTableHasSalary && columns.length >= 6) {
-      company = stripHtml(columns[0] || "");
-      role = stripHtml(columns[1] || "");
-      location = stripHtml(columns[2] || "") || undefined;
+      company = stripMarkup(columns[0] || "");
+      role = stripMarkup(columns[1] || "");
+      location = stripMarkup(columns[2] || "") || undefined;
       salary = parseSalary(columns[3] || "");
-      postingUrl = extractHref(columns[4] || "");
-      datePosted = parseAge(columns[5] ?? "");
+      postingUrl = pickFirstJobUrl(columns[4] || "");
+      datePosted = parsePostedDate(columns[5] ?? "");
     } else if (columns.length >= 5) {
-      company = stripHtml(columns[0] || "");
-      role = stripHtml(columns[1] || "");
-      location = stripHtml(columns[2] || "") || undefined;
-      postingUrl = extractHref(columns[3] || "");
-      datePosted = parseAge(columns[4] ?? "");
+      company = stripMarkup(columns[0] || "");
+      role = stripMarkup(columns[1] || "");
+      location = stripMarkup(columns[2] || "") || undefined;
+      postingUrl = pickFirstJobUrl(columns[3] || "");
+      datePosted = parsePostedDate(columns[4] ?? "");
     } else if (columns.length >= 4) {
-      company = stripHtml(columns[0] || "");
-      role = stripHtml(columns[1] || "");
-      location = stripHtml(columns[2] || "") || undefined;
-      postingUrl = extractHref(columns[3] || "");
+      company = stripMarkup(columns[0] || "");
+      role = stripMarkup(columns[1] || "");
+      location = stripMarkup(columns[2] || "") || undefined;
+      postingUrl = pickFirstJobUrl(columns[3] || "");
       datePosted = undefined;
     } else {
       continue;
@@ -133,17 +252,23 @@ const parseJobsFromMarkdown = (markdown: string, meta: { jobType: string; region
 
     if (!company || !role || company.length === 0 || role.length === 0) continue;
 
+    const fallbackUrl =
+      postingUrl ??
+      pickFirstJobUrl(columns[1] || "") ??
+      pickFirstJobUrl(columns[0] || "");
+
+    const applyKey = fallbackUrl ?? meta.file;
     const sourceId = buildSourceId(
-      `${company}|${role}|${location ?? ""}|${postingUrl ?? ""}`
+      `${company}|${role}|${location ?? ""}|${applyKey}`
     );
 
-    const tags: string[] = [meta.jobType, meta.region, currentCategory, '2026-swe'];
+    const tags: string[] = [meta.jobType, meta.region, currentCategory, '2026-swe', 'date:repo'];
 
     jobs.push({
       company,
       role,
       location,
-      url: postingUrl,
+      url: fallbackUrl,
       datePosted,
       tags,
       sourceId,
@@ -296,6 +421,7 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
             'User-Agent': 'Rezoomind Job Scraper',
             'Accept': 'text/plain',
           },
+          cache: 'no-store',
           signal: AbortSignal.timeout(30000),
         });
 
@@ -313,7 +439,7 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
           continue;
         }
 
-        const meta = { jobType: fileConfig.jobType, region: fileConfig.region };
+        const meta = { jobType: fileConfig.jobType, region: fileConfig.region, file: fileConfig.file };
         const jobs = parseJobsFromMarkdown(markdown, meta);
         allJobs.push(...jobs);
         console.log(`[jobs:sync] Found ${jobs.length} jobs in ${fileConfig.file}`);
@@ -339,7 +465,21 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
 
     console.log(`[jobs:sync] Total jobs fetched: ${allJobs.length} from ${GITHUB_JOB_FILES.length} files`);
 
-    const jobs = allJobs;
+    let jobs = allJobs;
+    const shouldEnrich = process.env.JOB_POSTED_ENRICH !== 'false';
+    let scrapedJobs = allJobs.map(toScrapedJob);
+    if (shouldEnrich) {
+      const { jobs: enrichedJobs, stats } = await enrichJobsWithPostedDate(scrapedJobs);
+      scrapedJobs = enrichedJobs;
+      console.log('[jobs:sync] Posted-date enrichment', stats);
+    }
+    const shouldDescEnrich = process.env.JOB_DESC_ENRICH !== 'false';
+    if (shouldDescEnrich) {
+      const { jobs: enrichedJobs, stats } = await enrichJobsWithDescription(scrapedJobs);
+      scrapedJobs = enrichedJobs;
+      console.log('[jobs:sync] Description enrichment', stats);
+    }
+    jobs = scrapedJobs.map(fromScrapedJob);
 
     // Identify truly new jobs (for email notifications only)
     const { data: existingJobs } = await supabase
@@ -358,24 +498,35 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
 
     for (let i = 0; i < jobs.length; i += batchSize) {
       const batch = jobs.slice(i, i + batchSize);
+      const payload = batch.map((job) => {
+        const row: Record<string, unknown> = {
+          source_id: job.sourceId,
+          company: job.company,
+          role: job.role,
+          location: job.location,
+          url: job.url,
+          date_posted: job.datePosted?.toISOString(),
+          source: job.source,
+          tags: job.tags,
+          salary_min: job.salaryMin,
+          salary_max: job.salaryMax,
+          salary_interval: job.salaryInterval,
+        };
+
+        if (job.description) {
+          row.description = job.description;
+          row.job_keywords = job.jobKeywords ?? null;
+          row.description_fetched_at = job.descriptionFetchedAt?.toISOString() ?? null;
+        } else if (job.jobKeywords && job.jobKeywords.length > 0) {
+          row.job_keywords = job.jobKeywords;
+        }
+
+        return row;
+      });
+
       const { error } = await supabase
         .from('job_postings')
-        .upsert(
-          batch.map((job) => ({
-            source_id: job.sourceId,
-            company: job.company,
-            role: job.role,
-            location: job.location,
-            url: job.url,
-            date_posted: job.datePosted?.toISOString(),
-            source: job.source,
-            tags: job.tags,
-            salary_min: job.salaryMin,
-            salary_max: job.salaryMax,
-            salary_interval: job.salaryInterval,
-          })),
-          { onConflict: 'source_id' }
-        );
+        .upsert(payload, { onConflict: 'source_id' });
 
       if (!error) {
         upsertedCount += batch.length;
