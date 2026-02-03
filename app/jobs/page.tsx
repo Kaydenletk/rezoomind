@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, useLayoutEffect } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -11,7 +11,6 @@ interface Job {
   role: string;
   location: string | null;
   url: string | null;
-  description: string | null;
   salary_min: number | null;
   salary_max: number | null;
   salary_interval: string | null;
@@ -53,6 +52,32 @@ const TIER_FILTERS = [
   { value: 'quant', label: 'Quant' },
 ];
 
+type JobsCache = {
+  jobs?: Job[];
+  totalCount?: number;
+  lastSyncTime?: string | null;
+  cachedAt?: string;
+};
+
+const readJobsCache = (cacheKey: string): JobsCache | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(cacheKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as JobsCache;
+    if (!parsed || !Array.isArray(parsed.jobs)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const JOBS_SELECT_FIELDS =
+  'id,company,role,location,url,salary_min,salary_max,salary_interval,source,tags,date_posted,created_at';
+
+const SYNC_STALE_MS = 2 * 60 * 1000;
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 function getJobFreshness(job: Job): 'new' | 'recent' | 'normal' {
   const dateStr = job.date_posted || job.created_at;
   const date = new Date(dateStr);
@@ -78,28 +103,21 @@ function getRelativeTime(dateStr: string): string {
   return `${diffDays} days ago`;
 }
 
-// Deterministic color from company name
-function getAvatarColor(name: string): string {
-  const colors = [
-    'from-blue-500 to-indigo-600',
-    'from-emerald-500 to-teal-600',
-    'from-violet-500 to-purple-600',
-    'from-rose-500 to-pink-600',
-    'from-amber-500 to-orange-600',
-    'from-cyan-500 to-blue-600',
-    'from-fuchsia-500 to-pink-600',
-    'from-lime-500 to-green-600',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
+function getJobTimestamp(job: Job): number {
+  const dateStr = job.date_posted || job.created_at;
+  const time = new Date(dateStr).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function sortJobsNewestFirst(items: Job[]): Job[] {
+  return [...items].sort((a, b) => getJobTimestamp(b) - getJobTimestamp(a));
 }
 
 export default function JobsPage() {
+  const cacheKey = 'rezoomind:jobs-cache:v1';
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all');
@@ -110,67 +128,199 @@ export default function JobsPage() {
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(50);
   const [totalCount, setTotalCount] = useState(0);
+  const [fallbackLoaded, setFallbackLoaded] = useState(false);
+  const loadIdRef = useRef(0);
+  const jobsRef = useRef<Job[]>([]);
+  const lastSyncRef = useRef<string | null>(null);
+  const syncingRef = useRef(false);
 
   const supabase = createSupabaseBrowserClient();
 
-  const loadJobs = useCallback(async () => {
-    // Get total count
-    const { count } = await supabase
-      .from('job_postings')
-      .select('*', { count: 'exact', head: true });
+  useIsomorphicLayoutEffect(() => {
+    const cached = readJobsCache(cacheKey);
+    if (cached?.jobs && cached.jobs.length > 0) {
+      const sorted = sortJobsNewestFirst(cached.jobs);
+      setJobs(sorted);
+      setTotalCount(cached.totalCount ?? cached.jobs.length);
+      setLastSyncTime(cached.lastSyncTime ?? cached.cachedAt ?? null);
+      setHasLoadedOnce(true);
+      setFallbackLoaded(true);
+      setLoading(false);
+    }
+  }, [cacheKey]);
 
-    setTotalCount(count ?? 0);
+  useEffect(() => {
+    jobsRef.current = jobs;
+  }, [jobs]);
 
-    // Fetch all jobs ordered by date_posted (actual job age), then created_at
-    const { data } = await supabase
-      .from('job_postings')
-      .select('*')
-      .order('date_posted', { ascending: false, nullsFirst: false })
-      .order('created_at', { ascending: false })
-      .limit(2000);
+  useEffect(() => {
+    lastSyncRef.current = lastSyncTime;
+  }, [lastSyncTime]);
 
-    if (data && data.length > 0) {
-      setJobs(data);
-      setLastSyncTime(data[0].created_at);
-    } else {
-      setJobs([]);
+  const cacheJobs = useCallback(
+    (items: Job[], count: number, lastSync?: string | null) => {
+      try {
+        const payload = {
+          jobs: items.slice(0, 1000),
+          totalCount: count,
+          lastSyncTime: lastSync ?? null,
+          cachedAt: new Date().toISOString(),
+        };
+        window.localStorage.setItem(cacheKey, JSON.stringify(payload));
+      } catch {
+        // Ignore cache errors (storage full/disabled)
+      }
+    },
+    [cacheKey]
+  );
+
+  const applyJobs = useCallback(
+    (items: Job[], count: number, lastSync?: string | null) => {
+      const sorted = sortJobsNewestFirst(items);
+      const resolvedLastSync = typeof lastSync === 'string' ? lastSync : lastSyncRef.current;
+      setJobs(sorted);
+      setTotalCount(count);
+      if (typeof lastSync === 'string') {
+        setLastSyncTime(lastSync);
+      }
+      setHasLoadedOnce(true);
+      setLoading(false);
+      setFallbackLoaded(true);
+      cacheJobs(sorted, count, resolvedLastSync ?? null);
+    },
+    [cacheJobs]
+  );
+
+  const loadFallbackJobs = useCallback(async (loadId?: number) => {
+    try {
+      const res = await fetch('/api/jobs/ensure-sync?force=true&returnJobs=true');
+      const result = await res.json();
+
+      if (loadId && loadId !== loadIdRef.current) return;
+
+      if (result?.jobs && result.jobs.length > 0) {
+        applyJobs(result.jobs, result.jobs.length, result.lastSync ?? new Date().toISOString());
+      } else {
+        setFallbackLoaded(true);
+        setHasLoadedOnce(true);
+        setLoading(false);
+      }
+    } catch {
+      // Ignore fallback errors
+      if (loadId && loadId !== loadIdRef.current) return;
+      setFallbackLoaded(true);
+      setHasLoadedOnce(true);
+      setLoading(false);
+    }
+  }, [applyJobs]);
+
+  const loadJobs = useCallback(async (options?: { skipFallback?: boolean; silent?: boolean }) => {
+    const loadId = ++loadIdRef.current;
+    const shouldShowLoading = !options?.silent && !hasLoadedOnce && jobsRef.current.length === 0;
+    if (shouldShowLoading) {
+      setLoading(true);
     }
 
-    setLoading(false);
-  }, [supabase]);
+    try {
+      const { data, count, error } = await supabase
+        .from('job_postings')
+        .select(JOBS_SELECT_FIELDS, { count: 'estimated' })
+        .eq('source', 'github')
+        .contains('tags', ['2026-swe'])
+        .order('date_posted', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(2000);
+
+      if (loadId !== loadIdRef.current) return;
+
+      if (error) {
+        if (!options?.skipFallback && jobsRef.current.length === 0 && !fallbackLoaded) {
+          await loadFallbackJobs(loadId);
+          return;
+        }
+        setFallbackLoaded(true);
+        setHasLoadedOnce(true);
+        setLoading(false);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        applyJobs(data, count ?? data.length);
+        return;
+      }
+
+      if (!options?.skipFallback && jobsRef.current.length === 0 && !fallbackLoaded) {
+        await loadFallbackJobs(loadId);
+        return;
+      }
+
+      setFallbackLoaded(true);
+      setHasLoadedOnce(true);
+      setLoading(false);
+    } catch {
+      if (loadId !== loadIdRef.current) return;
+      if (!options?.skipFallback && jobsRef.current.length === 0 && !fallbackLoaded) {
+        await loadFallbackJobs(loadId);
+        return;
+      }
+      setFallbackLoaded(true);
+      setHasLoadedOnce(true);
+      setLoading(false);
+    }
+  }, [supabase, fallbackLoaded, loadFallbackJobs, applyJobs, hasLoadedOnce]);
 
   const triggerBackgroundSync = useCallback(async () => {
+    if (syncingRef.current) return;
+    syncingRef.current = true;
     setSyncing(true);
     try {
       const res = await fetch('/api/jobs/ensure-sync?force=true');
       const result = await res.json();
-      if (result.ok && result.triggered) {
-        // Sync was triggered — wait for it to finish, then reload
-        setTimeout(() => {
-          loadJobs();
-          setSyncing(false);
-        }, 5000);
-      } else {
-        setSyncing(false);
-        if (result.lastSync) {
-          setLastSyncTime(result.lastSync);
-        }
+      if (result.lastSync) {
+        setLastSyncTime(result.lastSync);
+      }
+      const hasUpdates = (result.newJobs ?? 0) > 0 || (result.upserted ?? 0) > 0;
+      if (hasUpdates) {
+        await loadJobs({ skipFallback: true, silent: true });
       }
     } catch {
+    } finally {
+      syncingRef.current = false;
       setSyncing(false);
     }
   }, [loadJobs]);
 
   useEffect(() => {
-    // 1. Load existing data immediately
-    loadJobs();
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
-    // 2. Trigger background sync (non-blocking)
-    triggerBackgroundSync();
+    const shouldSyncNow = (lastSync: string | null) => {
+      if (!lastSync) return true;
+      const age = Date.now() - new Date(lastSync).getTime();
+      return age > SYNC_STALE_MS;
+    };
 
-    // 3. Poll every 5 minutes for real-time feel
-    const interval = setInterval(triggerBackgroundSync, 5 * 60 * 1000);
-    return () => clearInterval(interval);
+    const run = async () => {
+      await loadJobs();
+      if (cancelled) return;
+
+      if (shouldSyncNow(lastSyncRef.current)) {
+        triggerBackgroundSync();
+      }
+
+      interval = setInterval(() => {
+        if (shouldSyncNow(lastSyncRef.current)) {
+          triggerBackgroundSync();
+        }
+      }, 5 * 60 * 1000);
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+      if (interval) clearInterval(interval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -233,6 +383,22 @@ export default function JobsPage() {
   const visibleJobs = filteredJobs.slice(0, displayCount);
   const hasMore = filteredJobs.length > displayCount;
 
+  if (loading && !hasLoadedOnce) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-24 pb-16 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col items-center justify-center text-center py-24">
+            <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm text-slate-600 shadow-sm">
+              <span className="inline-block w-2.5 h-2.5 bg-cyan-500 rounded-full animate-pulse" />
+              <span>Loading jobs…</span>
+            </div>
+            <p className="mt-3 text-sm text-slate-500">Gathering the latest opportunities.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-24 pb-16 px-6">
       <div className="max-w-5xl mx-auto">
@@ -247,7 +413,7 @@ export default function JobsPage() {
             Browse Opportunities
           </h1>
           <p className="text-lg text-slate-600 mb-3">
-            {totalCount.toLocaleString()} verified positions from top companies
+            {totalCount.toLocaleString()} verified roles from trusted sources
           </p>
 
           {/* Sync Status */}
@@ -255,7 +421,7 @@ export default function JobsPage() {
             {syncing ? (
               <>
                 <span className="inline-block w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
-                <span>Checking for new jobs...</span>
+                <span>Refreshing listings...</span>
               </>
             ) : lastSyncTime ? (
               <>
@@ -387,17 +553,19 @@ export default function JobsPage() {
         )}
 
         {/* Job Listings */}
-        {loading ? (
+        {loading && !hasLoadedOnce ? (
           <div className="text-center py-20">
-            <div className="inline-block w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-4 text-slate-600">Loading jobs...</p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 shadow-sm">
+              <span className="inline-block w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
+              <span>Refreshing listings...</span>
+            </div>
           </div>
         ) : filteredJobs.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-slate-200">
             {syncing ? (
               <>
                 <div className="inline-block w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-xl font-bold text-slate-900 mb-2">Fetching jobs from GitHub...</p>
+                <p className="text-xl font-bold text-slate-900 mb-2">Updating listings...</p>
                 <p className="text-slate-600">Jobs will appear in a few seconds.</p>
               </>
             ) : (
@@ -420,7 +588,7 @@ export default function JobsPage() {
           <div className="space-y-3">
             {visibleJobs.map((job, index) => (
               <JobCard
-                key={job.id}
+                key={`${job.id}-${job.url ?? ''}`}
                 job={job}
                 delay={index < 20 ? index * 0.03 : 0}
               />
@@ -494,76 +662,57 @@ function JobCard({ job, delay }: { job: Job; delay: number }) {
     return `$${(job.salary_min / 1000).toFixed(0)}K`;
   };
 
-  const getTimeSince = () => {
-    // Prefer date_posted (actual posting age) over created_at (sync time)
-    const dateStr = job.date_posted || job.created_at;
-    return getRelativeTime(dateStr);
-  };
-
-  const avatarColor = getAvatarColor(job.company);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 hover:border-cyan-300 hover:shadow-md transition-all"
+      className="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200 hover:border-cyan-300 hover:shadow-md transition-all"
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3 flex-1 min-w-0">
-          {/* Company Avatar */}
-          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${avatarColor} flex items-center justify-center flex-shrink-0`}>
-            <span className="text-white text-sm font-bold">
-              {job.company.charAt(0).toUpperCase()}
-            </span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          {/* Role + Freshness badge */}
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="text-base font-semibold text-slate-900 truncate leading-tight">
+              {job.role}
+            </h3>
+            {freshness === 'new' && (
+              <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded flex-shrink-0">
+                New
+              </span>
+            )}
+            {freshness === 'recent' && (
+              <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded flex-shrink-0">
+                Recent
+              </span>
+            )}
+            {job.tags?.includes('faang') && (
+              <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded flex-shrink-0">
+                FAANG+
+              </span>
+            )}
+            {job.tags?.includes('quant') && (
+              <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded flex-shrink-0">
+                Quant
+              </span>
+            )}
           </div>
 
-          <div className="flex-1 min-w-0">
-            {/* Role + Freshness badge */}
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-base font-semibold text-slate-900 truncate">
-                {job.role}
-              </h3>
-              {freshness === 'new' && (
-                <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded flex-shrink-0">
-                  New
-                </span>
-              )}
-              {freshness === 'recent' && (
-                <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded flex-shrink-0">
-                  Recent
-                </span>
-              )}
-              {job.tags?.includes('faang') && (
-                <span className="px-1.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded flex-shrink-0">
-                  FAANG+
-                </span>
-              )}
-              {job.tags?.includes('quant') && (
-                <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 text-xs font-semibold rounded flex-shrink-0">
-                  Quant
-                </span>
-              )}
-            </div>
-
-            {/* Meta line: Company · Location · Salary · Time */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-              <span className="font-medium text-slate-700">{job.company}</span>
-              {job.location && (
-                <>
-                  <span className="text-slate-300">·</span>
-                  <span>{job.location}</span>
-                </>
-              )}
-              {formatSalary() && (
-                <>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-emerald-600 font-medium">{formatSalary()}</span>
-                </>
-              )}
-              <span className="text-slate-300">·</span>
-              <span>{getTimeSince()}</span>
-            </div>
+          {/* Meta line: Company · Location · Salary */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-slate-500">
+            <span className="font-medium text-slate-700">{job.company}</span>
+            {job.location && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span>{job.location}</span>
+              </>
+            )}
+            {formatSalary() && (
+              <>
+                <span className="text-slate-300">·</span>
+                <span className="text-emerald-600 font-medium">{formatSalary()}</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -573,7 +722,7 @@ function JobCard({ job, delay }: { job: Job; delay: number }) {
             href={job.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 bg-cyan-600 text-white text-sm font-semibold rounded-lg hover:bg-cyan-700 transition-colors flex-shrink-0"
+            className="px-3.5 py-2 bg-cyan-600 text-white text-sm font-semibold rounded-lg hover:bg-cyan-700 transition-colors flex-shrink-0 self-start mt-0.5"
           >
             Apply
           </a>

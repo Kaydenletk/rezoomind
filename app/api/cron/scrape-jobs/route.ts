@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { ScraperOrchestrator, toDbJob } from '@/lib/scrapers';
+import { ScraperOrchestrator, enrichJobsWithPostedDate, enrichJobsWithDescription, toDbJob } from '@/lib/scrapers';
 
 export const maxDuration = 60; // Vercel Hobby allows up to 60s
 export const dynamic = 'force-dynamic';
@@ -58,10 +58,25 @@ export async function GET(request: Request) {
 
     console.log(`[scrape-jobs] Found ${newJobs.length} new jobs (${existingIds.size} existing)`);
 
+    const shouldEnrich = process.env.JOB_POSTED_ENRICH !== 'false';
+    const { jobs: enrichedNewJobs, stats } = shouldEnrich
+      ? await enrichJobsWithPostedDate(newJobs)
+      : { jobs: newJobs, stats: null };
+    if (stats) {
+      console.log('[scrape-jobs] Posted-date enrichment', stats);
+    }
+    const shouldDescEnrich = process.env.JOB_DESC_ENRICH !== 'false';
+    const { jobs: descEnrichedJobs, stats: descStats } = shouldDescEnrich
+      ? await enrichJobsWithDescription(enrichedNewJobs)
+      : { jobs: enrichedNewJobs, stats: null };
+    if (descStats) {
+      console.log('[scrape-jobs] Description enrichment', descStats);
+    }
+
     // Batch insert new jobs (in chunks of 50)
     let insertedCount = 0;
-    for (let i = 0; i < newJobs.length; i += 50) {
-      const chunk = newJobs.slice(i, i + 50);
+    for (let i = 0; i < descEnrichedJobs.length; i += 50) {
+      const chunk = descEnrichedJobs.slice(i, i + 50);
       const dbJobs = chunk.map(toDbJob);
 
       const { error } = await supabase.from('job_postings').insert(dbJobs);

@@ -126,11 +126,25 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("[subscribe] failed", {
-      message: error instanceof Error ? error.message : "unknown",
-    });
+    const message = error instanceof Error ? error.message : "unknown";
+    console.error("[subscribe] failed", { message });
+
+    let responseMessage = "Unable to subscribe";
+    const normalized = message.toLowerCase();
+    if (normalized.includes("resend_api_key")) {
+      responseMessage = "Email service is not configured (missing RESEND_API_KEY).";
+    } else if (normalized.includes("resend_from")) {
+      responseMessage = "Email sender is not configured (missing RESEND_FROM).";
+    } else if (normalized.includes("verified") || normalized.includes("domain")) {
+      responseMessage = "Email sender domain is not verified with Resend.";
+    } else if (normalized.includes("email signing")) {
+      responseMessage = "Email signing is not configured.";
+    } else if (normalized.includes("prisma") || normalized.includes("database")) {
+      responseMessage = "Database connection failed.";
+    }
+
     return NextResponse.json(
-      { ok: false, error: "Unable to subscribe" },
+      { ok: false, error: responseMessage },
       { status: 500 }
     );
   }

@@ -55,7 +55,7 @@ export default function ResumePage() {
 
     if (!file && resumeText.trim().length === 0) {
       setStatus("error");
-      setNote("Upload a PDF or paste your resume text.");
+      setNote("Upload a PDF/DOCX or paste your resume text.");
       return;
     }
 
@@ -66,9 +66,13 @@ export default function ResumePage() {
       let fileUrl = existing?.file_url ?? null;
 
       if (file) {
-        if (file.type !== "application/pdf") {
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        const isDocx =
+          file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+          file.name.toLowerCase().endsWith(".docx");
+        if (!isPdf && !isDocx) {
           setStatus("error");
-          setNote("Please upload a PDF file.");
+          setNote("Please upload a PDF or DOCX file.");
           return;
         }
 
@@ -120,7 +124,7 @@ export default function ResumePage() {
       <div>
         <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Resume</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Upload a PDF or paste your resume text for smarter matching.
+          Upload a PDF/DOCX or paste your resume text for smarter matching.
         </p>
       </div>
 
@@ -128,11 +132,11 @@ export default function ResumePage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Resume PDF
+              Resume File
             </label>
             <Input
               type="file"
-              accept="application/pdf"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               className="mt-3"
               onChange={(event) => setFile(event.target.files?.[0] ?? null)}
               disabled={loading}

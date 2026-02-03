@@ -9,6 +9,8 @@ export interface ScrapedJob {
   location: string | null;
   url: string | null;
   description: string | null;
+  jobKeywords?: string[] | null;
+  descriptionFetchedAt?: Date | null;
   datePosted: Date | null;
   source: string;            // e.g., "remotive", "themuse", "usajobs"
   tags: string[];
@@ -53,7 +55,9 @@ export interface DbJob {
   role: string;
   location: string | null;
   url: string | null;
-  description: string | null;
+  description?: string | null;
+  job_keywords?: string[] | null;
+  description_fetched_at?: string | null;
   date_posted: string | null;
   source: string;
   tags: string[];
@@ -64,13 +68,12 @@ export interface DbJob {
 
 // Convert ScrapedJob to database format
 export function toDbJob(job: ScrapedJob): DbJob {
-  return {
+  const dbJob: DbJob = {
     source_id: job.sourceId,
     company: job.company.slice(0, 200),
     role: job.role.slice(0, 200),
     location: job.location?.slice(0, 200) ?? null,
     url: job.url?.slice(0, 500) ?? null,
-    description: job.description?.slice(0, 5000) ?? null,
     date_posted: job.datePosted?.toISOString() ?? null,
     source: job.source,
     tags: job.tags,
@@ -78,4 +81,14 @@ export function toDbJob(job: ScrapedJob): DbJob {
     salary_max: job.salaryMax,
     salary_interval: job.salaryInterval,
   };
+
+  if (job.description) {
+    dbJob.description = job.description.slice(0, 5000);
+    dbJob.job_keywords = job.jobKeywords ?? null;
+    dbJob.description_fetched_at = job.descriptionFetchedAt?.toISOString() ?? null;
+  } else if (job.jobKeywords && job.jobKeywords.length > 0) {
+    dbJob.job_keywords = job.jobKeywords;
+  }
+
+  return dbJob;
 }
