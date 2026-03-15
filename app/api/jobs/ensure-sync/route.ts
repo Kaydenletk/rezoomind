@@ -1,6 +1,6 @@
 import { createHash, createHmac } from 'crypto';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { prisma } from '@/lib/prisma';
 import { GitHubJobsScraper, ScrapedJob, enrichJobsWithPostedDate, enrichJobsWithDescription, toDbJob } from '@/lib/scrapers';
 import { sendJobAlertEmail } from '@/lib/email/resend';
 
@@ -54,72 +54,22 @@ const legacySourceIdFor = (job: ScrapedJob): string => {
  * Called by the jobs page on load for background refresh.
  */
 export async function GET(request: Request) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  // Use anon key for initial read (count check), service key for writes
   const { searchParams } = new URL(request.url);
   const force = searchParams.get('force') === 'true';
   const returnJobs = searchParams.get('returnJobs') === 'true';
 
-  if (!supabaseUrl || !anonKey) {
-    if (!returnJobs) {
-      return NextResponse.json(
-        { ok: false, error: 'Server not configured for jobs' },
-        { status: 503 }
-      );
-    }
-
-    const scraper = new GitHubJobsScraper();
-    const result = await scraper.scrape();
-    const shouldEnrich = process.env.JOB_POSTED_ENRICH !== 'false';
-    if (shouldEnrich) {
-      const { jobs: enrichedJobs, stats } = await enrichJobsWithPostedDate(result.jobs);
-      result.jobs = enrichedJobs;
-      console.log('[ensure-sync] Posted-date enrichment', stats);
-    }
-    const shouldDescEnrich = process.env.JOB_DESC_ENRICH !== 'false';
-    if (shouldDescEnrich) {
-      const { jobs: enrichedJobs, stats } = await enrichJobsWithDescription(result.jobs);
-      result.jobs = enrichedJobs;
-      console.log('[ensure-sync] Description enrichment', stats);
-    }
-    const scrapedAt = result.scrapedAt ?? new Date();
-
-    return NextResponse.json({
-      ok: true,
-      triggered: true,
-      fetched: result.jobs.length,
-      jobs: result.jobs.map((job) => toClientJob(job, scrapedAt)),
-      lastSync: scrapedAt.toISOString(),
-      message: 'Scrape completed without database.',
-      errors: result.errors.length > 0 ? result.errors : undefined,
-    });
-  }
-
-  const readClient = createClient(supabaseUrl, anonKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  let jobCount = 0;
+  let skipDbWrites = false;
 
   try {
-    const { count, error: countError } = await readClient
-      .from('job_postings')
-      .select('*', { count: 'exact', head: true });
+    jobCount = await prisma.job_postings.count();
+  } catch (countError: any) {
+    console.error('[ensure-sync] Count error, continuing without DB writes:', countError);
+    skipDbWrites = true;
+  }
 
-    if (countError) {
-      if (!returnJobs) {
-        console.error('[ensure-sync] Count error:', countError);
-        return NextResponse.json(
-          { ok: false, error: countError.message },
-          { status: 500 }
-        );
-      }
-    }
 
-    const skipDbWrites = Boolean(countError);
-    const jobCount = skipDbWrites ? 0 : (count ?? 0);
-
+  try {
     // Default behavior: only sync when DB is empty
     if (jobCount > 0 && !force) {
       return NextResponse.json({
@@ -131,13 +81,11 @@ export async function GET(request: Request) {
     }
 
     // Cooldown: if force=true but last sync was within 1 minute, skip
-    if (force && jobCount > 0) {
-      const { data: latest } = await readClient
-        .from('job_postings')
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+    if (force && jobCount > 0 && !skipDbWrites) {
+      const latest = await prisma.job_postings.findFirst({
+        orderBy: { created_at: 'desc' },
+        select: { created_at: true }
+      });
 
       if (latest) {
         const lastSyncAge = Date.now() - new Date(latest.created_at).getTime();
@@ -152,15 +100,6 @@ export async function GET(request: Request) {
           });
         }
       }
-    }
-
-    let writeClient: ReturnType<typeof createClient> | null = null;
-    if (!skipDbWrites) {
-      // Use service role key for writes if available, otherwise anon key
-      const writeKey = serviceKey || anonKey;
-      writeClient = createClient(supabaseUrl, writeKey, {
-        auth: { autoRefreshToken: false, persistSession: false },
-      });
     }
 
     // Scrape jobs directly — no HTTP self-call
@@ -186,24 +125,21 @@ export async function GET(request: Request) {
     let newJobs = result.jobs;
     let upsertedCount = 0;
 
-    const shouldEnrich = process.env.JOB_POSTED_ENRICH !== 'false';
-    const shouldDescEnrich = process.env.JOB_DESC_ENRICH !== 'false';
+    const shouldEnrich = process.env.JOB_POSTED_ENRICH !== 'false' && !skipDbWrites;
+    const shouldDescEnrich = process.env.JOB_DESC_ENRICH !== 'false' && !skipDbWrites;
 
-    if (writeClient) {
-      const queryClient = readClient;
+    if (!skipDbWrites) {
       const batchSize = 100;
 
       const fetchExistingIds = async (ids: string[]) => {
         const found = new Set<string>();
         for (let i = 0; i < ids.length; i += batchSize) {
           const chunk = ids.slice(i, i + batchSize);
-          const { data } = await queryClient
-            .from('job_postings')
-            .select('source_id')
-            .in('source_id', chunk);
-          if (data) {
-            data.forEach((row) => found.add(row.source_id));
-          }
+          const data = await prisma.job_postings.findMany({
+            where: { source_id: { in: chunk } },
+            select: { source_id: true }
+          });
+          data.forEach((row) => found.add(row.source_id));
         }
         return found;
       };
@@ -225,14 +161,13 @@ export async function GET(request: Request) {
         const syncSecret = process.env.JOBS_SYNC_SECRET || '';
         if (syncSecret) {
           console.warn('[ensure-sync] Detected legacy job IDs. Clearing and reseeding from GitHub.');
-          const { error: clearError } = await writeClient.rpc('clear_github_jobs', {
-            sync_secret: syncSecret,
-          });
-
-          if (clearError) {
-            console.error('[ensure-sync] Legacy clear failed:', clearError);
-          } else {
+          try {
+            await prisma.job_postings.deleteMany({
+              where: { source: 'github' }
+            });
             existingSourceIds = new Set();
+          } catch (clearError) {
+            console.error('[ensure-sync] Legacy clear failed:', clearError);
           }
         } else {
           console.warn('[ensure-sync] Legacy IDs detected but JOBS_SYNC_SECRET is missing; skipping auto-clear.');
@@ -267,27 +202,38 @@ export async function GET(request: Request) {
 
       for (let i = 0; i < result.jobs.length; i += upsertBatchSize) {
         const batch = result.jobs.slice(i, i + upsertBatchSize);
-        const dbBatch = batch.map(toDbJob);
+        // Transform the structured scraped job into row inserts
+        for (const job of batch) {
+          const row: any = {
+            source_id: job.sourceId,
+            company: job.company,
+            role: job.role,
+            location: job.location,
+            url: job.url,
+            date_posted: job.datePosted?.toISOString(),
+            source: job.source,
+            tags: job.tags,
+            salary_min: job.salaryMin,
+            salary_max: job.salaryMax,
+            salary_interval: job.salaryInterval,
+          };
 
-        const { error } = await writeClient
-          .from('job_postings')
-          .upsert(dbBatch, { onConflict: 'source_id' });
+          if (job.description) {
+            row.description = job.description; // description_fetched_at and job_keywords are ignored
+          }
 
-        if (!error) {
-          upsertedCount += batch.length;
-        } else {
-          console.error('[ensure-sync] Upsert error:', error);
+          try {
+            await prisma.job_postings.upsert({
+              where: { source_id: job.sourceId },
+              update: row,
+              create: row,
+            });
+            upsertedCount++;
+          } catch (error) {
+            console.error('[ensure-sync] Upsert error:', error);
+          }
         }
       }
-    } else if (shouldEnrich) {
-      const { jobs: enrichedJobs, stats } = await enrichJobsWithPostedDate(result.jobs);
-      result.jobs = enrichedJobs;
-      console.log('[ensure-sync] Posted-date enrichment', stats);
-    }
-    if (!writeClient && shouldDescEnrich) {
-      const { jobs: enrichedJobs, stats } = await enrichJobsWithDescription(result.jobs);
-      result.jobs = enrichedJobs;
-      console.log('[ensure-sync] Description enrichment', stats);
     }
 
     console.info('[ensure-sync]', {
@@ -300,11 +246,11 @@ export async function GET(request: Request) {
     let emailed = 0;
     const signingSecret = process.env.EMAIL_SIGNING_SECRET;
 
-    if (signingSecret && newJobs.length > 0 && writeClient) {
-      const { data: subscribers } = await writeClient
-        .from('email_subscribers')
-        .select('email, interests')
-        .eq('status', 'active');
+    if (signingSecret && newJobs.length > 0 && !skipDbWrites) {
+      const subscribers = await prisma.email_subscribers.findMany({
+        where: { status: 'active' },
+        select: { email: true, interests: true }
+      });
 
       if (subscribers && subscribers.length > 0) {
         const origin =
@@ -319,8 +265,8 @@ export async function GET(request: Request) {
 
           const interestList = Array.isArray(subscriber.interests)
             ? (subscriber.interests as string[]).map((v) =>
-                String(v).toLowerCase()
-              )
+              String(v).toLowerCase()
+            )
             : [];
 
           const matches = newJobs.filter((job) => {

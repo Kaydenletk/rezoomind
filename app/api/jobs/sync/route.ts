@@ -1,7 +1,6 @@
 import { createHash, createHmac } from "crypto";
 import { NextResponse } from "next/server";
-
-import { createClient } from '@supabase/supabase-js';
+import { prisma } from "@/lib/prisma";
 import { enrichJobsWithPostedDate, enrichJobsWithDescription, type ScrapedJob } from '@/lib/scrapers';
 import { sendJobAlertEmail } from "@/lib/email/resend";
 
@@ -321,29 +320,13 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    }
-  );
-
   try {
-    const { data: rpcResult, error: rpcError } = await supabase.rpc('clear_github_jobs', {
-      sync_secret: process.env.JOBS_SYNC_SECRET || ''
+    const deletedResult = await prisma.job_postings.deleteMany({
+      where: { source: 'github' }
     });
 
-    if (rpcError) {
-      console.error('[jobs:sync] RPC delete error:', rpcError);
-      return NextResponse.json({ ok: false, error: rpcError.message }, { status: 500 });
-    }
-
-    const deleted = rpcResult?.deleted || 0;
-    console.log(`[jobs:sync] Deleted ${deleted} jobs via RPC`);
+    const deleted = deletedResult.count || 0;
+    console.log(`[jobs:sync] Deleted ${deleted} jobs via Prisma`);
 
     return NextResponse.json({
       ok: true,
@@ -360,35 +343,16 @@ export async function DELETE(request: Request) {
 }
 
 async function syncJobs(request: Request, clearFirst = false, clearAndSync = false) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const supabase = createClient(url!, key!, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-
   let deletedCount = 0;
 
   if (clearFirst) {
     try {
-      const { data: rpcResult, error: rpcError } = await supabase.rpc('clear_github_jobs', {
-        sync_secret: process.env.JOBS_SYNC_SECRET || ''
+      const deletedResult = await prisma.job_postings.deleteMany({
+        where: { source: 'github' }
       });
 
-      if (rpcError) {
-        console.error('[jobs:sync] RPC clear error:', rpcError);
-        return NextResponse.json({
-          ok: false,
-          error: `Clear failed: ${rpcError.message}`,
-          hint: rpcError.hint
-        }, { status: 500 });
-      }
-
-      deletedCount = rpcResult?.deleted || 0;
-      console.log(`[jobs:sync] Deleted ${deletedCount} jobs via RPC.`);
+      deletedCount = deletedResult.count || 0;
+      console.log(`[jobs:sync] Deleted ${deletedCount} jobs via Prisma.`);
 
       if (!clearAndSync) {
         return NextResponse.json({
@@ -482,9 +446,7 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
     jobs = scrapedJobs.map(fromScrapedJob);
 
     // Identify truly new jobs (for email notifications only)
-    const { data: existingJobs } = await supabase
-      .from('job_postings')
-      .select('source_id');
+    const existingJobs = await prisma.job_postings.findMany({ select: { source_id: true } });
 
     const existingSourceIds = new Set(
       (existingJobs || []).map((job) => job.source_id)
@@ -498,8 +460,8 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
 
     for (let i = 0; i < jobs.length; i += batchSize) {
       const batch = jobs.slice(i, i + batchSize);
-      const payload = batch.map((job) => {
-        const row: Record<string, unknown> = {
+      for (const job of batch) {
+        const row: any = {
           source_id: job.sourceId,
           company: job.company,
           role: job.role,
@@ -515,23 +477,18 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
 
         if (job.description) {
           row.description = job.description;
-          row.job_keywords = job.jobKeywords ?? null;
-          row.description_fetched_at = job.descriptionFetchedAt?.toISOString() ?? null;
-        } else if (job.jobKeywords && job.jobKeywords.length > 0) {
-          row.job_keywords = job.jobKeywords;
         }
 
-        return row;
-      });
-
-      const { error } = await supabase
-        .from('job_postings')
-        .upsert(payload, { onConflict: 'source_id' });
-
-      if (!error) {
-        upsertedCount += batch.length;
-      } else {
-        console.error('[jobs:sync] Upsert error:', error);
+        try {
+          await prisma.job_postings.upsert({
+            where: { source_id: job.sourceId },
+            update: row,
+            create: row,
+          });
+          upsertedCount++;
+        } catch (error) {
+          console.error('[jobs:sync] Upsert error:', error);
+        }
       }
     }
     console.info("[jobs:sync]", {
@@ -561,10 +518,10 @@ async function syncJobs(request: Request, clearFirst = false, clearAndSync = fal
       });
     }
 
-    const { data: subscribers } = await supabase
-      .from('email_subscribers')
-      .select('email, interests')
-      .eq('status', 'active');
+    const subscribers = await prisma.email_subscribers.findMany({
+      where: { status: 'active' },
+      select: { email: true, interests: true }
+    });
 
     if (!subscribers) {
       return NextResponse.json({

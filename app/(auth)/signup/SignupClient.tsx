@@ -7,7 +7,7 @@ import { useMemo, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { signIn } from "next-auth/react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const knownExistingUserMessages = [
@@ -27,7 +27,6 @@ export default function SignupClient() {
     }
     return "/dashboard";
   }, [searchParams]);
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [form, setForm] = useState({
     email: "",
     confirmEmail: "",
@@ -69,26 +68,35 @@ export default function SignupClient() {
     try {
       setStatus("loading");
       setNote("");
-      const emailRedirectTo = `${window.location.origin}/login`;
-      const { error } = await supabase.auth.signUp({
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-        options: { emailRedirectTo },
+
+      const email = form.email.trim().toLowerCase();
+
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password: form.password,
+        }),
       });
 
-      if (error) {
-        const normalizedMessage = error.message.toLowerCase();
-        if (
-          knownExistingUserMessages.some((message) =>
-            normalizedMessage.includes(message)
-          )
-        ) {
-          setStatus("error");
-          setNote("Email already in use.");
-          return;
-        }
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
         setStatus("error");
-        setNote(error.message);
+        setNote(data.error || "Failed to create account.");
+        return;
+      }
+
+      const loginRes = await signIn("credentials", {
+        redirect: false,
+        email,
+        password: form.password,
+      });
+
+      if (loginRes?.error) {
+        setStatus("error");
+        setNote(loginRes.error);
         return;
       }
 
@@ -161,9 +169,8 @@ export default function SignupClient() {
 
         {note ? (
           <p
-            className={`text-sm ${
-              status === "success" ? "text-emerald-600" : "text-rose-500"
-            }`}
+            className={`text-sm ${status === "success" ? "text-emerald-600" : "text-rose-500"
+              }`}
           >
             {note}
           </p>

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/components/AuthProvider";
+import { useHolidayPromo } from "@/hooks/useHolidayPromo";
 
 const tiers = [
   {
@@ -17,6 +18,7 @@ const tiers = [
       "10 personalized jobs/week",
       "Weekly Monday digest",
       "Set role & location preferences",
+      "5 RezoomAI tries in this browser",
       "Unsubscribe anytime",
     ],
     cta: "Subscribe Free",
@@ -24,13 +26,13 @@ const tiers = [
   },
   {
     id: "upgraded",
-    name: "Upgraded",
+    name: "Registered",
     price: "$0",
     period: "/forever",
-    description: "Create a free account for more features.",
+    description: "Create a free account for more features — same price, more power.",
     features: [
       "Everything in Free",
-      "3 AI resume analyses/month",
+      "Keep RezoomAI unlocked after trial",
       "Browse unlimited jobs",
       "Save favorite jobs",
       "Track applications",
@@ -44,16 +46,16 @@ const tiers = [
     name: "Pro",
     price: "$15",
     period: "/mo",
-    description: "For serious job seekers who want every advantage.",
+    description: "For serious job seekers who want every competitive edge.",
     features: [
-      "Everything in Upgraded",
+      "Everything in Registered",
       "Unlimited AI analyses",
       "Cover letter generator",
       "LinkedIn optimizer",
       "Daily job alerts",
       "Priority support",
     ],
-    cta: "Go Pro",
+    cta: "Unlock Everything",
     ctaAction: "checkout" as const,
   },
 ];
@@ -62,6 +64,7 @@ export function Pricing() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
+  const { promo, getDiscountedPrice } = useHolidayPromo();
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
@@ -72,6 +75,19 @@ export function Pricing() {
     const timer = window.setTimeout(() => setNote(""), 1200);
     return () => window.clearTimeout(timer);
   }, [selectedPlan]);
+
+  const displayedTiers = tiers.map((tier) => {
+    if (tier.id !== "pro" || !promo?.isActive) {
+      return tier;
+    }
+
+    return {
+      ...tier,
+      price: `$${getDiscountedPrice(15).toFixed(0)}`,
+      description: `${tier.description} ${promo.discountPercent}% off for ${promo.holidayName}.`,
+      cta: `Go Pro (${promo.discountPercent}% off)`,
+    };
+  });
 
   const handleSelectPlan = (planId: string, action?: string) => {
     setPendingPlan(planId);
@@ -113,35 +129,44 @@ export function Pricing() {
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
           Pricing
         </p>
-        <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
-          Simple pricing for every internship hunt.
+        <h2 className="text-3xl font-semibold text-slate-950 sm:text-4xl">
+          Start free. Upgrade only when you&apos;re ready.
         </h2>
         <p className="text-sm text-slate-600">
-          Start free, then upgrade when you want deeper coverage and faster alerts.
+          Get full access with a free account. Upgrade to Pro only if you want unlimited AI, cover letters, and daily alerts.
         </p>
       </div>
+
+      {promo?.isActive ? (
+        <p className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-slate-700">
+          {promo.holidayName} sale is live. Pro is {promo.discountPercent}% off until the countdown ends.
+        </p>
+      ) : null}
 
       {note ? (
         <p className="text-sm text-slate-600">{note}</p>
       ) : null}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {tiers.map((tier) => (
+        {displayedTiers.map((tier) => (
           <div
             key={tier.name}
-            className={`relative rounded-3xl border bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(15,23,42,0.12)] ${
-              tier.highlighted
+            className={`relative rounded-3xl border bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(15,23,42,0.12)] ${tier.highlighted
                 ? "border-[rgba(var(--brand-rgb),0.4)] shadow-[0_26px_70px_var(--brand-glow)] lg:scale-[1.02]"
                 : "border-slate-200"
-            } ${
-              selectedPlan === tier.id
+              } ${selectedPlan === tier.id
                 ? "ring-2 ring-[var(--brand-ring)]"
                 : ""
-            }`}
+              }`}
           >
             {tier.highlighted ? (
               <span className="absolute right-6 top-6 rounded-full border border-[rgba(var(--brand-rgb),0.3)] bg-[var(--brand-tint)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-700">
                 Recommended
+              </span>
+            ) : null}
+            {promo?.isActive && tier.id === "pro" ? (
+              <span className="absolute left-6 top-6 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-700">
+                {promo.discountPercent}% Off
               </span>
             ) : null}
             <h3 className="text-xl font-semibold text-slate-900">

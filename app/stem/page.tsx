@@ -2,7 +2,8 @@ import { StemJobsTable, type StemJob } from "@/components/StemJobsTable";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { prisma } from "@/lib/prisma";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +22,8 @@ export default async function StemJobsPage() {
     },
   });
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
 
   const normalizedJobs: StemJob[] = jobs.map((job) => ({
     id: job.id,
@@ -55,7 +54,7 @@ export default async function StemJobsPage() {
         <Card className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">
-              AI Resume Analysis
+              RezoomAI Resume Analysis
             </h2>
             <p className="mt-1 text-sm text-slate-600">
               Get ATS-friendly bullets + match score for roles you're applying to.

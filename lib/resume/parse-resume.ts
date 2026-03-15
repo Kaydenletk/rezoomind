@@ -1,6 +1,5 @@
 import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 const toNumber = (value: string | undefined, fallback: number) => {
   const parsed = Number(value);
@@ -40,22 +39,19 @@ const fetchBuffer = async (url: string, maxBytes: number) => {
   return Buffer.from(buffer);
 };
 
-export async function parseResumeFromStorage(
-  supabase: SupabaseClient,
-  filePath: string
+export async function parseResumeFromUrl(
+  url: string
 ): Promise<{ text: string; bytes: number }> {
-  const { data, error } = await supabase.storage
-    .from("resumes")
-    .createSignedUrl(filePath, 60 * 5);
+  let rawText = "";
+  let buffer: Buffer;
 
-  if (error || !data?.signedUrl) {
-    throw new Error("Unable to access resume file.");
+  try {
+    buffer = await fetchBuffer(url, MAX_BYTES);
+  } catch (err: unknown) {
+    throw new Error(err instanceof Error ? err.message : "Unable to access resume file.");
   }
 
-  const buffer = await fetchBuffer(data.signedUrl, MAX_BYTES);
-  const extension = getExtension(filePath);
-
-  let rawText = "";
+  const extension = getExtension(url);
 
   if (extension === "pdf") {
     const parsed = await pdfParse(buffer);

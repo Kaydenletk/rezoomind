@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getResumeAIService } from "@/lib/ai/resume-ai.service";
 import { isAIServiceError } from "@/lib/ai/errors";
+import { hasGeminiKey } from "@/lib/ai/client";
 
 export const dynamic = "force-dynamic";
 
@@ -47,10 +48,10 @@ export async function POST(request: Request) {
       validation.data;
 
     // Check if API key is configured
-    if (!process.env.OPENAI_API_KEY) {
+    if (!hasGeminiKey()) {
       if (isDev) {
         console.warn(
-          "[resume:linkedin] OPENAI_API_KEY not set, returning mock data"
+          "[resume:linkedin] GEMINI_API_KEY not set, returning mock data"
         );
       }
       return NextResponse.json({

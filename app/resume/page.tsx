@@ -5,8 +5,7 @@ import { useMemo, useState, useEffect, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { useAuth } from "@/components/AuthProvider";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSession } from "next-auth/react";
 
 type ResumeRecord = {
   resume_text: string | null;
@@ -15,8 +14,10 @@ type ResumeRecord = {
 };
 
 export default function ResumePage() {
-  const { user, loading } = useAuth();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const loading = session === undefined;
+
   const [resumeText, setResumeText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [existing, setExisting] = useState<ResumeRecord | null>(null);
@@ -27,7 +28,7 @@ export default function ResumePage() {
     if (!user) return;
     let active = true;
 
-    fetch("/api/resume", { credentials: "include" })
+    fetch("/api/resume/data", { credentials: "include" })
       .then(async (response) => {
         if (!active) return;
         const data = await response.json().catch(() => null);
@@ -63,43 +64,13 @@ export default function ResumePage() {
       setStatus("loading");
       setNote("");
 
-      let fileUrl = existing?.file_url ?? null;
+      const formData = new FormData();
+      if (resumeText.trim()) formData.append("resumeText", resumeText.trim());
+      if (file) formData.append("file", file);
 
-      if (file) {
-        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-        const isDocx =
-          file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-          file.name.toLowerCase().endsWith(".docx");
-        if (!isPdf && !isDocx) {
-          setStatus("error");
-          setNote("Please upload a PDF or DOCX file.");
-          return;
-        }
-
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const filePath = `${user.id}/${Date.now()}-${safeName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("resumes")
-          .upload(filePath, file, { upsert: true });
-
-        if (uploadError) {
-          setStatus("error");
-          setNote(uploadError.message);
-          return;
-        }
-
-        fileUrl = filePath;
-      }
-
-      const response = await fetch("/api/resume", {
+      const response = await fetch("/api/resume/data", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          resumeText: resumeText.trim() || null,
-          fileUrl,
-        }),
+        body: formData,
       });
 
       const data = await response.json().catch(() => null);
@@ -164,9 +135,8 @@ export default function ResumePage() {
 
           {note ? (
             <p
-              className={`text-sm ${
-                status === "success" ? "text-emerald-600" : "text-rose-500"
-              }`}
+              className={`text-sm ${status === "success" ? "text-emerald-600" : "text-rose-500"
+                }`}
             >
               {note}
             </p>

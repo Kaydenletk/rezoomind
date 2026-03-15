@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 interface Stats {
   totalJobs: number;
@@ -20,45 +19,22 @@ export default function DebugPage() {
   const [logs, setLogs] = useState<string[]>([]);
   const [testing, setTesting] = useState(false);
 
-  const supabase = createSupabaseBrowserClient();
-
   useEffect(() => {
     loadStats();
   }, []);
 
   const loadStats = async () => {
-    // Check total jobs
-    const { count: totalJobs } = await supabase
-      .from('job_postings')
-      .select('*', { count: 'exact', head: true });
-
-    // Check latest job
-    const { data: latestJob } = await supabase
-      .from('job_postings')
-      .select('created_at, role, company, source')
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    // Check jobs from last 24 hours
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const { count: last24Hours } = await supabase
-      .from('job_postings')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', oneDayAgo);
-
-    // Check jobs from last hour
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count: lastHour } = await supabase
-      .from('job_postings')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', oneHourAgo);
-
-    setStats({
-      totalJobs: totalJobs || 0,
-      latestJob: latestJob?.[0] || null,
-      last24Hours: last24Hours || 0,
-      lastHour: lastHour || 0,
-    });
+    try {
+      const res = await fetch('/api/admin/debug');
+      const data = await res.json();
+      if (data.ok) {
+        setStats(data.stats);
+      } else {
+        console.error("Failed to load debug stats:", data.error);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const testCronJob = async () => {
@@ -198,12 +174,10 @@ export default function DebugPage() {
             <p className="text-sm text-slate-600">Total Jobs</p>
           </div>
 
-          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${
-            stats.lastHour > 0 ? 'border-green-500' : 'border-red-500'
-          }`}>
-            <div className={`text-3xl font-bold mb-2 ${
-              stats.lastHour > 0 ? 'text-green-600' : 'text-red-600'
+          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${stats.lastHour > 0 ? 'border-green-500' : 'border-red-500'
             }`}>
+            <div className={`text-3xl font-bold mb-2 ${stats.lastHour > 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
               {stats.lastHour}
             </div>
             <p className="text-sm text-slate-600">Last Hour</p>
@@ -212,23 +186,19 @@ export default function DebugPage() {
             )}
           </div>
 
-          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${
-            stats.last24Hours > 50 ? 'border-green-500' : 'border-amber-500'
-          }`}>
-            <div className={`text-3xl font-bold mb-2 ${
-              stats.last24Hours > 50 ? 'text-green-600' : 'text-amber-600'
+          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${stats.last24Hours > 50 ? 'border-green-500' : 'border-amber-500'
             }`}>
+            <div className={`text-3xl font-bold mb-2 ${stats.last24Hours > 50 ? 'text-green-600' : 'text-amber-600'
+              }`}>
               {stats.last24Hours}
             </div>
             <p className="text-sm text-slate-600">Last 24 Hours</p>
           </div>
 
-          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${
-            latestJobAge !== null && latestJobAge < 2 ? 'border-green-500' : 'border-red-500'
-          }`}>
-            <div className={`text-3xl font-bold mb-2 ${
-              latestJobAge !== null && latestJobAge < 2 ? 'text-green-600' : 'text-red-600'
+          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${latestJobAge !== null && latestJobAge < 2 ? 'border-green-500' : 'border-red-500'
             }`}>
+            <div className={`text-3xl font-bold mb-2 ${latestJobAge !== null && latestJobAge < 2 ? 'text-green-600' : 'text-red-600'
+              }`}>
               {latestJobAge !== null ? `${latestJobAge}h` : 'N/A'}
             </div>
             <p className="text-sm text-slate-600">Latest Job Age</p>

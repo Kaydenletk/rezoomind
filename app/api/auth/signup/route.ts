@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
@@ -70,46 +70,30 @@ export async function POST(request: Request) {
   }
 
   try {
-    const origin = request.headers.get("origin") ?? new URL(request.url).origin;
-    const emailRedirectTo = new URL("/login", origin).toString();
-    const supabase = await createSupabaseServerClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo },
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
     });
 
-    if (error) {
-      const normalizedMessage = error.message.toLowerCase();
-
-      if (knownExistingUserMessages.some((message) => normalizedMessage.includes(message))) {
-        log("email_in_use", { status: 409, message: error.message });
-        return NextResponse.json(
-          { ok: false, error: "Email already in use" },
-          { status: 409 }
-        );
-      }
-
-      if (error.message === "Database error saving new user" && isRlsViolation(error)) {
-        log("rls_violation", { status: 403, message: error.message });
-        return NextResponse.json(
-          { ok: false, error: "Row level security policy violation" },
-          { status: 403 }
-        );
-      }
-
-      log("supabase_error", { status: error.status ?? 400, message: error.message });
+    if (existingUser) {
+      log("email_in_use", { status: 409 });
       return NextResponse.json(
-        { ok: false, error: error.message },
-        { status: error.status ?? 400 }
+        { ok: false, error: "Email already in use" },
+        { status: 409 }
       );
     }
 
-    const user = data.user;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+      },
+    });
 
     log("created", { status: 201 });
     return NextResponse.json(
-      { ok: true, user: user ? { id: user.id, email: user.email } : null },
+      { ok: true, user: { id: user.id, email: user.email } },
       { status: 201 }
     );
   } catch (error) {

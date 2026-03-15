@@ -1,12 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light;
-  --brand-rgb: 102 227 249;
-  --brand-hover-rgb: 63 214 243;
-  --brand-tint: rgba(102, 227, 249, 0.12);
-  --brand-ring: rgba(102, 227, 249, 0.35);
-  --brand-glow: rgba(102, 227, 249, 0.25);
+  color-scheme: light dark;
+
+  /* Light mode defaults */
+  --bg-primary: 255 255 255;
+  --bg-secondary: 248 250 252;
+  --bg-tertiary: 241 245 249;
+  --text-primary: 15 23 42;
+  --text-secondary: 71 85 105;
+  --text-muted: 148 163 184;
+  --border-color: 226 232 240;
+  --border-subtle: 241 245 249;
+
+  /* Brand colors - Teal/Cyan accent */
+  --brand-rgb: 20 184 166;
+  --brand-hover-rgb: 13 148 136;
+  --brand-tint: rgba(20, 184, 166, 0.12);
+  --brand-ring: rgba(20, 184, 166, 0.35);
+  --brand-glow: rgba(20, 184, 166, 0.25);
+
+  /* Neon accent - Purple for AI features */
+  --neon-purple: 168 85 247;
+  --neon-purple-glow: rgba(168, 85, 247, 0.4);
+  --neon-teal: 45 212 191;
+  --neon-teal-glow: rgba(45, 212, 191, 0.4);
+
+  /* Status colors */
+  --success: 34 197 94;
+  --warning: 245 158 11;
+  --error: 239 68 68;
+}
+
+/* Dark mode */
+.dark, [data-theme="dark"] {
+  --bg-primary: 15 23 42;
+  --bg-secondary: 30 41 59;
+  --bg-tertiary: 51 65 85;
+  --text-primary: 248 250 252;
+  --text-secondary: 203 213 225;
+  --text-muted: 148 163 184;
+  --border-color: 51 65 85;
+  --border-subtle: 30 41 59;
+
+  /* Enhanced neon for dark mode */
+  --brand-tint: rgba(20, 184, 166, 0.15);
+  --brand-ring: rgba(20, 184, 166, 0.45);
+  --brand-glow: rgba(20, 184, 166, 0.35);
+  --neon-purple-glow: rgba(168, 85, 247, 0.5);
+  --neon-teal-glow: rgba(45, 212, 191, 0.5);
 }
 
 @theme inline {
@@ -32,13 +74,14 @@ html {
 body {
   margin: 0;
   font-family: var(--font-inter), "Segoe UI", sans-serif;
-  background: #ffffff;
-  color: #0b1220;
+  background: rgb(var(--bg-primary));
+  color: rgb(var(--text-primary));
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 ::selection {
   background: var(--brand-tint);
-  color: #0b1220;
+  color: rgb(var(--text-primary));
 }
 
 input,
@@ -47,6 +90,107 @@ button {
   font-family: inherit;
 }
 
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgb(var(--bg-secondary));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-color));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--text-muted));
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Neon glow effects */
+.neon-glow-teal {
+  box-shadow: 0 0 20px var(--neon-teal-glow), 0 0 40px var(--neon-teal-glow);
+}
+
+.neon-glow-purple {
+  box-shadow: 0 0 20px var(--neon-purple-glow), 0 0 40px var(--neon-purple-glow);
+}
+
+.neon-text-teal {
+  text-shadow: 0 0 10px var(--neon-teal-glow), 0 0 20px var(--neon-teal-glow);
+}
+
+.neon-text-purple {
+  text-shadow: 0 0 10px var(--neon-purple-glow), 0 0 20px var(--neon-purple-glow);
+}
+
+/* Glassmorphism effect */
+.glass {
+  background: rgba(var(--bg-secondary), 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--border-color), 0.3);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+/* Progress bar animations */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-value);
+  }
+}
+
+.progress-bar-animate {
+  animation: progressFill 1s ease-out forwards;
+}
+
+/* Pulse animation for live indicators */
+@keyframes pulse-neon {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--neon-teal-glow);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 16px var(--neon-teal-glow), 0 0 24px var(--neon-teal-glow);
+  }
+}
+
+.pulse-neon {
+  animation: pulse-neon 2s ease-in-out infinite;
+}
+
+/* Gradient backgrounds */
+.gradient-dark-subtle {
+  background: linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 100%);
+}
+
+.gradient-card-dark {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+/* Legacy animations kept for compatibility */
 .logo-marquee {
   overflow: hidden;
 }
@@ -221,9 +365,9 @@ button {
 .signal-radar {
   background: conic-gradient(
     from 0deg,
-    rgba(102, 227, 249, 0.2),
-    rgba(102, 227, 249, 0) 55%,
-    rgba(102, 227, 249, 0.18)
+    rgba(20, 184, 166, 0.2),
+    rgba(20, 184, 166, 0) 55%,
+    rgba(20, 184, 166, 0.18)
   );
   mask: radial-gradient(transparent 62%, #000 64%);
   -webkit-mask: radial-gradient(transparent 62%, #000 64%);
@@ -322,7 +466,9 @@ button {
   .mascot-live-ping,
   .signal-radar,
   .signal-chip,
-  .signal-live-ping {
+  .signal-live-ping,
+  .pulse-neon,
+  .progress-bar-animate {
     animation: none;
   }
 

@@ -1,5 +1,7 @@
-import OpenAI from "openai";
-import { getOpenAIClient } from "./client";
+import {
+  GEMINI_GENERATIVE_MODEL,
+  generateGeminiJson,
+} from "./client";
 import { AIServiceError } from "./errors";
 import {
   ANALYZE_SYSTEM_PROMPT,
@@ -33,78 +35,42 @@ import type {
   LinkedInOptimizationResult,
 } from "@/types/ai";
 
-const DEFAULT_MODEL = "gpt-4o";
+const DEFAULT_MODEL = GEMINI_GENERATIVE_MODEL;
 const DEFAULT_MAX_TOKENS = 4096;
 
 export class ResumeAIService {
-  private client: OpenAI;
   private model: string;
   private maxTokens: number;
 
   constructor(options?: { model?: string; maxTokens?: number }) {
-    this.client = getOpenAIClient();
     this.model = options?.model ?? DEFAULT_MODEL;
     this.maxTokens = options?.maxTokens ?? DEFAULT_MAX_TOKENS;
   }
 
-  private async callOpenAI<T>(
+  private async callGemini<T>(
     systemPrompt: string,
     userPrompt: string
   ): Promise<T> {
     try {
-      const response = await this.client.chat.completions.create({
+      return await generateGeminiJson<T>({
+        systemPrompt,
+        prompt: userPrompt,
         model: this.model,
-        max_tokens: this.maxTokens,
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: userPrompt,
-          },
-        ],
+        maxOutputTokens: this.maxTokens,
       });
-
-      const content = response.choices[0]?.message?.content;
-      if (!content) {
-        throw new AIServiceError(
-          "PARSE_ERROR",
-          "Empty response from AI",
-          500
-        );
-      }
-
-      // Extract JSON from the response (handles potential markdown wrapping)
-      let jsonText = content.trim();
-
-      // Remove markdown code blocks if present
-      if (jsonText.startsWith("```json")) {
-        jsonText = jsonText.slice(7);
-      } else if (jsonText.startsWith("```")) {
-        jsonText = jsonText.slice(3);
-      }
-      if (jsonText.endsWith("```")) {
-        jsonText = jsonText.slice(0, -3);
-      }
-      jsonText = jsonText.trim();
-
-      try {
-        return JSON.parse(jsonText) as T;
-      } catch {
-        throw new AIServiceError(
-          "PARSE_ERROR",
-          "Failed to parse AI response as JSON",
-          500
-        );
-      }
     } catch (error) {
       if (error instanceof AIServiceError) {
         throw error;
       }
 
-      if (error instanceof OpenAI.RateLimitError) {
+      const message =
+        error instanceof Error ? error.message : "Gemini service unavailable";
+
+      if (
+        message.toLowerCase().includes("quota") ||
+        message.toLowerCase().includes("rate limit") ||
+        message.includes("RESOURCE_EXHAUSTED")
+      ) {
         throw new AIServiceError(
           "RATE_LIMIT",
           "Too many requests. Please try again later.",
@@ -113,26 +79,33 @@ export class ResumeAIService {
         );
       }
 
-      if (error instanceof OpenAI.AuthenticationError) {
+      if (
+        message.toLowerCase().includes("api key") ||
+        message.toLowerCase().includes("permission denied") ||
+        message.includes("API_KEY_INVALID")
+      ) {
         throw new AIServiceError(
           "UNAUTHORIZED",
-          "Invalid API key",
+          "Invalid Gemini API key",
           401
         );
       }
 
-      if (error instanceof OpenAI.APIError) {
+      if (
+        message.toLowerCase().includes("json") ||
+        message.toLowerCase().includes("parse")
+      ) {
         throw new AIServiceError(
-          "API_ERROR",
-          error.message || "AI service unavailable",
-          502
+          "PARSE_ERROR",
+          "Failed to parse AI response as JSON",
+          500
         );
       }
 
       throw new AIServiceError(
         "API_ERROR",
-        error instanceof Error ? error.message : "Unknown error",
-        500
+        message,
+        502
       );
     }
   }
@@ -155,7 +128,7 @@ export class ResumeAIService {
     const systemPrompt = ANALYZE_SYSTEM_PROMPT;
     const userPrompt = getAnalyzeUserPrompt(resumeText, targetRole);
 
-    return this.callOpenAI<ResumeAnalysisResult>(systemPrompt, userPrompt);
+    return this.callGemini<ResumeAnalysisResult>(systemPrompt, userPrompt);
   }
 
   /**
@@ -177,7 +150,7 @@ export class ResumeAIService {
     const systemPrompt = BULLET_IMPROVE_SYSTEM_PROMPT;
     const userPrompt = getBulletImproveUserPrompt(bullet, context, mode);
 
-    return this.callOpenAI<BulletImprovementResult>(systemPrompt, userPrompt);
+    return this.callGemini<BulletImprovementResult>(systemPrompt, userPrompt);
   }
 
   /**
@@ -206,7 +179,7 @@ export class ResumeAIService {
     const systemPrompt = ATS_OPTIMIZE_SYSTEM_PROMPT;
     const userPrompt = getATSOptimizeUserPrompt(resumeText, jobDescription);
 
-    return this.callOpenAI<ATSOptimizationResult>(systemPrompt, userPrompt);
+    return this.callGemini<ATSOptimizationResult>(systemPrompt, userPrompt);
   }
 
   /**
@@ -242,7 +215,7 @@ export class ResumeAIService {
     const systemPrompt = COVER_LETTER_SYSTEM_PROMPT;
     const userPrompt = getCoverLetterUserPrompt(params);
 
-    return this.callOpenAI<CoverLetterResult>(systemPrompt, userPrompt);
+    return this.callGemini<CoverLetterResult>(systemPrompt, userPrompt);
   }
 
   /**
@@ -270,7 +243,7 @@ export class ResumeAIService {
     const systemPrompt = LINKEDIN_SYSTEM_PROMPT;
     const userPrompt = getLinkedInUserPrompt(params);
 
-    return this.callOpenAI<LinkedInOptimizationResult>(systemPrompt, userPrompt);
+    return this.callGemini<LinkedInOptimizationResult>(systemPrompt, userPrompt);
   }
 }
 
