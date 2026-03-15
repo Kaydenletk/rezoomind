@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { ScraperOrchestrator, enrichJobsWithPostedDate, enrichJobsWithDescription, toDbJob } from '@/lib/scrapers';
+import { prisma } from '@/lib/prisma';
+import { ScraperOrchestrator, enrichJobsWithPostedDate, enrichJobsWithDescription } from '@/lib/scrapers';
 
 export const maxDuration = 60; // Vercel Hobby allows up to 60s
 export const dynamic = 'force-dynamic';
@@ -14,11 +14,6 @@ export async function GET(request: Request) {
     console.error('[scrape-jobs] Unauthorized cron attempt');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
 
   try {
     const currentHour = new Date().getUTCHours();
@@ -44,10 +39,10 @@ export async function GET(request: Request) {
     const existingIds = new Set<string>();
     for (let i = 0; i < sourceIds.length; i += 100) {
       const chunk = sourceIds.slice(i, i + 100);
-      const { data: existingJobs } = await supabase
-        .from('job_postings')
-        .select('source_id')
-        .in('source_id', chunk);
+      const existingJobs = await prisma.job_postings.findMany({
+        where: { source_id: { in: chunk } },
+        select: { source_id: true }
+      });
 
       if (existingJobs) {
         existingJobs.forEach((job) => existingIds.add(job.source_id));
@@ -73,18 +68,37 @@ export async function GET(request: Request) {
       console.log('[scrape-jobs] Description enrichment', descStats);
     }
 
-    // Batch insert new jobs (in chunks of 50)
+    // Batch insert new jobs (using an upsert loop)
     let insertedCount = 0;
-    for (let i = 0; i < descEnrichedJobs.length; i += 50) {
-      const chunk = descEnrichedJobs.slice(i, i + 50);
-      const dbJobs = chunk.map(toDbJob);
+    for (const job of descEnrichedJobs) {
+      // Map ScrapedJob to the Prisma schema expectation
+      const row: any = {
+        source_id: job.sourceId,
+        company: job.company,
+        role: job.role,
+        location: job.location,
+        url: job.url,
+        date_posted: job.datePosted?.toISOString(),
+        source: job.source,
+        tags: job.tags,
+        salary_min: job.salaryMin,
+        salary_max: job.salaryMax,
+        salary_interval: job.salaryInterval,
+      };
 
-      const { error } = await supabase.from('job_postings').insert(dbJobs);
+      if (job.description) {
+        row.description = job.description;
+      }
 
-      if (error) {
-        console.error(`[scrape-jobs] Insert error:`, error);
-      } else {
-        insertedCount += chunk.length;
+      try {
+        await prisma.job_postings.upsert({
+          where: { source_id: job.sourceId },
+          update: row,
+          create: row,
+        });
+        insertedCount++;
+      } catch (upsertError) {
+        console.error(`[scrape-jobs] Insert error for ${job.sourceId}:`, upsertError);
       }
     }
 
@@ -94,25 +108,6 @@ export async function GET(request: Request) {
     result.stats.newJobs = insertedCount;
 
     const duration = (Date.now() - startTime) / 1000;
-
-    // Log success to scraper_logs table
-    try {
-      const { error: logError } = await supabase.from('scraper_logs').insert({
-        status: 'success',
-        scraped: result.jobs.length,
-        saved: insertedCount,
-        duplicates: existingIds.size,
-        duration_seconds: duration,
-        sources: result.stats.scrapersRun,
-      });
-      if (logError) {
-        console.error('[scrape-jobs] Failed to log to scraper_logs:', logError);
-      } else {
-        console.log('[scrape-jobs] Logged success to scraper_logs');
-      }
-    } catch (logError) {
-      console.error('[scrape-jobs] Failed to log to scraper_logs:', logError);
-    }
 
     return NextResponse.json({
       success: true,
@@ -128,21 +123,8 @@ export async function GET(request: Request) {
   } catch (err) {
     const duration = (Date.now() - startTime) / 1000;
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    const errorStack = err instanceof Error ? err.stack : undefined;
 
     console.error('[scrape-jobs] Error:', err);
-
-    // Log error to scraper_logs table
-    try {
-      await supabase.from('scraper_logs').insert({
-        status: 'error',
-        error_message: errorMessage,
-        error_stack: errorStack,
-        duration_seconds: duration,
-      });
-    } catch (logError) {
-      console.error('[scrape-jobs] Failed to log error to scraper_logs:', logError);
-    }
 
     return NextResponse.json(
       {

@@ -1,0 +1,58 @@
+{
+     "manifest_version": 3,
+     "name": "Rezoomind Autofill",
+     "version": "1.0.0",
+     "description": "Auto-fill job applications with your Rezoomind profile data",
+     "permissions": [
+          "activeTab",
+          "storage"
+     ],
+     "host_permissions": [
+          "https://*.rezoomind.com/*",
+          "http://localhost:3000/*"
+     ],
+     "action": {
+          "default_popup": "popup/popup.html",
+          "default_icon": {
+               "16": "icons/icon16.png",
+               "48": "icons/icon48.png",
+               "128": "icons/icon128.png"
+          }
+     },
+     "background": {
+          "service_worker": "background.js"
+     },
+     "content_scripts": [
+          {
+               "matches": [
+                    "*://*.myworkdayjobs.com/*",
+                    "*://*.workday.com/*",
+                    "*://jobs.lever.co/*",
+                    "*://*.lever.co/*",
+                    "*://*.greenhouse.io/*",
+                    "*://boards.greenhouse.io/*",
+                    "*://*.icims.com/*",
+                    "*://*.bamboohr.com/*",
+                    "*://*.smartrecruiters.com/*",
+                    "*://*.ashbyhq.com/*",
+                    "*://*.taleo.net/*",
+                    "*://*.jobvite.com/*",
+                    "*://*.ultipro.com/*",
+                    "*://*.successfactors.com/*",
+                    "*://*.applytojob.com/*"
+               ],
+               "js": [
+                    "content.js"
+               ],
+               "css": [
+                    "content.css"
+               ],
+               "run_at": "document_idle"
+          }
+     ],
+     "icons": {
+          "16": "icons/icon16.png",
+          "48": "icons/icon48.png",
+          "128": "icons/icon128.png"
+     }
+}

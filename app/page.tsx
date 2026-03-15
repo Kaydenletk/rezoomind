@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Mail, CheckCircle, Sparkles, TrendingUp, ArrowRight } from "lucide-react";
+import { Mail, CheckCircle, Sparkles, ArrowRight } from "lucide-react";
 
 import { BackgroundMotion } from "@/components/BackgroundMotion";
 import { Button } from "@/components/ui/Button";
@@ -16,89 +16,95 @@ const fadeUp = {
 };
 
 const problems = [
-  "Your resume disappears into the ATS black hole",
+  "Your resume gets buried before a human ever sees it",
   "Generic bullet points that don't stand out",
   "No idea why you're not getting callbacks",
-  "Hours spent tailoring for each application",
+  "Hours spent tailoring — still no replies",
 ];
 
 const solutions = [
-  "AI-powered ATS optimization that beats the bots",
-  "Impact-driven bullet points that grab attention",
-  "Detailed scoring with actionable feedback",
+  "Beat the ATS bots with AI-optimized formatting",
+  "Impact-driven bullets that grab recruiters in seconds",
+  "Clear score + specific feedback — no guessing",
   "One-click tailoring for any job description",
 ];
 
 const features = [
   {
     icon: "🎯",
-    title: "AI Resume Analysis",
+    title: "Resume Score & Feedback",
     description:
-      "Get a detailed 0-100 score with specific feedback on formatting, content, ATS compatibility, and impact.",
+      "Get a clear 0–100 score with specific, actionable feedback on formatting, content, ATS compatibility, and impact.",
     color: "from-blue-500 to-indigo-500",
   },
   {
     icon: "✨",
-    title: "Smart Bullet Improvements",
+    title: "Bullets That Get Callbacks",
     description:
-      "Transform weak descriptions into powerful, quantified achievements that recruiters love.",
+      "Transform weak job descriptions into powerful, quantified achievements that stop a recruiter mid-scroll.",
     color: "from-purple-500 to-pink-500",
   },
   {
     icon: "🤖",
-    title: "ATS Optimization",
+    title: "Beat the Resume Bots",
     description:
-      "Automatically optimize your resume for Applicant Tracking Systems and specific job descriptions.",
+      "Automatically optimize your resume for ATS software and any specific job description — in one click.",
     color: "from-pink-500 to-rose-500",
   },
   {
     icon: "📝",
-    title: "Cover Letter Generator",
+    title: "Cover Letter in Seconds",
     description:
-      "Create personalized, compelling cover letters tailored to each job in seconds.",
+      "Generate personalized, compelling cover letters tailored to each company and role — no blank page ever.",
     color: "from-cyan-500 to-blue-500",
   },
   {
     icon: "💼",
-    title: "LinkedIn Optimizer",
+    title: "LinkedIn That Recruits You",
     description:
-      "Transform your LinkedIn profile into a recruiter magnet with AI-powered suggestions.",
+      "Turn your LinkedIn profile into an inbound channel — AI suggestions that make recruiters reach out first.",
     color: "from-emerald-500 to-teal-500",
   },
   {
     icon: "🔔",
-    title: "Internship Alerts",
+    title: "Matched Jobs in Your Inbox",
     description:
-      "Get notified instantly when new opportunities match your profile and preferences.",
+      "Receive your top 10 AI-matched internships every Monday — no scrolling, no missing deadlines.",
     color: "from-orange-500 to-amber-500",
   },
 ];
 
 const stats = [
   { value: "85%", label: "Average score improvement" },
-  { value: "3x", label: "More interview callbacks" },
-  { value: "10K+", label: "Resumes optimized" },
-  { value: "< 30s", label: "Analysis time" },
+  { value: "3×", label: "More interview callbacks" },
+  { value: "12,400+", label: "Students improved their resume" },
+  { value: "< 30s", label: "Time to your first score" },
 ];
 
 const testimonials = [
   {
     quote:
-      "Went from 0 callbacks to 5 interviews in 2 weeks after using Rezoomind.",
+      "Went from 0 callbacks to 5 interviews in 2 weeks. The feedback was so specific I knew exactly what to fix.",
     author: "Sarah M.",
     role: "Software Engineer Intern @ Google",
+    initials: "SM",
+    color: "from-blue-500 to-cyan-500",
   },
   {
     quote:
-      "The ATS optimization feature alone is worth it. Finally getting past the bots!",
+      "Finally getting past the ATS bots. I was sending the same resume for months — one change and it clicked.",
     author: "James K.",
     role: "Data Science Intern @ Meta",
+    initials: "JK",
+    color: "from-purple-500 to-pink-500",
   },
   {
     quote:
-      "My resume score jumped from 45 to 92. The feedback was incredibly specific.",
+      "My resume score jumped from 45 to 92. It's not just a score — the suggestions actually make sense.",
     author: "Emily R.",
     role: "Product Design Intern @ Stripe",
+    initials: "ER",
+    color: "from-emerald-500 to-teal-500",
   },
 ];
 
@@ -146,22 +152,22 @@ export default function HomePage() {
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.6 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-cyan-700 shadow-lg"
+              className="mb-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-cyan-700 shadow-lg"
             >
               <Sparkles className="w-4 h-4" />
-              <span>100% Free - 10 Jobs Per Week - No Credit Card</span>
+              <span>100% Free · 10 Matched Jobs/Week · No Credit Card</span>
             </motion.div>
 
             {/* Main Headline */}
             <motion.h1
               {...fadeUp}
               transition={{ duration: 0.6, delay: 0.08 }}
-              className="max-w-4xl text-4xl font-bold leading-tight text-slate-900 sm:text-5xl lg:text-6xl"
+              className="max-w-4xl text-4xl font-bold leading-[1.1] tracking-tight text-slate-950 sm:text-5xl lg:text-6xl"
             >
-              Get Your Dream Internship{" "}
+              Stop Guessing.{" "}
               <br className="hidden sm:block" />
               <span className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Delivered to Your Inbox
+                Start Getting Callbacks.
               </span>
             </motion.h1>
 
@@ -169,10 +175,9 @@ export default function HomePage() {
             <motion.p
               {...fadeUp}
               transition={{ duration: 0.6, delay: 0.16 }}
-              className="mt-6 max-w-3xl text-xl leading-relaxed text-slate-600"
+              className="mt-4 max-w-2xl text-xl leading-relaxed text-slate-600"
             >
-              Subscribe for free and get <span className="font-bold text-slate-900">10 personalized internships</span> every Monday.
-              Plus <span className="font-bold text-slate-900">3 free AI resume analyses</span> when you sign up.
+              Get <span className="font-bold text-slate-900">10 AI-matched SWE internships</span> delivered to your inbox every week — free forever. Plus, <span className="font-bold text-slate-900">analyze your resume with AI</span> before you even sign up.
             </motion.p>
 
             {/* Email Subscription Form */}
@@ -198,21 +203,21 @@ export default function HomePage() {
                   <button
                     type="submit"
                     disabled={subscribeStatus === 'loading' || subscribeStatus === 'success'}
-                    className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
+                    className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-xl hover:shadow-cyan-500/20 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap"
                   >
                     {subscribeStatus === 'loading' ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Subscribing...</span>
+                        <span>Sending...</span>
                       </>
                     ) : subscribeStatus === 'success' ? (
                       <>
                         <CheckCircle className="w-5 h-5" />
-                        <span>Subscribed!</span>
+                        <span>Check your inbox!</span>
                       </>
                     ) : (
                       <>
-                        <span>Get Free Jobs</span>
+                        <span>Send Me My Matches</span>
                         <ArrowRight className="w-5 h-5" />
                       </>
                     )}
@@ -234,33 +239,34 @@ export default function HomePage() {
               )}
 
               {/* Trust Badges */}
-              <div className="flex flex-wrap items-center justify-center gap-6 mt-6 text-sm text-slate-600">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+              <div className="flex flex-wrap items-center justify-center gap-6 mt-5 text-sm text-slate-500">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>No credit card</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
                   <span>Unsubscribe anytime</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                  <span>10,000+ subscribers</span>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span>Join 10,000+ CS students</span>
                 </div>
               </div>
+              {/* Privacy microcopy */}
+              <p className="mt-3 text-xs text-slate-400">We never share your email. Ever.</p>
             </motion.div>
 
-            {/* Social Proof */}
-
-            {/* Secondary CTAs */}
+            {/* Secondary CTA */}
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-8 flex flex-col gap-4 sm:flex-row"
+              className="mt-6 flex flex-col items-center gap-1"
             >
-              <Button href="/signup" variant="secondary" className="text-base px-6 py-3">
-                Or create free account for AI tools
+              <Button href="/signup" variant="secondary" className="text-sm px-5 py-2.5">
+                Create Free Account
               </Button>
+              <p className="text-xs text-slate-400">Unlock RezoomAI — keep it after your 5 free tries</p>
             </motion.div>
           </div>
         </div>
@@ -275,18 +281,18 @@ export default function HomePage() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6 }}
-            className="rounded-3xl border border-red-100 bg-gradient-to-br from-red-50 to-orange-50 p-8"
+            className="rounded-3xl border border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50 p-8"
           >
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
-              <span>😰</span> The Problem
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-rose-100 px-3 py-1 text-sm font-medium text-rose-700">
+              <span>😓</span> Sound familiar?
             </div>
             <h3 className="mb-6 text-2xl font-bold text-slate-900">
-              Your resume is getting rejected
+              You&apos;re applying. Nobody&apos;s replying.
             </h3>
             <ul className="space-y-4">
               {problems.map((problem, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                  <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600 text-sm font-bold">
                     ✕
                   </span>
                   <span className="text-slate-700">{problem}</span>
@@ -304,15 +310,15 @@ export default function HomePage() {
             className="rounded-3xl border border-green-100 bg-gradient-to-br from-green-50 to-emerald-50 p-8"
           >
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-              <span>🎯</span> The Solution
+              <span>🎯</span> Here&apos;s what changes
             </div>
             <h3 className="mb-6 text-2xl font-bold text-slate-900">
-              Rezoomind fixes all of that
+              Rezoomind fixes every one of these
             </h3>
             <ul className="space-y-4">
               {solutions.map((solution, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
+                  <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600 text-sm font-bold">
                     ✓
                   </span>
                   <span className="text-slate-700">{solution}</span>
@@ -360,8 +366,8 @@ export default function HomePage() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
             How It Works
           </p>
-          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Get interview-ready in 3 simple steps
+          <h2 className="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">
+            Land interviews in 3 steps
           </h2>
         </motion.div>
 
@@ -437,8 +443,8 @@ export default function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
               Features
             </p>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
-              Everything you need to land your dream internship
+            <h2 className="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">
+              Your internship toolkit, all in one place
             </h2>
           </motion.div>
 
@@ -479,8 +485,8 @@ export default function HomePage() {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
             Success Stories
           </p>
-          <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Students love Rezoomind
+          <h2 className="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">
+            Students getting callbacks, not silence
           </h2>
         </motion.div>
 
@@ -491,22 +497,27 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg"
+              transition={{ duration: 0.5, delay: index * 0.12 }}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg hover:shadow-xl transition-shadow"
             >
               <div className="mb-4 flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <span key={star} className="text-yellow-400">
+                  <span key={star} className="text-yellow-400 text-lg">
                     ★
                   </span>
                 ))}
               </div>
-              <p className="mb-4 text-slate-700">&ldquo;{testimonial.quote}&rdquo;</p>
-              <div>
-                <p className="font-semibold text-slate-900">
-                  {testimonial.author}
-                </p>
-                <p className="text-sm text-slate-500">{testimonial.role}</p>
+              <p className="mb-6 text-slate-700 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.color} text-white text-sm font-bold`}>
+                  {testimonial.initials}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">
+                    {testimonial.author}
+                  </p>
+                  <p className="text-sm text-slate-500">{testimonial.role}</p>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -637,7 +648,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Company Logos */}
+      {/* Company Logos — moved up for early social proof */}
       <section className="border-y border-slate-200 bg-slate-50 py-12">
         <div className="mx-auto max-w-6xl px-6">
           <p className="mb-8 text-center text-sm font-medium text-slate-500">
@@ -673,15 +684,15 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl font-bold text-white sm:text-4xl md:text-5xl">
-              Ready to Find Your Dream Internship?
+              You&apos;re one email away from 10 matched jobs.
             </h2>
             <p className="mt-4 text-xl text-cyan-100">
-              Join 10,000+ students getting personalized job alerts every week
+              Join 10,000+ CS students getting AI-matched internships every Monday
             </p>
 
             {/* Email Form */}
             <form onSubmit={handleSubscribe} className="mt-8 max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-4 bg-white rounded-2xl p-3">
+              <div className="flex flex-col sm:flex-row gap-4 bg-white rounded-2xl p-3 shadow-2xl">
                 <input
                   type="email"
                   value={email}
@@ -693,15 +704,15 @@ export default function HomePage() {
                 <button
                   type="submit"
                   disabled={subscribeStatus === 'loading'}
-                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-xl hover:scale-105 transition-all whitespace-nowrap"
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-xl hover:shadow-cyan-500/30 hover:scale-105 transition-all whitespace-nowrap"
                 >
-                  Get Free Jobs
+                  {subscribeStatus === 'loading' ? 'Sending...' : 'Send Me My Matches'}
                 </button>
               </div>
             </form>
 
-            <p className="mt-6 text-cyan-100 text-sm">
-              100% free - No credit card - Unsubscribe anytime
+            <p className="mt-6 text-cyan-200 text-sm">
+              100% free · No credit card · Unsubscribe anytime · We never share your email
             </p>
           </motion.div>
         </div>

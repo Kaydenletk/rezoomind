@@ -1,41 +1,26 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const syncSecret = process.env.JOBS_SYNC_SECRET;
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!syncSecret) {
     return NextResponse.json({
       ok: false,
       error: `Missing env vars`
     }, { status: 500 });
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-
   try {
-    const { data: rpcResult, error: rpcError } = await supabase.rpc('clear_github_jobs', {
-      sync_secret: process.env.JOBS_SYNC_SECRET || ''
+    const deleted = await prisma.job_postings.deleteMany({
+      where: { source: 'github' }
     });
-
-    if (rpcError) {
-      return NextResponse.json({
-        ok: false,
-        error: `Clear failed: ${rpcError.message || JSON.stringify(rpcError)}`
-      }, { status: 500 });
-    }
 
     return NextResponse.json({
       ok: true,
-      deleted: rpcResult?.deleted || 0,
+      deleted: deleted.count || 0,
       message: 'All GitHub jobs cleared. Ready for fresh sync.'
     });
   } catch (error) {

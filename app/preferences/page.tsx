@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { useSession } from "next-auth/react";
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -51,34 +51,34 @@ function PreferencesContent() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
-  const supabase = createSupabaseBrowserClient();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
+    if (status === 'loading') return;
     loadUserOrSubscriber();
-  }, [token]);
+  }, [token, status]);
 
   const loadUserOrSubscriber = async () => {
     setLoading(true);
 
-    // First, check for authenticated Supabase user
-    const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
-
-    if (authUser && !userError) {
+    // First, check for authenticated user
+    if (session?.user) {
       // Authenticated user mode
       setAuthMode('authenticated');
-      setUser(authUser);
+      setUser(session.user);
 
-      // Load preferences from Supabase user_job_preferences table
-      const { data: prefs } = await supabase
-        .from('user_job_preferences')
-        .select('*')
-        .eq('user_id', authUser.id)
-        .single();
+      // Load preferences from our internal API which uses Prisma
+      try {
+        const response = await fetch("/api/preferences/data");
+        const { prefs } = await response.json();
 
-      if (prefs) {
-        setSelectedRoles(prefs.interested_roles || []);
-        setSelectedLocations(prefs.preferred_locations || []);
-        setKeywords((prefs.keywords || []).join(', '));
+        if (prefs) {
+          setSelectedRoles(prefs.interested_roles || []);
+          setSelectedLocations(prefs.preferred_locations || []);
+          setKeywords((prefs.keywords || []).join(', '));
+        }
+      } catch (err) {
+        console.error('Failed to load user preferences:', err);
       }
 
       setLoading(false);
@@ -130,27 +130,31 @@ function PreferencesContent() {
       .filter(k => k.length > 0);
 
     if (authMode === 'authenticated' && user) {
-      // Save to Supabase user_job_preferences
-      const { error: saveError } = await supabase
-        .from('user_job_preferences')
-        .upsert({
-          user_id: user.id,
-          interested_roles: selectedRoles,
-          preferred_locations: selectedLocations,
-          keywords: keywordArray,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id'
+      // Save via internal API
+      try {
+        const res = await fetch("/api/preferences/data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            interested_roles: selectedRoles,
+            preferred_locations: selectedLocations,
+            keywords: keywordArray
+          })
         });
 
-      setSaving(false);
+        const data = await res.json();
+        setSaving(false);
 
-      if (saveError) {
+        if (data.ok) {
+          setSaved(true);
+          setTimeout(() => router.push('/jobs'), 2000);
+        } else {
+          setError('Failed to save preferences. Please try again.');
+        }
+      } catch (saveError) {
         console.error('Save error:', saveError);
+        setSaving(false);
         setError('Failed to save preferences. Please try again.');
-      } else {
-        setSaved(true);
-        setTimeout(() => router.push('/jobs'), 2000);
       }
     } else if (authMode === 'subscriber' && token) {
       // Save via API for email subscribers
@@ -279,11 +283,10 @@ function PreferencesContent() {
               <button
                 key={role.value}
                 onClick={() => toggleRole(role.value)}
-                className={`flex items-start gap-4 p-5 rounded-2xl border-2 transition-all text-left ${
-                  selectedRoles.includes(role.value)
+                className={`flex items-start gap-4 p-5 rounded-2xl border-2 transition-all text-left ${selectedRoles.includes(role.value)
                     ? 'border-cyan-500 bg-gradient-to-br from-cyan-50 to-blue-50 shadow-lg scale-[1.02]'
                     : 'border-slate-200 bg-white hover:border-cyan-300 hover:shadow-md'
-                }`}
+                  }`}
               >
                 <span className="text-4xl">{role.icon}</span>
                 <div className="flex-1">
@@ -333,11 +336,10 @@ function PreferencesContent() {
               <button
                 key={location.value}
                 onClick={() => toggleLocation(location.value)}
-                className={`flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all ${
-                  selectedLocations.includes(location.value)
+                className={`flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all ${selectedLocations.includes(location.value)
                     ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg scale-[1.05]'
                     : 'border-slate-200 bg-white hover:border-purple-300 hover:shadow-md'
-                }`}
+                  }`}
               >
                 <span className="text-4xl">{location.emoji}</span>
                 <span className="font-bold text-slate-900 text-sm text-center leading-tight">
@@ -413,15 +415,14 @@ function PreferencesContent() {
           <button
             onClick={handleSave}
             disabled={saving || selectedRoles.length === 0 || selectedLocations.length === 0}
-            className={`w-full py-6 rounded-2xl font-bold text-xl transition-all flex items-center justify-center gap-3 ${
-              saved
+            className={`w-full py-6 rounded-2xl font-bold text-xl transition-all flex items-center justify-center gap-3 ${saved
                 ? 'bg-green-500 text-white shadow-xl'
                 : saving
-                ? 'bg-slate-400 text-white cursor-not-allowed'
-                : selectedRoles.length === 0 || selectedLocations.length === 0
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]'
-            }`}
+                  ? 'bg-slate-400 text-white cursor-not-allowed'
+                  : selectedRoles.length === 0 || selectedLocations.length === 0
+                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]'
+              }`}
           >
             {saved ? (
               <>
@@ -457,7 +458,7 @@ function PreferencesContent() {
                 Want 3 Free AI Resume Analyses?
               </h3>
               <p className="text-sm text-slate-600 mb-4">
-                Create a free account to unlock AI-powered resume analysis, cover letter generation, and more.
+                Create a free account to keep RezoomAI unlocked for resume analysis, cover letters, and more.
               </p>
               <button
                 onClick={() => router.push('/signup')}

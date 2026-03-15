@@ -7,7 +7,7 @@ import { useMemo, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { signIn } from "next-auth/react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -21,7 +21,6 @@ export default function LoginClient() {
     }
     return "/dashboard";
   }, [searchParams]);
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const [form, setForm] = useState({ email: "", password: "" });
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
@@ -40,14 +39,16 @@ export default function LoginClient() {
     try {
       setStatus("loading");
       setNote("");
-      const { error } = await supabase.auth.signInWithPassword({
+
+      const res = await signIn("credentials", {
+        redirect: false,
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
 
-      if (error) {
+      if (res?.error) {
         setStatus("error");
-        setNote(error.message);
+        setNote(res.error);
         return;
       }
 
@@ -104,9 +105,8 @@ export default function LoginClient() {
 
         {note ? (
           <p
-            className={`text-sm ${
-              status === "success" ? "text-emerald-600" : "text-rose-500"
-            }`}
+            className={`text-sm ${status === "success" ? "text-emerald-600" : "text-rose-500"
+              }`}
           >
             {note}
           </p>

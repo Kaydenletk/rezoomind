@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { parseResumeFromStorage } from "@/lib/resume/parse-resume";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+import { parseResumeFromUrl } from "@/lib/resume/parse-resume";
 import { getResumeKeywords, rankJobMatches } from "@/lib/job-matching-resume";
-import { ensureInternshipsInJobPostings } from "@/lib/jobs/ensure-internships";
 
 const resumeSchema = z.object({
   resumeText: z.string().optional().nullable(),
@@ -12,27 +14,24 @@ const resumeSchema = z.object({
 });
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
 
-  if (authError || !user) {
+  if (!session?.user) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("resumes")
-    .select("resume_text,file_url,created_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const userId = (session.user as any).id;
 
-  if (error) {
+  try {
+    const data = await prisma.resume.findUnique({
+      where: { userId },
+      select: { resume_text: true, file_url: true, created_at: true }
+    });
+
+    return NextResponse.json({ ok: true, resume: data ?? null });
+  } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, resume: data ?? null });
 }
 
 export async function POST(request: Request) {
@@ -53,22 +52,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
 
-  if (authError || !user) {
+  if (!session?.user) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = (session.user as any).id;
 
   let parsedText: string | null = null;
   let parsedAt: string | null = null;
 
   if (fileUrl) {
     try {
-      const parsedResume = await parseResumeFromStorage(supabase, fileUrl);
+      // NOTE: For local dev, this would need to point to a publicly accessible URL,
+      // or we'd just pass the raw buffer if uploaded locally.
+      const parsedResume = await parseResumeFromUrl(fileUrl);
       parsedText = parsedResume.text;
       parsedAt = new Date().toISOString();
     } catch (error) {
@@ -89,47 +88,45 @@ export async function POST(request: Request) {
 
   const resumeKeywords = getResumeKeywords(finalResumeText, null);
 
-  const { data, error } = await supabase
-    .from("resumes")
-    .upsert(
-      {
-        user_id: user.id,
+  let data;
+  try {
+    data = await prisma.resume.upsert({
+      where: { userId },
+      update: {
         resume_text: finalResumeText,
         file_url: fileUrl,
         resume_keywords: resumeKeywords,
         parsed_at: parsedAt,
       },
-      { onConflict: "user_id" }
-    )
-    .select("resume_text,file_url,resume_keywords,parsed_at,created_at")
-    .single();
-
-  if (error) {
+      create: {
+        userId,
+        resume_text: finalResumeText,
+        file_url: fileUrl,
+        resume_keywords: resumeKeywords,
+        parsed_at: parsedAt,
+      }
+    });
+  } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
 
   try {
-    await ensureInternshipsInJobPostings(supabase);
-  } catch {
-    // Ignore ingestion errors
-  }
+    const preferences = await prisma.interest.findUnique({
+      where: { userId },
+      select: { roles: true, locations: true, keywords: true }
+    });
 
-  try {
-    const [{ data: preferences }, { data: jobs }] = await Promise.all([
-      supabase
-        .from("user_job_preferences")
-        .select("interested_roles,preferred_locations,keywords")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("job_postings")
-        .select("id,role,company,location,url,tags,description,job_keywords")
-        .order("date_posted", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(2000),
-    ]);
+    const jobs = await prisma.job_postings.findMany({
+      select: { id: true, role: true, company: true, location: true, url: true, tags: true, description: true },
+      orderBy: [{ date_posted: "desc" }, { created_at: "desc" }],
+      take: 2000
+    });
 
-    const prefs = preferences ?? {
+    const prefs = preferences ? {
+      interested_roles: preferences.roles,
+      preferred_locations: preferences.locations,
+      keywords: preferences.keywords,
+    } : {
       interested_roles: [],
       preferred_locations: [],
       keywords: [],
@@ -157,21 +154,8 @@ export async function POST(request: Request) {
 
     const now = new Date().toISOString();
 
-    await supabase
-      .from("job_matches")
-      .update({ match_score: 0, match_reasons: [], matched_at: now })
-      .eq("user_id", user.id);
+    // Skipping Job Match Persistence since job_matches model wasn't ported yet.
 
-    if (matches.length > 0) {
-      const payload = matches.map((match) => ({
-        user_id: user.id,
-        job_id: match.jobId,
-        match_score: match.score,
-        match_reasons: match.reasons,
-        matched_at: now,
-      }));
-      await supabase.from("job_matches").upsert(payload, { onConflict: "user_id,job_id" });
-    }
   } catch {
     // Ignore matching errors to avoid blocking resume saves
   }

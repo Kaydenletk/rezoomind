@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const interestsSchema = z.object({
   roles: z.array(z.string()).optional(),
@@ -16,27 +18,24 @@ const normalizeList = (items: string[] | undefined) =>
     .filter((value) => value.length > 0);
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
 
-  if (authError || !user) {
+  if (!session?.user) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("interests")
-    .select("roles,locations,keywords,grad_year,created_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const userId = (session.user as any).id;
 
-  if (error) {
+  try {
+    const data = await prisma.interest.findUnique({
+      where: { userId },
+      select: { roles: true, locations: true, keywords: true, grad_year: true, created_at: true },
+    });
+
+    return NextResponse.json({ ok: true, interests: data ?? null });
+  } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, interests: data ?? null });
 }
 
 export async function POST(request: Request) {
@@ -47,13 +46,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid interests payload" }, { status: 400 });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
 
-  if (authError || !user) {
+  if (!session?.user) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
@@ -62,24 +57,29 @@ export async function POST(request: Request) {
       ? parsed.data.gradYear
       : null;
 
-  const { data, error } = await supabase
-    .from("interests")
-    .upsert(
-      {
-        user_id: user.id,
+  const userId = (session.user as any).id;
+
+  try {
+    const data = await prisma.interest.upsert({
+      where: { userId },
+      update: {
         roles: normalizeList(parsed.data.roles),
         locations: normalizeList(parsed.data.locations),
         keywords: normalizeList(parsed.data.keywords),
         grad_year: gradYear,
       },
-      { onConflict: "user_id" }
-    )
-    .select("roles,locations,keywords,grad_year,created_at")
-    .single();
+      create: {
+        userId,
+        roles: normalizeList(parsed.data.roles),
+        locations: normalizeList(parsed.data.locations),
+        keywords: normalizeList(parsed.data.keywords),
+        grad_year: gradYear,
+      },
+      select: { roles: true, locations: true, keywords: true, grad_year: true, created_at: true },
+    });
 
-  if (error) {
+    return NextResponse.json({ ok: true, interests: data });
+  } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, interests: data });
 }

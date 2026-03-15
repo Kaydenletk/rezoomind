@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 const alertsSchema = z.object({
   enabled: z.boolean(),
@@ -9,27 +11,24 @@ const alertsSchema = z.object({
 });
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
 
-  if (authError || !user) {
+  if (!session?.user) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("alerts")
-    .select("enabled,frequency,created_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const userId = (session.user as any).id;
 
-  if (error) {
+  try {
+    const data = await prisma.alert.findUnique({
+      where: { userId },
+      select: { enabled: true, frequency: true, created_at: true },
+    });
+
+    return NextResponse.json({ ok: true, alerts: data ?? null });
+  } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, alerts: data ?? null });
 }
 
 export async function POST(request: Request) {
@@ -40,32 +39,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid alerts payload" }, { status: 400 });
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const session = await getServerSession(authOptions);
 
-  if (authError || !user) {
+  if (!session?.user) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("alerts")
-    .upsert(
-      {
-        user_id: user.id,
+  const userId = (session.user as any).id;
+
+  try {
+    const data = await prisma.alert.upsert({
+      where: { userId },
+      update: {
         enabled: parsed.data.enabled,
         frequency: parsed.data.frequency,
       },
-      { onConflict: "user_id" }
-    )
-    .select("enabled,frequency,created_at")
-    .single();
+      create: {
+        userId,
+        enabled: parsed.data.enabled,
+        frequency: parsed.data.frequency,
+      },
+      select: { enabled: true, frequency: true, created_at: true },
+    });
 
-  if (error) {
+    return NextResponse.json({ ok: true, alerts: data });
+  } catch (error: any) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   }
-
-  return NextResponse.json({ ok: true, alerts: data });
 }

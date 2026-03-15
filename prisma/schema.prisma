@@ -3,9 +3,136 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL_UNPOOLED")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth Required Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  interest      Interest?
+  alert         Alert?
+  resume        Resume?
+  candidateProfile CandidateProfile?
+  savedJobs     SavedJob[]
+}
+
+model Interest {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  roles      String[] @default([])
+  locations  String[] @default([])
+  keywords   String[] @default([])
+  grad_year  Int?
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Alert {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  enabled    Boolean  @default(true)
+  frequency  String   @default("weekly")
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  resume_text     String?  @db.Text
+  file_url        String?
+  resume_keywords String[] @default([])
+  embedding       Float[]  @default([])
+  parsed_at       DateTime? @db.Timestamptz
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// AI Auto-Apply Agent Profile
+model CandidateProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  
+  // Basic info
+  firstName       String?
+  lastName        String?
+  phone           String?
+  addressLine1    String?
+  city            String?
+  state           String?
+  zipCode         String?
+  country         String?  @default("United States")
+
+  // Links
+  linkedinUrl     String?
+  githubUrl       String?
+  portfolioUrl    String?
+
+  // Master Resume
+  masterResume    String?  @db.Text
+  masterResumeName String?
+
+  // Demographics & Auth
+  usWorkAuth      Boolean? @default(true)
+  requiresSponsorship Boolean? @default(false)
+  veteranStatus   String?  @default("I am not a veteran")
+  disabilityStatus String? @default("No, I do not have a disability")
+  gender          String?  @default("Prefer not to answer")
+  race            String?  @default("Prefer not to answer")
+  
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Email subscribers table (for free tier users without accounts)
@@ -57,6 +184,8 @@ model job_postings {
   location        String?
   url             String?
   description     String?
+  job_keywords    String[]  @default([])
+  embedding       Float[]   @default([])
   date_posted     DateTime? @db.Timestamptz
   source          String
   tags            String[]
@@ -67,4 +196,37 @@ model job_postings {
 
   // Relation to track sent alerts
   sent_alerts     sent_subscriber_job_alerts[]
+}
+
+// Company data enrichment cache
+model CompanyData {
+  id              String   @id @default(cuid())
+  companyName     String   @unique
+  industry        String?
+  employeeCount   String?
+  funding         String?
+  leadership      Json?    // Array of { name, title }
+  h1bSponsorship  Boolean?
+  website         String?
+  logoUrl         String?
+  lastEnriched    DateTime @default(now()) @db.Timestamptz
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @default(now()) @updatedAt @db.Timestamptz
+}
+
+model SavedJob {
+  id          String   @id @default(cuid())
+  userId      String
+  jobSourceId String
+  company     String
+  role        String
+  location    String?
+  url         String?
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobSourceId])
+  @@index([userId])
 }

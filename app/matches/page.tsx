@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
 import { Card } from "@/components/ui/Card";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type JobPosting = {
   id: string;
@@ -21,36 +20,40 @@ type JobMatchRow = {
 };
 
 export default async function MatchesPage() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const headersList = Object.fromEntries(new Headers(Object.entries(process.env as Record<string, string>)).entries());
+  // Server-side fetch requires absolute URL or passing headers for Auth
+  // A cleaner way for a Server Component is to just call a local function or `getServerSession`.
+  // However, to keep it simple, we'll fetch from the absolute URL if available, 
+  // or refactor to use getServerSession directly in the Server Component.
+
+  const { getServerSession } = await import("next-auth");
+  const { authOptions } = await import("@/lib/auth");
+
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
 
   if (!user) {
     redirect("/login?next=/matches");
   }
 
-  const [{ data: resume }, { data: preferences }, { data: matches }] = await Promise.all([
-    supabase
-      .from("resumes")
-      .select("resume_text,resume_keywords,file_url")
-      .eq("user_id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("user_job_preferences")
-      .select("interested_roles,preferred_locations,keywords")
-      .eq("user_id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("job_matches")
-      .select(
-        "match_score,match_reasons,job_postings(id,role,company,location,url,tags,date_posted,created_at)"
-      )
-      .eq("user_id", user.id)
-      .gt("match_score", 0)
-      .order("match_score", { ascending: false })
-      .limit(20),
-  ]);
+  // Assuming you create a local lib function to fetch this data later, 
+  // For now, we fetch from our new absolute route or we can just query Prisma directly here.
+  // Querying Prisma directly in a Server Component is standard Next.js 13+ practice:
+  const { prisma } = await import("@/lib/prisma");
+  const userId = (user as any).id;
+
+  // Temporary mock data as models don't exist yet
+  const resume = null;
+  const preferencesData = await prisma.interest.findUnique({
+    where: { userId },
+    select: { roles: true, locations: true, keywords: true }
+  });
+  const preferences = preferencesData ? {
+    interested_roles: preferencesData.roles,
+    preferred_locations: preferencesData.locations,
+    keywords: preferencesData.keywords
+  } : null;
+  const matches: any[] = [];
 
   const typedResume = resume as {
     resume_text: string | null;
@@ -107,54 +110,55 @@ export default async function MatchesPage() {
             const score = match.match_score ?? 0;
             const reasons = match.match_reasons ?? [];
             return (
-            <Card key={job.id} highlighted={score >= 70}>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900">{job.role}</h2>
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                  {score}
-                </span>
-              </div>
-              <p className="mt-2 text-sm text-slate-600">
-                {job.company ?? "Unknown company"}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                {job.location ?? "Location flexible"}
-              </p>
-              {reasons.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {reasons.slice(0, 3).map((reason) => (
-                    <span
-                      key={`${job.id}-${reason}`}
-                      className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
-                    >
-                      {reason}
-                    </span>
-                  ))}
+              <Card key={job.id} highlighted={score >= 70}>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-slate-900">{job.role}</h2>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                    {score}
+                  </span>
                 </div>
-              ) : job.tags?.length ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {job.tags.slice(0, 6).map((tag) => (
-                    <span
-                      key={`${job.id}-${tag}`}
-                      className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              {job.url ? (
-                <a
-                  href={job.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-brand hover:text-brand-hover"
-                >
-                  View posting
-                </a>
-              ) : null}
-            </Card>
-          )})}
+                <p className="mt-2 text-sm text-slate-600">
+                  {job.company ?? "Unknown company"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {job.location ?? "Location flexible"}
+                </p>
+                {reasons.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {reasons.slice(0, 3).map((reason) => (
+                      <span
+                        key={`${job.id}-${reason}`}
+                        className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+                      >
+                        {reason}
+                      </span>
+                    ))}
+                  </div>
+                ) : job.tags?.length ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {job.tags.slice(0, 6).map((tag) => (
+                      <span
+                        key={`${job.id}-${tag}`}
+                        className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {job.url ? (
+                  <a
+                    href={job.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex text-xs font-semibold uppercase tracking-[0.2em] text-brand hover:text-brand-hover"
+                  >
+                    View posting
+                  </a>
+                ) : null}
+              </Card>
+            )
+          })}
         </div>
       )}
     </div>

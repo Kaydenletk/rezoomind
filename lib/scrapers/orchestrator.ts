@@ -7,20 +7,21 @@ import { createHash } from 'crypto';
 import {
   JobScraper,
   ScrapedJob,
-  ScraperResult,
-  ScraperStats,
   OrchestratorResult,
 } from './types';
 import { shouldRunAtHour } from './config';
 import { GitHubJobsScraper } from './github-jobs';
+import { JSearchScraper } from './jsearch-scraper';
 
 export class ScraperOrchestrator {
   private scrapers: JobScraper[];
 
   constructor() {
     this.scrapers = [
-      // Only GitHub scraper - fetches from speedyapply/2026-SWE-College-Jobs
+      // GitHub scraper - fetches from speedyapply/2026-SWE-College-Jobs
       new GitHubJobsScraper(),
+      // JSearch API scraper - fetches from RapidAPI JSearch
+      new JSearchScraper(),
     ];
   }
 

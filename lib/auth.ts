@@ -1,73 +1,74 @@
-import jwt from "jsonwebtoken";
-import { z } from "zod";
+import { DefaultSession, NextAuthOptions } from "next-auth";
+import type { Adapter } from "next-auth/adapters";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
-const payloadSchema = z.object({
-  sub: z.string(),
-  email: z.string().email(),
-});
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma) as Adapter,
+  session: {
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: "/login",
+  },
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email", placeholder: "you@school.edu" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing credentials");
+        }
 
-const JWT_ISSUER = "rezoomind";
-const JWT_AUDIENCE = "rezoomind-users";
-const COOKIE_NAME = "rezoomind_token";
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
 
-export type SessionUser = {
-  id: string;
-  email: string;
+        // if user not found or doesn't have a password
+        if (!user || !user.password) {
+          throw new Error("Invalid username or password");
+        }
+
+        const isValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isValid) {
+          throw new Error("Invalid username or password");
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    session: ({ session, token }) => {
+      if (token && session.user) {
+        if (token.sub) {
+          session.user.id = token.sub;
+        }
+      }
+      return session;
+    },
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+  },
 };
 
-function getJwtSecret() {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET is not set");
-  }
-  return secret;
-}
-
-export function getSessionCookieName() {
-  return COOKIE_NAME;
-}
-
-export function createSessionToken(user: SessionUser) {
-  const secret = getJwtSecret();
-
-  return jwt.sign(
-    { email: user.email },
-    secret,
-    {
-      subject: user.id,
-      issuer: JWT_ISSUER,
-      audience: JWT_AUDIENCE,
-      expiresIn: "7d",
-    }
-  );
-}
-
-export function verifySessionToken(token: string) {
-  try {
-    const secret = getJwtSecret();
-    const decoded = jwt.verify(token, secret, {
-      issuer: JWT_ISSUER,
-      audience: JWT_AUDIENCE,
-    });
-
-    if (typeof decoded === "string") {
-      return null;
-    }
-
-    const parsed = payloadSchema.safeParse({
-      sub: decoded.sub,
-      email: decoded.email,
-    });
-
-    if (!parsed.success) {
-      return null;
-    }
-
-    return {
-      id: parsed.data.sub,
-      email: parsed.data.email,
-    } satisfies SessionUser;
-  } catch {
-    return null;
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession["user"];
   }
 }

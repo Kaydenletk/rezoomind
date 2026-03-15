@@ -5,7 +5,9 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { useAuth } from "@/hooks/useAuth";
+import { RezoomAITrialNotice } from "@/components/RezoomAITrialNotice";
+import { useAuth } from "@/components/AuthProvider";
+import { useRezoomAIAccess } from "@/hooks/useRezoomAIAccess";
 
 type AnalysisResult = {
   score: number;
@@ -17,6 +19,7 @@ type AnalysisResult = {
 
 export default function ResumeAnalysisPage() {
   const { isAuthenticated, signIn } = useAuth();
+  const aiAccess = useRezoomAIAccess();
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [fileMeta, setFileMeta] = useState<{ name: string; size: number } | null>(
@@ -31,9 +34,9 @@ export default function ResumeAnalysisPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isAuthenticated) {
+    if (!aiAccess.canUseAI) {
       setStatus("error");
-      setNote("Sign in to run the analysis.");
+      setNote("Log in to keep using RezoomAI after your 5 free tries.");
       return;
     }
 
@@ -67,6 +70,7 @@ export default function ResumeAnalysisPage() {
       }
 
       setStatus("success");
+      aiAccess.consumeCredit();
       setResult({
         score: data.score,
         strengths: data.strengths,
@@ -85,13 +89,13 @@ export default function ResumeAnalysisPage() {
     await navigator.clipboard.writeText(result.bulletSuggestions.join("\n"));
   };
 
-  const formDisabled = !isAuthenticated || status === "loading";
+  const formDisabled = status === "loading" || aiAccess.requiresLogin;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-10 px-6 py-20">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
-          AI Resume Analysis
+          RezoomAI Resume Analysis
         </p>
         <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
           Tailor your resume to this role in minutes.
@@ -104,17 +108,26 @@ export default function ResumeAnalysisPage() {
       {!isAuthenticated ? (
         <Card className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Sign in required</h2>
+            <h2 className="text-lg font-semibold text-slate-900">5 free RezoomAI tries</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Log in to unlock AI resume analysis and save your results.
+              Start with 5 free RezoomAI actions in this browser, then log in to keep unlimited access and save your results.
             </p>
           </div>
-          <Button onClick={signIn}>Sign in</Button>
+          <Button onClick={() => signIn()}>Log in</Button>
         </Card>
       ) : null}
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <RezoomAITrialNotice
+            isAuthenticated={aiAccess.isAuthenticated}
+            remainingGuestCredits={aiAccess.remainingGuestCredits}
+            requiresLogin={aiAccess.requiresLogin}
+            loginHref={aiAccess.loginHref}
+            encouragement={aiAccess.encouragement}
+            theme="light"
+          />
+
           <div>
             <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
               Resume file (PDF or DOCX)
@@ -170,9 +183,8 @@ export default function ResumeAnalysisPage() {
 
           {note ? (
             <p
-              className={`text-sm ${
-                status === "success" ? "text-emerald-600" : "text-rose-500"
-              }`}
+              className={`text-sm ${status === "success" ? "text-emerald-600" : "text-rose-500"
+                }`}
             >
               {note}
             </p>

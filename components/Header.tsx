@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/AuthProvider";
+import { SalePromoBar } from "@/components/SalePromoBar";
 
 const publicNavLinks = [
   { href: "/jobs", label: "Browse Jobs" },
@@ -19,6 +20,7 @@ const authenticatedNavLinks = [
   { href: "/jobs", label: "Jobs" },
   { href: "/preferences", label: "Preferences" },
   { href: "/resume", label: "Resume" },
+  { href: "/dashboard/profile", label: "Profile" },
 ];
 
 const MotionLink = motion(Link);
@@ -38,7 +40,7 @@ function NavItem({ href, label, onClick }: NavItemProps) {
       href={href}
       onClick={onClick}
       className={cn(
-        "relative px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.32em] text-slate-500 transition-colors hover:text-brand",
+        "relative px-2 py-1 text-[12px] font-semibold tracking-wide text-slate-500 transition-colors hover:text-brand",
         isActive && "text-slate-900"
       )}
       initial="rest"
@@ -65,12 +67,6 @@ export default function Header() {
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
   const signInActive = pathname === "/login" || pathname === "/signup";
-  const displayName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
-    user?.email?.split("@")[0] ||
-    "there";
-
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
@@ -89,6 +85,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur">
+      <SalePromoBar />
       <div className="mx-auto grid h-20 max-w-6xl grid-cols-[1fr_auto_1fr] items-center px-6">
         <div className="flex items-center">
           <MotionLink
@@ -126,25 +123,31 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  {`Welcome, ${displayName}`.toUpperCase()}
-                </span>
+                {/* Avatar circle + name — more readable than all-caps tracking */}
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-xs font-bold select-none">
+                    {(user.name ?? user.email ?? 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">
+                    Hi, {user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'there'}
+                  </span>
+                </div>
                 <motion.button
                   type="button"
                   onClick={handleSignOut}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-brand"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-500 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-brand transition-colors"
                   whileHover={{ y: -1 }}
                   whileTap={{ y: 1 }}
                   transition={{ type: "spring", stiffness: 260, damping: 18 }}
                 >
-                  Log Out
+                  Log out
                 </motion.button>
               </>
             ) : (
               <MotionLink
                 href="/login"
                 className={cn(
-                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-900 transition",
+                  "rounded-full px-5 py-2 text-xs font-semibold text-white transition",
                   signInActive
                     ? "bg-[rgb(var(--brand-rgb))]"
                     : "bg-[rgb(var(--brand-rgb))] hover:bg-[rgb(var(--brand-hover-rgb))]"
@@ -153,7 +156,7 @@ export default function Header() {
                 whileTap={{ y: 1 }}
                 transition={{ type: "spring", stiffness: 260, damping: 18 }}
               >
-                {loading ? "Loading" : "Sign In"}
+                {loading ? "Loading..." : "Sign In"}
               </MotionLink>
             )}
           </div>
@@ -185,9 +188,14 @@ export default function Header() {
           >
             <div className="flex flex-col gap-4 px-6 py-6">
               {user ? (
-                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  {`Welcome, ${displayName}`.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-xs font-bold">
+                    {(user.name ?? user.email ?? 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">
+                    Hi, {user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'there'}
+                  </span>
+                </div>
               ) : null}
               {(user ? authenticatedNavLinks : publicNavLinks).map((link) => (
                 <NavItem
