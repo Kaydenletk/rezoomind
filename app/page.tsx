@@ -19,9 +19,9 @@ const FALLBACK_STATS = {
     intlNewGrad: EMPTY_CATEGORY,
   },
   totalJobs: 0,
-  recentPostings: [],
-  topHiring: [],
-  marketTrend: [],
+  recentPostings: [] as Array<{ id: string; title: string; company: string; location: string | null; postedAt: string; category: string; url: string | null }>,
+  topHiring: [] as Array<{ company: string; count: number }>,
+  marketTrend: [] as Array<{ date: string; usaInternships: number; usaNewGrad: number; intlInternships: number; intlNewGrad: number }>,
   lastSynced: new Date().toISOString(),
 };
 
@@ -38,14 +38,14 @@ export default async function HomePage() {
   const syncLabel = syncHours < 1 ? "<1h" : `${syncHours}h`;
 
   return (
-    <div className="min-h-screen bg-stone-50 flex flex-col">
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col transition-colors">
       <DashboardHeader />
 
       {/* Status line */}
       <div className="flex items-center gap-2 px-7 pt-5 pb-2">
         <span className="text-orange-600 font-mono text-[13px] font-bold">▸</span>
-        <span className="font-mono text-[13px] font-semibold text-stone-950">internship_market</span>
-        <span className="text-stone-400">—</span>
+        <span className="font-mono text-[13px] font-semibold text-stone-950 dark:text-stone-50">internship_market</span>
+        <span className="text-stone-400 dark:text-stone-600">—</span>
         <span className="text-stone-400 text-xs">real-time data · synced {syncLabel} ago</span>
         <div className="ml-auto flex items-center gap-1.5">
           <div className="w-[7px] h-[7px] rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
@@ -65,7 +65,7 @@ export default async function HomePage() {
 
       {/* Market Chart */}
       <div className="pb-3.5">
-        <MarketChart data={stats.marketTrend} />
+        <MarketChart />
       </div>
 
       {/* Bottom Bento: Jobs + Top Hiring + Locked */}
