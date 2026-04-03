@@ -114,11 +114,10 @@ export default function InterestsPage() {
                     key={role}
                     type="button"
                     onClick={() => toggleRole(role)}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
-                      selected
+                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${selected
                         ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-slate-900"
                         : "border-slate-200 text-slate-600 hover:border-[rgba(var(--brand-rgb),0.4)]"
-                    }`}
+                      }`}
                     disabled={loading}
                   >
                     {role}
@@ -170,9 +169,8 @@ export default function InterestsPage() {
 
           {note ? (
             <p
-              className={`text-sm ${
-                status === "success" ? "text-emerald-600" : "text-rose-500"
-              }`}
+              className={`text-sm ${status === "success" ? "text-emerald-600" : "text-rose-500"
+                }`}
             >
               {note}
             </p>
