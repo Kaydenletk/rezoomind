@@ -104,6 +104,38 @@ export async function GET(request: Request) {
 
     console.log(`[scrape-jobs] Inserted ${insertedCount} jobs`);
 
+    // Record daily dashboard snapshot
+    try {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      const [usaIntern, usaNewGrad, intlIntern, intlNewGrad] = await Promise.all([
+        prisma.job_postings.count({ where: { tags: { hasEvery: ["internship", "usa"] } } }),
+        prisma.job_postings.count({ where: { tags: { hasEvery: ["new-grad", "usa"] } } }),
+        prisma.job_postings.count({ where: { tags: { hasEvery: ["internship", "international"] } } }),
+        prisma.job_postings.count({ where: { tags: { hasEvery: ["new-grad", "international"] } } }),
+      ]);
+
+      await prisma.dashboardSnapshot.upsert({
+        where: { date: today },
+        update: {
+          usa_internships: usaIntern,
+          usa_new_grad: usaNewGrad,
+          intl_internships: intlIntern,
+          intl_new_grad: intlNewGrad,
+        },
+        create: {
+          date: today,
+          usa_internships: usaIntern,
+          usa_new_grad: usaNewGrad,
+          intl_internships: intlIntern,
+          intl_new_grad: intlNewGrad,
+        },
+      });
+    } catch (snapErr) {
+      console.error("Dashboard snapshot failed:", snapErr);
+    }
+
     // Update stats
     result.stats.newJobs = insertedCount;
 
