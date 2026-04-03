@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/AuthProvider";
-import { SalePromoBar } from "@/components/SalePromoBar";
 
 const publicNavLinks = [
   { href: "/jobs", label: "Browse Jobs" },
@@ -85,7 +84,6 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur">
-      <SalePromoBar />
       <div className="mx-auto grid h-20 max-w-6xl grid-cols-[1fr_auto_1fr] items-center px-6">
         <div className="flex items-center">
           <MotionLink
