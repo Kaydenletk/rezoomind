@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function DashboardFooter() {
   return (
-    <footer className="flex items-center justify-between px-7 py-4 border-t border-stone-100">
+    <footer className="flex items-center justify-between px-7 py-4 border-t border-stone-100 dark:border-stone-800">
       <div className="flex items-center gap-2 font-mono">
         <span className="text-[11px] text-stone-300">$</span>
         <span className="text-[11px] text-stone-400">
