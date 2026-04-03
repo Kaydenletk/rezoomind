@@ -13,12 +13,12 @@
   --border-color: 226 232 240;
   --border-subtle: 241 245 249;
 
-  /* Brand colors - Teal/Cyan accent */
-  --brand-rgb: 20 184 166;
-  --brand-hover-rgb: 13 148 136;
-  --brand-tint: rgba(20, 184, 166, 0.12);
-  --brand-ring: rgba(20, 184, 166, 0.35);
-  --brand-glow: rgba(20, 184, 166, 0.25);
+  /* Brand colors - Orange accent */
+  --brand-rgb: 234 88 12;
+  --brand-hover-rgb: 194 65 12;
+  --brand-tint: rgba(234, 88, 12, 0.12);
+  --brand-ring: rgba(234, 88, 12, 0.35);
+  --brand-glow: rgba(234, 88, 12, 0.25);
 
   /* Neon accent - Purple for AI features */
   --neon-purple: 168 85 247;
@@ -44,16 +44,16 @@
   --border-subtle: 30 41 59;
 
   /* Enhanced neon for dark mode */
-  --brand-tint: rgba(20, 184, 166, 0.15);
-  --brand-ring: rgba(20, 184, 166, 0.45);
-  --brand-glow: rgba(20, 184, 166, 0.35);
+  --brand-tint: rgba(234, 88, 12, 0.15);
+  --brand-ring: rgba(234, 88, 12, 0.4);
+  --brand-glow: rgba(234, 88, 12, 0.3);
   --neon-purple-glow: rgba(168, 85, 247, 0.5);
   --neon-teal-glow: rgba(45, 212, 191, 0.5);
 }
 
 @theme inline {
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-geist-mono);
 }
 
 *,

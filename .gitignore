@@ -44,3 +44,6 @@ next-env.d.ts
 scripts/jobs.db
 scripts/jobs_export.csv
 scripts/.last_commit_hash
+.env*.local
+
+.superpowers/
