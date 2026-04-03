@@ -70,8 +70,9 @@ function parseHTMLTable(html: string, category: GitHubJob["category"]): GitHubJo
 
     if (!company || !roleText) continue;
 
+    const idx = jobs.length;
     jobs.push({
-      id: `${category}-${company}-${roleText}`.replace(/[^a-z0-9-]/gi, "-").toLowerCase().slice(0, 80),
+      id: `${category}-${idx}-${company}-${roleText}`.replace(/[^a-z0-9-]/gi, "-").toLowerCase().slice(0, 80),
       company,
       role: roleText,
       location: location || "USA",
