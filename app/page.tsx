@@ -9,8 +9,29 @@ import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 
 export const revalidate = 3600; // ISR: regenerate every hour
 
+const EMPTY_CATEGORY = { total: 0, faang: 0, quant: 0, other: 0 };
+
+const FALLBACK_STATS = {
+  categories: {
+    usaInternships: EMPTY_CATEGORY,
+    usaNewGrad: EMPTY_CATEGORY,
+    intlInternships: EMPTY_CATEGORY,
+    intlNewGrad: EMPTY_CATEGORY,
+  },
+  totalJobs: 0,
+  recentPostings: [],
+  topHiring: [],
+  marketTrend: [],
+  lastSynced: new Date().toISOString(),
+};
+
 export default async function HomePage() {
-  const stats = await getDashboardStats();
+  let stats = FALLBACK_STATS;
+  try {
+    stats = await getDashboardStats();
+  } catch (e) {
+    console.error("Dashboard data fetch failed:", e);
+  }
 
   const syncMs = Date.now() - new Date(stats.lastSynced).getTime();
   const syncHours = Math.floor(syncMs / 3600000);
