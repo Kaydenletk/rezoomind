@@ -26,11 +26,11 @@ const LINES = [
   { key: "intlNewGrad", color: "#ef4444", label: "Intl New Grad" },
 ] as const;
 
+type Period = "3M" | "6M" | "ALL";
+
 export function MarketBanner({ trend }: Props) {
   const [open, setOpen] = useState(true);
   const [dismissed, setDismissed] = useState(false);
-
-  type Period = "3M" | "6M" | "ALL";
   const [period, setPeriod] = useState<Period>("ALL");
 
   const filteredTrend = (() => {
@@ -130,9 +130,10 @@ export function MarketBanner({ trend }: Props) {
                   <XAxis
                     dataKey="date"
                     tick={{ fontSize: 9, fill: "#a8a29e" }}
-                    tickFormatter={(d: string) =>
-                      new Date(d).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
-                    }
+                    tickFormatter={(d: string) => {
+                      const dt = new Date(d + "T00:00:00Z");
+                      return dt.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }) + " '" + String(dt.getUTCFullYear()).slice(2);
+                    }}
                   />
                   <YAxis tick={{ fontSize: 9, fill: "#a8a29e" }} width={36} />
                   <Tooltip
