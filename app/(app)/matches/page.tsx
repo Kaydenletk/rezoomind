@@ -20,12 +20,6 @@ type JobMatchRow = {
 };
 
 export default async function MatchesPage() {
-  const headersList = Object.fromEntries(new Headers(Object.entries(process.env as Record<string, string>)).entries());
-  // Server-side fetch requires absolute URL or passing headers for Auth
-  // A cleaner way for a Server Component is to just call a local function or `getServerSession`.
-  // However, to keep it simple, we'll fetch from the absolute URL if available, 
-  // or refactor to use getServerSession directly in the Server Component.
-
   const { getServerSession } = await import("next-auth");
   const { authOptions } = await import("@/lib/auth");
 
