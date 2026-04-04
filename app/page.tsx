@@ -1,7 +1,9 @@
 import { getDashboardStats } from "@/lib/dashboard";
 import { fetchGitHubJobs } from "@/lib/fetch-github-jobs";
+import { computeMarketInsights } from "@/lib/insights";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MarketBanner } from "@/components/dashboard/MarketBanner";
+import { InsightCards } from "@/components/dashboard/InsightCards";
 import { CategoryBreakdown } from "@/components/dashboard/CategoryBreakdown";
 import { MarketChart } from "@/components/dashboard/MarketChart";
 import { JobsTable } from "@/components/dashboard/JobsTable";
@@ -23,6 +25,7 @@ export default async function HomePage() {
   const emptyCat = { total: 0, faang: 0, quant: 0, other: 0 };
 
   const trend = dbStats?.marketTrend ?? [];
+  const insights = computeMarketInsights(trend);
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col transition-colors">
@@ -30,6 +33,9 @@ export default async function HomePage() {
 
       {/* Collapsible market trend chart */}
       <MarketBanner trend={trend} />
+
+      {/* Market insight cards */}
+      <InsightCards insights={insights} />
 
       {/* Stats bar */}
       <div className="flex items-center gap-3 px-5 lg:px-7 py-3">
