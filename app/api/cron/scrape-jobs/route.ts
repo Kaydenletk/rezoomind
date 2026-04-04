@@ -116,6 +116,10 @@ export async function GET(request: Request) {
         prisma.job_postings.count({ where: { tags: { hasEvery: ["new-grad", "international"] } } }),
       ]);
 
+      // Skip snapshot if all counts are zero (scraper hasn't populated jobs yet)
+      if (usaIntern + usaNewGrad + intlIntern + intlNewGrad === 0) {
+        console.warn("Skipping dashboard snapshot: all counts are zero");
+      } else {
       await prisma.dashboardSnapshot.upsert({
         where: { date: today },
         update: {
@@ -132,6 +136,7 @@ export async function GET(request: Request) {
           intl_new_grad: intlNewGrad,
         },
       });
+      }
     } catch (snapErr) {
       console.error("Dashboard snapshot failed:", snapErr);
     }
