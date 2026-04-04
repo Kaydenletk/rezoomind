@@ -34,12 +34,14 @@ export function MarketBanner({ trend }: Props) {
   const [period, setPeriod] = useState<Period>("ALL");
 
   const filteredTrend = (() => {
-    if (period === "ALL") return trend;
+    // Trim noisy early data (pre-May 2024 had inflated counts from broader repo scope)
+    const baseline = trend.filter((t) => t.date >= "2024-05-01");
+    if (period === "ALL") return baseline;
     const now = new Date();
     const months = period === "3M" ? 3 : 6;
     const cutoff = new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
     const cutoffStr = cutoff.toISOString().split("T")[0];
-    return trend.filter((t) => t.date >= cutoffStr);
+    return baseline.filter((t) => t.date >= cutoffStr);
   })();
 
   useEffect(() => {
