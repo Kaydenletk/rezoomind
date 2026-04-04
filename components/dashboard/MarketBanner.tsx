@@ -9,11 +9,10 @@ import {
 
 interface TrendPoint {
   date: string;
-  swe: number;
-  pm: number;
-  dsml: number;
-  quant: number;
-  hardware: number;
+  usaInternships: number;
+  usaNewGrad: number;
+  intlInternships: number;
+  intlNewGrad: number;
 }
 
 interface Props {
@@ -21,16 +20,27 @@ interface Props {
 }
 
 const LINES = [
-  { key: "swe", color: "#3b82f6", label: "SWE" },
-  { key: "dsml", color: "#a855f7", label: "DS/ML" },
-  { key: "hardware", color: "#f97316", label: "Hardware" },
-  { key: "pm", color: "#22c55e", label: "PM" },
-  { key: "quant", color: "#ef4444", label: "Quant" },
+  { key: "usaInternships", color: "#3b82f6", label: "USA Internships" },
+  { key: "usaNewGrad", color: "#22c55e", label: "USA New Grad" },
+  { key: "intlInternships", color: "#a855f7", label: "Intl Internships" },
+  { key: "intlNewGrad", color: "#ef4444", label: "Intl New Grad" },
 ] as const;
 
 export function MarketBanner({ trend }: Props) {
   const [open, setOpen] = useState(true);
   const [dismissed, setDismissed] = useState(false);
+
+  type Period = "3M" | "6M" | "ALL";
+  const [period, setPeriod] = useState<Period>("ALL");
+
+  const filteredTrend = (() => {
+    if (period === "ALL") return trend;
+    const now = new Date();
+    const months = period === "3M" ? 3 : 6;
+    const cutoff = new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
+    const cutoffStr = cutoff.toISOString().split("T")[0];
+    return trend.filter((t) => t.date >= cutoffStr);
+  })();
 
   useEffect(() => {
     const stored = localStorage.getItem("market-banner");
@@ -75,9 +85,27 @@ export function MarketBanner({ trend }: Props) {
         >
           {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           <span className="text-orange-600 font-bold">▸</span>
-          market_trend
+          Software Engineering College Job Market
           {!open && <span className="text-stone-400 dark:text-stone-500 ml-1">· click to expand</span>}
         </button>
+
+        {/* Period toggles */}
+        <div className="flex items-center gap-1 ml-auto mr-3">
+          {(["3M", "6M", "ALL"] as Period[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors ${
+                period === p
+                  ? "bg-orange-600 text-white"
+                  : "text-stone-400 hover:text-stone-600 border border-stone-200 dark:border-stone-700"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
         <button
           onClick={dismiss}
           className="text-stone-300 dark:text-stone-600 hover:text-stone-500 dark:hover:text-stone-400 transition-colors"
@@ -96,14 +124,14 @@ export function MarketBanner({ trend }: Props) {
                 Collecting data — chart will build over time as daily snapshots accumulate.
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={180}>
-                <LineChart data={trend}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={filteredTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                   <XAxis
                     dataKey="date"
                     tick={{ fontSize: 9, fill: "#a8a29e" }}
                     tickFormatter={(d: string) =>
-                      new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                      new Date(d).toLocaleDateString("en-US", { month: "short", year: "2-digit" })
                     }
                   />
                   <YAxis tick={{ fontSize: 9, fill: "#a8a29e" }} width={36} />
@@ -122,7 +150,7 @@ export function MarketBanner({ trend }: Props) {
                       dataKey={line.key}
                       stroke={line.color}
                       strokeWidth={2}
-                      dot={{ r: 2, fill: "white", stroke: line.color, strokeWidth: 1.5 }}
+                      dot={false}
                     />
                   ))}
                   <Legend
@@ -135,7 +163,7 @@ export function MarketBanner({ trend }: Props) {
               </ResponsiveContainer>
             )}
             <div className="text-[9px] text-stone-400 dark:text-stone-500 font-mono text-right mt-1">
-              source: SimplifyJobs · {trend.length} data point{trend.length !== 1 ? "s" : ""}
+              source: SimplifyJobs · {filteredTrend.length} data point{filteredTrend.length !== 1 ? "s" : ""}
             </div>
           </div>
         </div>
