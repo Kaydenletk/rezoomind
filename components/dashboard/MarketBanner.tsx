@@ -91,7 +91,7 @@ export function MarketBanner({ trend }: Props) {
       {open && (
         <div className="px-5 lg:px-7 pb-4">
           <div className="border-[1.5px] border-stone-200 dark:border-stone-800 rounded-[10px] bg-white dark:bg-stone-900 p-4 overflow-hidden">
-            {trend.length < 2 ? (
+            {trend.length === 0 ? (
               <div className="flex items-center justify-center h-[140px] text-stone-400 dark:text-stone-500 text-xs font-mono">
                 Collecting data — chart will build over time as daily snapshots accumulate.
               </div>
