@@ -2,8 +2,33 @@
 
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  ResponsiveContainer, Legend, Tooltip,
+} from "recharts";
 
-export function MarketBanner() {
+interface TrendPoint {
+  date: string;
+  swe: number;
+  pm: number;
+  dsml: number;
+  quant: number;
+  hardware: number;
+}
+
+interface Props {
+  trend: TrendPoint[];
+}
+
+const LINES = [
+  { key: "swe", color: "#3b82f6", label: "SWE" },
+  { key: "dsml", color: "#a855f7", label: "DS/ML" },
+  { key: "hardware", color: "#f97316", label: "Hardware" },
+  { key: "pm", color: "#22c55e", label: "PM" },
+  { key: "quant", color: "#ef4444", label: "Quant" },
+] as const;
+
+export function MarketBanner({ trend }: Props) {
   const [open, setOpen] = useState(true);
   const [dismissed, setDismissed] = useState(false);
 
@@ -24,7 +49,6 @@ export function MarketBanner() {
     localStorage.setItem("market-banner", "dismissed");
   }
 
-  // Fully dismissed — just a tiny "show chart" link
   if (dismissed) {
     return (
       <button
@@ -36,7 +60,7 @@ export function MarketBanner() {
         className="flex items-center gap-1.5 px-5 lg:px-7 py-1.5 text-[10px] font-mono text-stone-400 hover:text-orange-600 transition-colors"
       >
         <ChevronDown className="w-3 h-3" />
-        show market chart
+        show market trend
       </button>
     );
   }
@@ -51,7 +75,7 @@ export function MarketBanner() {
         >
           {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           <span className="text-orange-600 font-bold">▸</span>
-          job_market
+          market_trend
           {!open && <span className="text-stone-400 dark:text-stone-500 ml-1">· click to expand</span>}
         </button>
         <button
@@ -66,24 +90,52 @@ export function MarketBanner() {
       {/* Chart — collapsible */}
       {open && (
         <div className="px-5 lg:px-7 pb-4">
-          <div className="border-[1.5px] border-stone-200 dark:border-stone-800 rounded-[10px] bg-white dark:bg-stone-900 p-3 overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://www.speedyapply.com/api/jobs/chart"
-              alt="Software Engineering College Job Market trends"
-              className="w-full rounded-lg"
-              loading="lazy"
-            />
-            <div className="flex items-center justify-between mt-2 px-1">
-              <span className="text-[9px] text-stone-400 dark:text-stone-500 font-mono">
-                source: speedyapply.com · USA & International · Intern + New Grad
-              </span>
-              <button
-                onClick={toggle}
-                className="text-[9px] font-mono text-stone-400 hover:text-orange-600 transition-colors"
-              >
-                collapse ↑
-              </button>
+          <div className="border-[1.5px] border-stone-200 dark:border-stone-800 rounded-[10px] bg-white dark:bg-stone-900 p-4 overflow-hidden">
+            {trend.length < 2 ? (
+              <div className="flex items-center justify-center h-[140px] text-stone-400 dark:text-stone-500 text-xs font-mono">
+                Collecting data — chart will build over time as daily snapshots accumulate.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={trend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 9, fill: "#a8a29e" }}
+                    tickFormatter={(d: string) =>
+                      new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                    }
+                  />
+                  <YAxis tick={{ fontSize: 9, fill: "#a8a29e" }} width={36} />
+                  <Tooltip
+                    contentStyle={{
+                      fontSize: 11,
+                      borderRadius: 8,
+                      border: "1.5px solid #e7e5e4",
+                      fontFamily: "monospace",
+                    }}
+                  />
+                  {LINES.map((line) => (
+                    <Line
+                      key={line.key}
+                      type="monotone"
+                      dataKey={line.key}
+                      stroke={line.color}
+                      strokeWidth={2}
+                      dot={{ r: 2, fill: "white", stroke: line.color, strokeWidth: 1.5 }}
+                    />
+                  ))}
+                  <Legend
+                    formatter={(value: string) => {
+                      const line = LINES.find((l) => l.key === value);
+                      return <span style={{ fontSize: 10, color: "#78716c" }}>{line?.label ?? value}</span>;
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+            <div className="text-[9px] text-stone-400 dark:text-stone-500 font-mono text-right mt-1">
+              source: SimplifyJobs · {trend.length} data point{trend.length !== 1 ? "s" : ""}
             </div>
           </div>
         </div>
