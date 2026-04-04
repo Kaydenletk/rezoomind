@@ -1,14 +1,15 @@
 # Rezoomind
 # Website: https://rezoomind.vercel.app/
-<img width="1502" height="606" alt="Screenshot 2026-01-22 at 9 16 59 AM" src="https://github.com/user-attachments/assets/f4eedc8b-e3c6-45d0-99f6-2f2d1f72339f" />
+<img width="1407" height="462" alt="Screenshot 2026-04-03 at 9 18 24 PM" src="https://github.com/user-attachments/assets/3bfcd6f7-677c-449d-a346-c2c62c673d2e" 
+ />
 
 ---
 # Browse Newest job/intership scrapper from Indoor/Linkedin/Glassdoor
-<img width="1494" height="702" alt="Screenshot 2026-01-22 at 9 18 19 AM" src="https://github.com/user-attachments/assets/bfe706e0-e0b0-4f05-b2f7-6c247c759270" />
+<img width="1392" height="566" alt="Screenshot 2026-04-03 at 9 20 01 PM" src="https://github.com/user-attachments/assets/68dcdbef-eb77-41f9-bade-b8476b6fe651" />
 
 ---
 # Analyze Resume powered - AI
-<img width="1462" height="698" alt="Screenshot 2026-01-22 at 9 19 33 AM" src="https://github.com/user-attachments/assets/eaafcd69-2a40-4984-a8ed-820d0d88ccd8" />
+
 
 ---
 
