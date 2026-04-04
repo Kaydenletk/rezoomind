@@ -35,10 +35,11 @@ export function JobsTable({ postings }: { postings: Posting[] }) {
       </div>
 
       {/* Column headers */}
-      <div className="grid grid-cols-[2fr_1.5fr_1fr_80px] gap-2 px-5 py-2 bg-stone-50 dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800">
+      <div className="grid grid-cols-[2fr_1.5fr_1fr_60px_80px] gap-2 px-5 py-2 bg-stone-50 dark:bg-stone-950 border-b border-stone-100 dark:border-stone-800">
         <span className="text-[9px] text-stone-400 uppercase tracking-widest font-mono">Company</span>
         <span className="text-[9px] text-stone-400 uppercase tracking-widest font-mono">Role</span>
         <span className="text-[9px] text-stone-400 uppercase tracking-widest font-mono hidden md:block">Location</span>
+        <span className="text-[9px] text-stone-400 uppercase tracking-widest font-mono hidden md:block">Age</span>
         <span className="text-[9px] text-stone-400 uppercase tracking-widest font-mono text-right">Apply</span>
       </div>
 
@@ -52,7 +53,7 @@ export function JobsTable({ postings }: { postings: Posting[] }) {
           postings.map((job, i) => (
             <div
               key={job.id}
-              className={`grid grid-cols-[2fr_1.5fr_1fr_80px] gap-2 px-5 py-2.5 items-center hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors ${
+              className={`grid grid-cols-[2fr_1.5fr_1fr_60px_80px] gap-2 px-5 py-2.5 items-center hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors ${
                 i < postings.length - 1 ? "border-b border-stone-50 dark:border-stone-800/50" : ""
               }`}
             >
@@ -67,6 +68,7 @@ export function JobsTable({ postings }: { postings: Posting[] }) {
               </div>
               <span className="text-xs text-stone-700 dark:text-stone-300 truncate">{job.role}</span>
               <span className="text-[11px] text-stone-500 dark:text-stone-400 truncate hidden md:block">{job.location}</span>
+              <span className="text-[10px] text-stone-400 dark:text-stone-500 font-mono hidden md:block">{job.datePosted || "—"}</span>
               <div className="text-right">
                 {job.url ? (
                   <a
