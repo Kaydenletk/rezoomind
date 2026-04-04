@@ -23,6 +23,11 @@ function loadEnv(filePath: string) {
 loadEnv(resolve(process.cwd(), ".env.local"));
 loadEnv(resolve(process.cwd(), ".env"));
 
+if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL is required. Is .env.local present?");
+  process.exit(1);
+}
+
 const REPO_URL = "https://github.com/speedyapply/2026-SWE-College-Jobs.git";
 const CLONE_DIR = "/tmp/speedyapply-jobs";
 const COUNT_REGEX = /\*\*(\d+)\*\* available/g;
@@ -58,7 +63,7 @@ async function main() {
 
   console.log(`Found ${commitsByDate.size} unique days of data`);
 
-  let inserted = 0;
+  let upserted = 0;
   let skipped = 0;
   let failed = 0;
 
@@ -74,15 +79,16 @@ async function main() {
         encoding: "utf8",
       });
     } catch {
+      console.warn(`  Skipping ${hash} (${date}): README not found`);
       failed++;
       continue;
     }
 
     // 5. Extract counts
     const matches = [...readme.matchAll(COUNT_REGEX)];
-    if (matches.length < 4) {
+    if (matches.length !== 4) {
       skipped++;
-      continue; // README format didn't have counts yet
+      continue; // README format didn't have counts yet, or unexpected extra matches
     }
 
     const [usaIntern, usaNewGrad, intlIntern, intlNewGrad] = matches.map(
@@ -102,7 +108,7 @@ async function main() {
         },
         update: {}, // don't overwrite if cron already recorded this date
       });
-      inserted++;
+      upserted++;
     } catch (err) {
       console.error(`  Error on ${date}:`, err);
       failed++;
@@ -113,7 +119,7 @@ async function main() {
     }
   }
 
-  console.log(`\nDone! Inserted: ${inserted}, Skipped: ${skipped}, Failed: ${failed}`);
+  console.log(`\nDone! Upserted: ${upserted}, Skipped: ${skipped}, Failed: ${failed}`);
 }
 
 main()
