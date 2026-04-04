@@ -25,7 +25,22 @@ Add a **computed insights engine** (math + templates, no AI) that analyzes `Dash
 
 ### File: `lib/insights.ts`
 
-A pure function `computeMarketInsights(snapshots: DashboardSnapshot[])` that returns structured insights. Server-side only — called from page components.
+A pure function that takes the `marketTrend` array from `getDashboardStats()` and returns structured insights. Server-side only.
+
+```typescript
+// Input type matches getDashboardStats().marketTrend shape
+type MarketTrendPoint = {
+  date: string;           // YYYY-MM-DD
+  usaInternships: number;
+  usaNewGrad: number;
+  intlInternships: number;
+  intlNewGrad: number;
+};
+
+function computeMarketInsights(trend: MarketTrendPoint[]): MarketInsights
+```
+
+**Empty data contract:** If `trend` is empty or has fewer than 2 data points, return a default `MarketInsights` with season based on current month, all trends at 0%, null YoY, and a generic recommendation. The homepage should render the cards normally (never hide them) — the season status and recommendation are always valid regardless of data.
 
 ### Season Detection
 
@@ -66,7 +81,7 @@ interface MarketInsights {
 
   // Derived
   hottestCategory: string;       // Category with highest MoM growth
-  currentVsPeakAvg: number;      // % of historical peak season average
+  monthsUntilPeak: number;       // 0 during peak season, otherwise months until next September
 
   // Recommendation (template-filled string)
   recommendation: string;
@@ -85,7 +100,7 @@ Templates selected by `season` + overall trend direction (majority of categories
 | ramping-up | any | "The market is heating up. {hottestCategory} postings increased {x}% this month. Get your applications ready — early applicants get first looks." |
 | peak | up | "Peak recruiting season is underway. {hottestCategory} are up {x}% this month. Apply within 48 hours of new postings for best chances." |
 | peak | down | "We're in peak season but postings are tapering. Most positions fill by January — don't delay applications." |
-| winding-down | any | "Peak season is winding down. Late-cycle positions often have less competition. {hottestCategory} still has {n} active postings." |
+| winding-down | any | "Peak season is winding down. Late-cycle positions often have less competition. {hottestCategory} still has {current} active postings." |
 
 Short recommendations follow the same logic but as one-liners (under 80 chars).
 
@@ -162,6 +177,8 @@ Server Component with `revalidate = 3600` (same as homepage). Calls `getDashboar
 
 Uses the same shell as homepage: `DashboardHeader` + `DashboardFooter`. Content is a single column, max-width container.
 
+**Nav link fix:** Update `DashboardHeader` so `~/insights` links to `/insights` (real route) instead of `#insights` (anchor). This is now a real page.
+
 ### Sections
 
 #### 1. Market Status Hero
@@ -195,10 +212,15 @@ Full-width card at top:
 - Static table (no sorting needed — only 4 rows)
 - Color-coded arrows
 - YoY column shows "—" if no data from last year
+- If ALL 4 categories have null YoY, hide the YoY column entirely and show "Year-over-year data not yet available" note
 
 #### 3. Market Chart
 
-Reuse `MarketBanner` component but in a non-collapsible mode. Pass a prop like `collapsible={false}` to render without the toggle bar and dismiss button — just the chart with period toggles.
+Reuse `MarketBanner` component with a `collapsible` prop (default `true`). When `collapsible={false}`:
+- Skip the toggle bar (no expand/collapse button, no dismiss button)
+- Skip all `localStorage` side effects (no reading/writing `"market-banner"` key — avoids conflict with homepage state)
+- Render the chart directly (always expanded)
+- Keep the period toggles (render them above the chart instead)
 
 #### 4. Seasonal Calendar
 
@@ -283,7 +305,10 @@ No new database models. No new API routes. Everything computed from existing `Da
 | File | Change |
 |------|--------|
 | `app/page.tsx` | Add `InsightCards` between MarketBanner and stats bar |
-| `components/dashboard/MarketBanner.tsx` | Add `collapsible` prop (default true) so insights page can render chart without toggle |
+| `components/dashboard/MarketBanner.tsx` | Add `collapsible` prop (default true) so insights page can render chart without toggle/localStorage |
+| `components/dashboard/DashboardHeader.tsx` | Change `~/insights` link from `#insights` anchor to `/insights` route |
+
+**Folder note:** New insight page components go in `components/insights/` (separate from `components/dashboard/`) since they are specific to the insights page, not reused on the homepage.
 
 ## Dependencies
 
