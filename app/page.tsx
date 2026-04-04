@@ -22,15 +22,7 @@ export default async function HomePage() {
   const { counts } = githubData;
   const emptyCat = { total: 0, faang: 0, quant: 0, other: 0 };
 
-  // Build trend data from snapshots (will grow daily)
-  const trend = (dbStats?.marketTrend ?? []).map((s) => ({
-    date: s.date,
-    swe: s.usaInternships, // repurpose existing columns for now
-    pm: 0,
-    dsml: s.usaNewGrad,
-    quant: s.intlInternships,
-    hardware: s.intlNewGrad,
-  }));
+  const trend = dbStats?.marketTrend ?? [];
 
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col transition-colors">
