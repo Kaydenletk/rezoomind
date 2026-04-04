@@ -41,6 +41,7 @@ function parseHTMLRows(html: string, category: string, startIdx: number): GitHub
   for (const row of rows) {
     if (!row.includes("<td>")) continue;
     if (row.includes("🔒")) continue;
+    if (row.includes("↳")) continue;
 
     const cells = row.split("<td>").slice(1).map((c) => c.split("</td>")[0]?.trim() ?? "");
     if (cells.length < 4) continue;
@@ -91,21 +92,20 @@ function parseCategoryCounts(md: string): CategoryCounts {
   const totalMatch = md.match(/Browse\s+(\d[\d,]+)\s+Internship/);
   if (totalMatch) counts.total = parseInt(totalMatch[1].replace(/,/g, ""), 10);
 
-  // "Software Engineering...** (447)"
-  const sweMatch = md.match(/Software Engineering[^(]*\((\d+)\)/);
-  if (sweMatch) counts.swe = parseInt(sweMatch[1], 10);
+  // Format: `💻 **[Software Engineering](...)**  (447)`
+  // The URL contains ( ) so we match `** (number)` at end of line
+  const lines = md.split("\n");
+  for (const line of lines) {
+    const countMatch = line.match(/\*\*\s+\((\d+)\)\s*$/);
+    if (!countMatch) continue;
+    const n = parseInt(countMatch[1], 10);
 
-  const pmMatch = md.match(/Product Management[^(]*\((\d+)\)/);
-  if (pmMatch) counts.pm = parseInt(pmMatch[1], 10);
-
-  const dsmlMatch = md.match(/Data Science[^(]*\((\d+)\)/);
-  if (dsmlMatch) counts.dsml = parseInt(dsmlMatch[1], 10);
-
-  const quantMatch = md.match(/Quantitative Finance[^(]*\((\d+)\)/);
-  if (quantMatch) counts.quant = parseInt(quantMatch[1], 10);
-
-  const hwMatch = md.match(/Hardware Engineering[^(]*\((\d+)\)/);
-  if (hwMatch) counts.hardware = parseInt(hwMatch[1], 10);
+    if (line.includes("Software Engineering")) counts.swe = n;
+    else if (line.includes("Product Management")) counts.pm = n;
+    else if (line.includes("Data Science")) counts.dsml = n;
+    else if (line.includes("Quantitative Finance")) counts.quant = n;
+    else if (line.includes("Hardware Engineering")) counts.hardware = n;
+  }
 
   if (!counts.total) {
     counts.total = counts.swe + counts.pm + counts.dsml + counts.quant + counts.hardware;
