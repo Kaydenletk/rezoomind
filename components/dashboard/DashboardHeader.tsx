@@ -17,7 +17,7 @@ export function DashboardHeader() {
         <span className="text-stone-300 dark:text-stone-700">|</span>
         <nav className="hidden sm:flex gap-4">
           <a href="#jobs" className="font-mono text-xs text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">~/jobs</a>
-          <a href="#insights" className="font-mono text-xs text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">~/insights</a>
+          <Link href="/insights" className="font-mono text-xs text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">~/insights</Link>
         </nav>
       </div>
       <div className="flex items-center gap-3">
