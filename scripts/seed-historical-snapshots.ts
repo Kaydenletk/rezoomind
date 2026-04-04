@@ -4,9 +4,9 @@ import { PrismaClient } from "@prisma/client";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
 
-// Load env vars (same approach as prisma-with-env.js)
-// Uses process.cwd() instead of __dirname because tsx runs as ESM where __dirname is undefined
-function loadEnv(filePath: string) {
+// Load env vars manually. Prisma auto-loads .env at import time, so .env.local
+// must override (not skip) to match Next.js precedence: .env.local > .env
+function loadEnv(filePath: string, override = false) {
   if (!existsSync(filePath)) return;
   const contents = readFileSync(filePath, "utf8");
   for (const line of contents.split(/\r?\n/)) {
@@ -15,12 +15,17 @@ function loadEnv(filePath: string) {
     const eq = trimmed.indexOf("=");
     if (eq === -1) continue;
     const key = trimmed.slice(0, eq).trim();
-    const value = trimmed.slice(eq + 1).trim();
-    if (!process.env[key]) process.env[key] = value;
+    let value = trimmed.slice(eq + 1).trim();
+    // Strip surrounding quotes
+    if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (override || !process.env[key]) process.env[key] = value;
   }
 }
 
-loadEnv(resolve(process.cwd(), ".env.local"));
+loadEnv(resolve(process.cwd(), ".env.local"), true);  // override Prisma's auto-loaded .env
 loadEnv(resolve(process.cwd(), ".env"));
 
 if (!process.env.DATABASE_URL) {
