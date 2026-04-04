@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
-  ResponsiveContainer, Legend, Tooltip,
+  ResponsiveContainer, Legend, Tooltip, ReferenceArea,
 } from "recharts";
 
 interface TrendPoint {
@@ -27,6 +27,26 @@ const LINES = [
 ] as const;
 
 type Period = "3M" | "6M" | "ALL";
+
+// Peak recruiting season: Sep 1 → Jan 31 each cycle
+function getPeakSeasons(data: TrendPoint[]): Array<{ x1: string; x2: string; label: string }> {
+  if (data.length === 0) return [];
+  const startDate = data[0].date;
+  const endDate = data[data.length - 1].date;
+  const seasons: Array<{ x1: string; x2: string; label: string }> = [];
+  // Check years that could have a peak season within our data range
+  for (let year = 2024; year <= 2030; year++) {
+    const sepStart = `${year}-09-01`;
+    const janEnd = `${year + 1}-01-31`;
+    // Clamp to data range
+    const x1 = sepStart < startDate ? startDate : sepStart;
+    const x2 = janEnd > endDate ? endDate : janEnd;
+    if (x1 < x2 && x1 <= endDate && x2 >= startDate) {
+      seasons.push({ x1, x2, label: `Peak Season` });
+    }
+  }
+  return seasons;
+}
 
 export function MarketBanner({ trend }: Props) {
   const [open, setOpen] = useState(true);
@@ -129,6 +149,16 @@ export function MarketBanner({ trend }: Props) {
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={filteredTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                  {getPeakSeasons(filteredTrend).map((s, i) => (
+                    <ReferenceArea
+                      key={i}
+                      x1={s.x1}
+                      x2={s.x2}
+                      fill="#ea580c"
+                      fillOpacity={0.06}
+                      label={{ value: s.label, position: "insideTopRight", fontSize: 9, fill: "#a8a29e", fontFamily: "monospace" }}
+                    />
+                  ))}
                   <XAxis
                     dataKey="date"
                     tick={{ fontSize: 9, fill: "#a8a29e" }}
