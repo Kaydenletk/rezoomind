@@ -1,36 +1,83 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { extractKeywords } from "@/lib/matching/keywords";
+import { generateEmbedding } from "@/lib/ai/embeddings";
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+  const userId = (session.user as any).id;
+  const data = await prisma.resume.findUnique({
+    where: { userId },
+    select: { resume_text: true, file_url: true, resume_keywords: true, created_at: true },
+  });
+  return NextResponse.json({ ok: true, resume: data ?? null });
+}
 
 export async function POST(request: Request) {
-     const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
 
-     if (!session?.user) {
-          return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-     }
+  const userId = (session.user as any).id;
 
-     try {
-          const formData = await request.formData();
-          const resumeText = formData.get("resumeText") as string | null;
-          const file = formData.get("file") as File | null;
+  try {
+    const formData = await request.formData();
+    const resumeText = (formData.get("resumeText") as string | null)?.trim() || null;
+    const file = formData.get("file") as File | null;
 
-          // TODO: Implement S3/R2/Local file upload logic here instead of Supabase Storage
-          // For now, just simulating success.
+    // For now, file upload just extracts the name — actual S3/R2 upload is a future task
+    let fileUrl: string | null = null;
+    if (file) {
+      fileUrl = `/uploads/${file.name}`;
+    }
 
-          let fileUrl = null;
-          if (file) {
-               fileUrl = `/uploads/${file.name}`; // Mock URL
-          }
+    if (!resumeText) {
+      return NextResponse.json(
+        { ok: false, error: "Provide resume text." },
+        { status: 400 }
+      );
+    }
 
-          // TODO: Save to Prisma when Resume model is created
-          const resume = {
-               resume_text: resumeText,
-               file_url: fileUrl,
-               created_at: new Date().toISOString()
-          };
+    // Extract keywords
+    const resumeKeywords = extractKeywords(resumeText, 120);
 
-          return NextResponse.json({ ok: true, resume });
-     } catch (error: any) {
-          return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
-     }
+    // Upsert resume to database
+    const data = await prisma.resume.upsert({
+      where: { userId },
+      update: {
+        resume_text: resumeText,
+        file_url: fileUrl,
+        resume_keywords: resumeKeywords,
+        parsed_at: new Date(),
+      },
+      create: {
+        userId,
+        resume_text: resumeText,
+        file_url: fileUrl,
+        resume_keywords: resumeKeywords,
+        parsed_at: new Date(),
+      },
+    });
+
+    // Generate embedding (non-blocking: if it fails, /api/matches/score generates lazily)
+    try {
+      const embedding = await generateEmbedding(resumeText);
+      await prisma.resume.update({
+        where: { userId },
+        data: { embedding },
+      });
+    } catch (e) {
+      console.error("[resume/data] Embedding generation failed, will retry on match:", e);
+    }
+
+    return NextResponse.json({ ok: true, resume: data });
+  } catch (error: any) {
+    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  }
 }
