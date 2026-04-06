@@ -33,7 +33,9 @@ export function AuthHeader() {
       </div>
       <div className="flex items-center gap-3">
         <ThemeToggle />
-        {isAuth ? (
+        {status === "loading" ? (
+          <div className="w-20 h-6 bg-stone-200 dark:bg-stone-800 rounded animate-pulse" />
+        ) : isAuth ? (
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs text-stone-500 dark:text-stone-400 hidden sm:inline">
               {session?.user?.email?.split("@")[0]}

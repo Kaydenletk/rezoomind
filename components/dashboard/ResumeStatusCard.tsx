@@ -26,7 +26,7 @@ export function ResumeStatusCard({ keywords, parsedAt, onReUpload, matchLoading 
           onClick={onReUpload}
           className="flex items-center gap-1 text-[10px] text-stone-400 hover:text-orange-500 font-mono transition-colors"
         >
-          <RefreshCw className="w-3 h-3" />
+          <RefreshCw className="w-3 h-3" aria-hidden="true" />
           re-upload
         </button>
       </div>
