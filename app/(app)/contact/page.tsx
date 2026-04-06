@@ -55,7 +55,7 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-3xl font-semibold text-slate-900 sm:text-4xl"
+        className="text-3xl font-semibold text-stone-100 font-mono sm:text-4xl"
       >
         Contact us
       </motion.h1>
@@ -63,7 +63,7 @@ export default function ContactPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-3 text-base text-slate-600"
+        className="mt-3 text-base text-stone-400"
       >
         Let us know how we can help with verified internship alerts.
       </motion.p>
@@ -73,7 +73,7 @@ export default function ContactPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         onSubmit={handleSubmit}
-        className="mt-10 space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
+        className="mt-10 space-y-5 border border-stone-800 bg-[#0c0c0c] p-6"
       >
         <Input
           placeholder="Name"
@@ -93,7 +93,7 @@ export default function ContactPage() {
         <textarea
           placeholder="Message"
           rows={5}
-          className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]"
+          className="w-full bg-transparent border-0 border-b border-stone-800 rounded-none px-0 py-2 text-sm text-stone-200 placeholder:text-stone-600 transition focus:border-orange-600 focus:outline-none focus:ring-0 font-mono resize-none"
           value={form.message}
           onChange={(event) =>
             setForm((prev) => ({ ...prev, message: event.target.value }))
@@ -103,7 +103,7 @@ export default function ContactPage() {
         {note ? (
           <p
             className={`text-sm ${
-              status === "success" ? "text-emerald-600" : "text-rose-500"
+              status === "success" ? "text-green-500" : "text-red-400"
             }`}
           >
             {note}

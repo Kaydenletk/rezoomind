@@ -297,9 +297,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="flex items-center gap-3 text-slate-400 text-sm">
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse" />
+      <div className="min-h-screen flex items-center justify-center bg-stone-950">
+        <div className="flex items-center gap-3 text-stone-400 text-sm font-mono">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-orange-600 animate-pulse" />
           Loading your dashboard...
         </div>
       </div>
@@ -307,11 +307,11 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex">
+    <div className="min-h-screen bg-stone-950 text-stone-100 flex">
       {/* Left Column - Navigation Sidebar */}
-      <aside className="w-[72px] bg-slate-950 border-r border-slate-800 flex flex-col items-center py-6 shrink-0">
+      <aside className="w-[72px] bg-stone-950 border-r border-stone-800 flex flex-col items-center py-6 shrink-0">
         {/* Logo */}
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white font-bold text-lg mb-8 neon-glow-teal">
+        <div className="w-10 h-10 border border-orange-600/50 bg-orange-600/10 flex items-center justify-center text-orange-500 font-bold text-lg mb-8 font-mono">
           R
         </div>
 
@@ -329,13 +329,13 @@ export default function DashboardPage() {
         </nav>
 
         {/* Bottom Utilities */}
-        <div className="flex flex-col items-center gap-2 pt-4 border-t border-slate-800 mt-auto">
+        <div className="flex flex-col items-center gap-2 pt-4 border-t border-stone-800 mt-auto">
           <NavIcon icon={<Icons.Extension />} label="Autofill" small />
           <NavIcon icon={<Icons.Messages />} label="Messages" small />
           <NavIcon icon={<Icons.Feedback />} label="Feedback" small />
           <button
             onClick={handleSignOut}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-rose-400 hover:bg-slate-800/50 transition-all"
+            className="w-10 h-10 flex items-center justify-center text-stone-500 hover:text-rose-400 hover:bg-stone-800/50 transition-all"
             title="Logout"
           >
             <Icons.Logout />
@@ -344,18 +344,18 @@ export default function DashboardPage() {
       </aside>
 
       {/* Middle Column - Job Feed & Search */}
-      <main className="flex-1 flex flex-col min-w-0 max-w-2xl border-r border-slate-800">
+      <main className="flex-1 flex flex-col min-w-0 max-w-2xl border-r border-stone-800">
         {/* Search Header */}
-        <header className="p-4 border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur-sm z-10">
+        <header className="p-4 border-b border-stone-800 sticky top-0 bg-stone-950/95 backdrop-blur-sm z-10">
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500">
               <Icons.Search />
             </span>
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search jobs by title, company, or location..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20 transition-all"
+              className="w-full bg-stone-900 border-b border-stone-800 rounded-none pl-10 pr-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-orange-600 focus:ring-0 transition-all font-mono"
             />
           </div>
 
@@ -365,9 +365,9 @@ export default function DashboardPage() {
               <button
                 key={filter.id}
                 onClick={() => toggleFilter(filter.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${activeFilters.includes(filter.id)
-                    ? "bg-teal-500/20 text-teal-400 border border-teal-500/40"
-                    : "bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-600"
+                className={`px-3 py-1.5 text-xs font-medium font-mono transition-all ${activeFilters.includes(filter.id)
+                    ? "bg-orange-600/10 text-orange-500 border border-orange-600/40"
+                    : "bg-stone-900 text-stone-400 border border-stone-800 hover:border-stone-600"
                   }`}
               >
                 {filter.label}
@@ -380,16 +380,16 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {visibleMatches.length === 0 ? (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-stone-900 border border-stone-800 flex items-center justify-center">
                 <Icons.Jobs />
               </div>
-              <p className="text-lg font-semibold text-slate-300">No matches found</p>
-              <p className="text-sm text-slate-500 mt-2">
+              <p className="text-lg font-semibold text-stone-300 font-mono">No matches found</p>
+              <p className="text-sm text-stone-500 mt-2">
                 Try adjusting your filters or upload your resume for better matches.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-800">
+            <div className="divide-y divide-stone-800">
               {visibleMatches.map((match) => {
                 const job = match.job_postings;
                 if (!job) return null;
@@ -413,11 +413,11 @@ export default function DashboardPage() {
       </main>
 
       {/* Right Column - Job Details & AI Copilot */}
-      <aside className="w-[480px] flex flex-col shrink-0 bg-slate-900">
+      <aside className="w-[480px] flex flex-col shrink-0 bg-stone-950">
         {selectedJob?.job_postings ? (
           <>
             {/* Job Details - Top Half */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-slate-800">
+            <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-stone-800">
               <JobDetails
                 job={selectedJob.job_postings}
                 expandedSections={expandedSections}
@@ -426,7 +426,7 @@ export default function DashboardPage() {
             </div>
 
             {/* AI Copilot - Bottom Half */}
-            <div className="h-[360px] flex flex-col bg-slate-950 border-t border-slate-800">
+            <div className="h-[360px] flex flex-col bg-stone-950 border-t border-stone-800">
               <AICopilot
                 messages={copilotMessages}
                 input={copilotInput}
@@ -440,10 +440,10 @@ export default function DashboardPage() {
         ) : (
           <div className="flex-1 flex items-center justify-center p-8 text-center">
             <div>
-              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-600">
+              <div className="w-20 h-20 mx-auto mb-4 bg-stone-900 border border-stone-800 flex items-center justify-center text-stone-600">
                 <Icons.Jobs />
               </div>
-              <p className="text-slate-400">Select a job to view details</p>
+              <p className="text-stone-400 font-mono">Select a job to view details</p>
             </div>
           </div>
         )}
@@ -467,27 +467,27 @@ function NavIcon({
   active?: boolean;
   href?: string;
   badge?: string;
-  badgeColor?: "purple" | "teal";
+  badgeColor?: "purple" | "orange";
   small?: boolean;
 }) {
   const size = small ? "w-9 h-9" : "w-10 h-10";
-  const className = `${size} rounded-xl flex items-center justify-center transition-all relative group ${active
-      ? "bg-teal-500/20 text-teal-400"
-      : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/50"
+  const className = `${size} flex items-center justify-center transition-all relative group ${active
+      ? "bg-orange-600/10 text-orange-500"
+      : "text-stone-500 hover:text-stone-300 hover:bg-stone-800/50"
     }`;
 
   const content = (
     <>
       {icon}
       {badge && (
-        <span className={`absolute -top-1 -right-1 px-1.5 py-0.5 text-[9px] font-bold rounded-md ${badgeColor === "purple"
+        <span className={`absolute -top-1 -right-1 px-1.5 py-0.5 text-[9px] font-bold font-mono ${badgeColor === "purple"
             ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-            : "bg-teal-500/20 text-teal-400 border border-teal-500/30"
+            : "bg-orange-600/10 text-orange-500 border border-orange-600/30"
           }`}>
           {badge}
         </span>
       )}
-      <span className="absolute left-full ml-3 px-2 py-1 bg-slate-800 text-slate-200 text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity z-50">
+      <span className="absolute left-full ml-3 px-2 py-1 bg-stone-800 text-stone-200 text-xs font-mono opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity z-50">
         {label}
       </span>
     </>
@@ -515,7 +515,7 @@ function MatchScoreRing({ score, size = 52 }: { score: number; size?: number }) 
   const circumference = 2 * Math.PI * radius;
   const progress = Math.min(score, 100) / 100;
   const offset = circumference * (1 - progress);
-  const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#64748b';
+  const color = score >= 80 ? '#ea580c' : score >= 60 ? '#f59e0b' : '#78716c';
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
@@ -525,7 +525,7 @@ function MatchScoreRing({ score, size = 52 }: { score: number; size?: number }) 
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#1e293b"
+          stroke="#292524"
           strokeWidth={strokeWidth}
         />
         <motion.circle
@@ -575,14 +575,14 @@ function JobCard({
     <motion.div
       onClick={onClick}
       className={`p-4 cursor-pointer transition-all ${isSelected
-          ? "bg-slate-800/50 border-l-2 border-teal-500"
-          : "hover:bg-slate-800/30 border-l-2 border-transparent"
+          ? "bg-stone-800/50 border-l-2 border-orange-600"
+          : "hover:bg-stone-800/30 border-l-2 border-transparent"
         }`}
       whileHover={{ x: 2 }}
     >
       <div className="flex gap-4">
         {/* Company Logo */}
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-slate-300 font-bold text-lg shrink-0">
+        <div className="w-12 h-12 border border-stone-800 bg-stone-900 flex items-center justify-center text-stone-300 font-bold text-lg shrink-0 font-mono">
           {job.company.charAt(0)}
         </div>
 
@@ -590,9 +590,9 @@ function JobCard({
           {/* Header with Circular Score */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <h3 className="font-semibold text-slate-100 truncate">{job.role}</h3>
-              <p className="text-sm text-slate-400">{job.company}</p>
-              <span className="text-xs text-slate-500">
+              <h3 className="font-semibold text-stone-100 truncate font-mono">{job.role}</h3>
+              <p className="text-sm text-stone-400">{job.company}</p>
+              <span className="text-xs text-stone-500 font-mono">
                 {getRelativeTime(job.date_posted ?? job.created_at)}
               </span>
             </div>
@@ -602,7 +602,7 @@ function JobCard({
           {/* Location & Tags */}
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {job.location && (
-              <span className="text-xs text-slate-500">{job.location}</span>
+              <span className="text-xs text-stone-500">{job.location}</span>
             )}
             {isInternship && (
               <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-medium">
@@ -619,18 +619,18 @@ function JobCard({
           {/* Match Bars */}
           <div className="mt-3 space-y-1.5">
             <MatchProgressBar label="Skills" value={match.skills_match ?? 0} color="purple" />
-            <MatchProgressBar label="Experience" value={match.experience_match ?? 0} color="teal" />
+            <MatchProgressBar label="Experience" value={match.experience_match ?? 0} color="orange" />
           </div>
 
           {/* Badges */}
           <div className="flex gap-2 mt-3">
             {isH1B && (
-              <span className="px-2 py-1 rounded-md bg-purple-500/10 text-purple-400 text-[10px] font-medium border border-purple-500/20">
+              <span className="px-2 py-1 bg-purple-500/10 text-purple-400 text-[10px] font-medium border border-purple-500/20 font-mono">
                 H1B Sponsor
               </span>
             )}
             {isEarly && (
-              <span className="px-2 py-1 rounded-md bg-teal-500/10 text-teal-400 text-[10px] font-medium border border-teal-500/20">
+              <span className="px-2 py-1 bg-orange-600/10 text-orange-500 text-[10px] font-medium border border-orange-600/20 font-mono">
                 Early applicant
               </span>
             )}
@@ -640,14 +640,14 @@ function JobCard({
           <div className="flex gap-2 mt-3">
             <button
               onClick={(e) => { e.stopPropagation(); onAutofill(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500/10 text-teal-400 text-xs font-semibold border border-teal-500/20 hover:bg-teal-500/20 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-600/10 text-orange-500 text-xs font-semibold font-mono border border-orange-600/20 hover:bg-orange-600/20 transition-all"
             >
               <Icons.Lightning />
               Autofill
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onTailorResume(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 text-xs font-semibold border border-purple-500/20 hover:bg-purple-500/20 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-400 text-xs font-semibold font-mono border border-purple-500/20 hover:bg-purple-500/20 transition-all"
             >
               <Icons.Agent />
               Tailor Resume
@@ -667,18 +667,18 @@ function MatchProgressBar({
 }: {
   label: string;
   value: number;
-  color: "teal" | "purple" | "blue";
+  color: "orange" | "purple" | "blue";
 }) {
   const colorClasses = {
-    teal: "bg-teal-500",
+    orange: "bg-orange-600",
     purple: "bg-purple-500",
     blue: "bg-blue-500",
   };
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[10px] text-slate-500 w-16">{label}</span>
-      <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+      <span className="text-[10px] text-stone-500 w-16 font-mono">{label}</span>
+      <div className="flex-1 h-1.5 bg-stone-800 rounded-full overflow-hidden">
         <motion.div
           className={`h-full ${colorClasses[color]} rounded-full`}
           initial={{ width: 0 }}
@@ -686,7 +686,7 @@ function MatchProgressBar({
           transition={{ duration: 0.8, ease: "easeOut" }}
         />
       </div>
-      <span className="text-[10px] text-slate-500 w-8 text-right">{value}%</span>
+      <span className="text-[10px] text-stone-500 w-8 text-right font-mono">{value}%</span>
     </div>
   );
 }
@@ -715,13 +715,13 @@ function JobDetails({
     <div className="p-6">
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
-        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-slate-200 font-bold text-xl shrink-0">
+        <div className="w-14 h-14 border border-stone-800 bg-stone-900 flex items-center justify-center text-stone-200 font-bold text-xl shrink-0 font-mono">
           {job.company.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-slate-100">{job.role}</h1>
-          <p className="text-slate-400">{job.company}</p>
-          <div className="flex items-center gap-3 mt-2 text-sm text-slate-500">
+          <h1 className="text-xl font-bold text-stone-100 font-mono">{job.role}</h1>
+          <p className="text-stone-400">{job.company}</p>
+          <div className="flex items-center gap-3 mt-2 text-sm text-stone-500 font-mono">
             {job.location && <span>{job.location}</span>}
             <span>{getRelativeTime(job.date_posted ?? job.created_at)}</span>
           </div>
@@ -733,7 +733,7 @@ function JobDetails({
         href={job.url || "#"}
         target="_blank"
         rel="noopener noreferrer"
-        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold text-sm hover:from-teal-400 hover:to-teal-500 transition-all shadow-lg shadow-teal-500/25 neon-glow-teal mb-6"
+        className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-orange-600/50 bg-orange-600/10 text-orange-500 font-semibold text-sm font-mono hover:bg-orange-600/20 transition-all mb-6"
       >
         <Icons.Lightning />
         Apply with Autofill
@@ -741,8 +741,8 @@ function JobDetails({
 
       {/* Job Description */}
       <div className="mb-6">
-        <h2 className="text-sm font-semibold text-slate-300 mb-3">Job Description</h2>
-        <div className="text-sm text-slate-400 leading-relaxed space-y-3">
+        <h2 className="text-sm font-semibold text-stone-300 mb-3 font-mono uppercase tracking-[0.2em] text-[10px]">Job Description</h2>
+        <div className="text-sm text-stone-400 leading-relaxed space-y-3">
           {job.description ? (
             <p className="whitespace-pre-wrap">{job.description.slice(0, 800)}...</p>
           ) : (
@@ -764,9 +764,9 @@ function JobDetails({
           {skills.map((skill) => (
             <div
               key={skill.name}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${skill.matched
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-mono ${skill.matched
                   ? "bg-emerald-500/10 text-emerald-400"
-                  : "bg-slate-800 text-slate-500"
+                  : "bg-stone-800 text-stone-500"
                 }`}
             >
               {skill.matched ? (
@@ -774,7 +774,7 @@ function JobDetails({
                   <Icons.Check />
                 </span>
               ) : (
-                <span className="w-4 h-4 rounded-full border border-slate-600" />
+                <span className="w-4 h-4 border border-stone-600" />
               )}
               {skill.name}
             </div>
@@ -789,19 +789,19 @@ function JobDetails({
         onToggle={() => toggleSection("connections")}
       >
         <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50">
-            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-medium">
+          <div className="flex items-center gap-3 p-3 bg-stone-800/50">
+            <div className="w-10 h-10 bg-purple-500/20 flex items-center justify-center text-purple-400 text-sm font-medium font-mono">
               JD
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-slate-300">John Doe</p>
-              <p className="text-xs text-slate-500">Software Engineer at {job.company}</p>
+              <p className="text-sm font-medium text-stone-300">John Doe</p>
+              <p className="text-xs text-stone-500">Software Engineer at {job.company}</p>
             </div>
-            <button className="px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 text-xs font-medium hover:bg-purple-500/20 transition-colors">
+            <button className="px-3 py-1.5 bg-purple-500/10 text-purple-400 text-xs font-medium font-mono border border-purple-500/20 hover:bg-purple-500/20 transition-colors">
               Connect
             </button>
           </div>
-          <p className="text-xs text-slate-500 text-center">
+          <p className="text-xs text-stone-500 text-center font-mono">
             2nd degree connection via LinkedIn
           </p>
         </div>
@@ -815,16 +815,16 @@ function JobDetails({
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-400">Total Raised</span>
-            <span className="text-sm font-semibold text-teal-400">$50M Series B</span>
+            <span className="text-sm text-stone-400 font-mono">Total Raised</span>
+            <span className="text-sm font-semibold text-orange-500 font-mono">$50M Series B</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-400">Last Round</span>
-            <span className="text-sm text-slate-300">March 2024</span>
+            <span className="text-sm text-stone-400 font-mono">Last Round</span>
+            <span className="text-sm text-stone-300 font-mono">March 2024</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-400">Investors</span>
-            <span className="text-sm text-slate-300">a16z, Sequoia</span>
+            <span className="text-sm text-stone-400 font-mono">Investors</span>
+            <span className="text-sm text-stone-300 font-mono">a16z, Sequoia</span>
           </div>
         </div>
       </AccordionSection>
@@ -842,12 +842,12 @@ function JobDetails({
             { name: "Emily Davis", role: "VP Engineering" },
           ].map((leader) => (
             <div key={leader.name} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 text-xs font-medium">
+              <div className="w-8 h-8 bg-stone-800 border border-stone-700 flex items-center justify-center text-stone-400 text-xs font-medium font-mono">
                 {leader.name.split(" ").map(n => n[0]).join("")}
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-300">{leader.name}</p>
-                <p className="text-xs text-slate-500">{leader.role}</p>
+                <p className="text-sm font-medium text-stone-300">{leader.name}</p>
+                <p className="text-xs text-stone-500">{leader.role}</p>
               </div>
             </div>
           ))}
@@ -870,10 +870,10 @@ function AccordionSection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-t border-slate-800 py-4">
+    <div className="border-t border-stone-800 py-4">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between text-sm font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+        className="w-full flex items-center justify-between text-sm font-semibold text-stone-300 hover:text-stone-100 transition-colors font-mono uppercase tracking-[0.15em] text-[10px]"
       >
         {title}
         <motion.span
@@ -926,22 +926,22 @@ function AICopilot({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-slate-800 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center neon-glow-purple">
+      <div className="px-4 py-3 border-b border-stone-800 flex items-center gap-3">
+        <div className="w-8 h-8 border border-orange-600/50 bg-orange-600/10 flex items-center justify-center text-orange-500">
           <Icons.Agent />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-slate-200">RezoomAI</h3>
-          <p className="text-[10px] text-slate-500">Powered by Gemini</p>
+          <h3 className="text-sm font-semibold text-stone-200 font-mono">RezoomAI</h3>
+          <p className="text-[10px] text-stone-500 font-mono">Powered by Gemini</p>
         </div>
         <div className="ml-auto flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-neon" />
-          <span className="text-[10px] text-slate-500">Online</span>
+          <span className="w-2 h-2 rounded-full bg-green-500" />
+          <span className="text-[10px] text-stone-500 font-mono">Online</span>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="px-4 py-3 flex gap-2 flex-wrap border-b border-slate-800/50">
+      <div className="px-4 py-3 flex gap-2 flex-wrap border-b border-stone-800/50">
         <div className="w-full">
           <RezoomAITrialNotice
             isAuthenticated={aiAccess.isAuthenticated}
@@ -972,9 +972,9 @@ function AICopilot({
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm ${msg.role === "user"
-                  ? "bg-teal-500/20 text-teal-100 rounded-tr-sm"
-                  : "bg-slate-800 text-slate-300 rounded-tl-sm"
+              className={`max-w-[85%] px-4 py-2.5 text-sm font-mono ${msg.role === "user"
+                  ? "bg-orange-600/10 text-orange-200"
+                  : "bg-stone-800 text-stone-300"
                 }`}
             >
               {msg.content}
@@ -983,7 +983,7 @@ function AICopilot({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-2">
+            <div className="bg-stone-800 px-4 py-3 flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
               <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
               <span className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -993,7 +993,7 @@ function AICopilot({
       </div>
 
       {/* Input */}
-      <div className="p-3 border-t border-slate-800">
+      <div className="p-3 border-t border-stone-800">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -1006,12 +1006,12 @@ function AICopilot({
             onChange={(e) => setInput(e.target.value)}
             placeholder={aiAccess.requiresLogin ? "Log in to continue with RezoomAI..." : "Ask anything or tailor your resume..."}
             disabled={isLoading || aiAccess.requiresLogin}
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all disabled:opacity-50"
+            className="flex-1 bg-transparent border-b border-stone-800 rounded-none px-4 py-2.5 text-sm text-stone-100 placeholder:text-stone-500 focus:outline-none focus:border-orange-600 focus:ring-0 transition-all disabled:opacity-50 font-mono"
           />
           <button
             type="submit"
             disabled={!input.trim() || isLoading || aiAccess.requiresLogin}
-            className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center hover:bg-purple-500/30 transition-colors disabled:opacity-50"
+            className="w-10 h-10 bg-orange-600/10 text-orange-500 border border-orange-600/50 flex items-center justify-center hover:bg-orange-600/20 transition-colors disabled:opacity-50"
           >
             <Icons.Send />
           </button>

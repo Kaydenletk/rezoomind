@@ -80,8 +80,8 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
 
   if (jobs.length === 0) {
     return (
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <p className="text-sm text-slate-600">
+      <div className="border border-stone-800 bg-[#0c0c0c] p-8 text-center">
+        <p className="text-sm text-stone-400">
           No STEM jobs yet. Check back soon for fresh postings.
         </p>
       </div>
@@ -97,11 +97,11 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
         return (
           <div
             key={job.id}
-            className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] md:grid-cols-[2fr_1.2fr_1fr_1fr_1.4fr]"
+            className="grid gap-4 border border-stone-800 bg-[#0c0c0c] p-5 md:grid-cols-[2fr_1.2fr_1fr_1fr_1.4fr]"
           >
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-semibold text-slate-900">
+                <h3 className="text-base font-semibold text-stone-100 font-mono">
                   {job.role}
                 </h3>
                 {job.url ? (
@@ -115,10 +115,10 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                   </a>
                 ) : null}
               </div>
-              <p className="mt-1 text-sm text-slate-600">{job.company}</p>
+              <p className="mt-1 text-sm text-stone-400">{job.company}</p>
             </div>
 
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-stone-400">
               {job.location ?? "Remote"}
             </div>
 
@@ -126,26 +126,25 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
               {(job.tags ?? ["STEM"]).slice(0, 3).map((tag) => (
                 <span
                   key={`${job.id}-${tag}`}
-                  className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500"
+                  className="border border-stone-800 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500 font-mono"
                 >
                   {tag}
                 </span>
               ))}
             </div>
 
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-stone-500">
               {job.datePosted ? `Posted ${new Date(job.datePosted).toLocaleDateString()}` : ""}
             </div>
 
             <FeatureGate
               showOverlay={showOverlay}
-              className="rounded-2xl"
               title="Track Applied & Tried jobs"
               description="Sign in to unlock one-click tracking and reminders."
             >
               <div className="flex flex-col gap-3">
                 <div className="flex flex-wrap items-center gap-4">
-                  <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600">
+                  <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-400 font-mono">
                     <input
                       type="checkbox"
                       checked={Boolean(state.applied)}
@@ -154,7 +153,7 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                     />
                     Applied
                   </label>
-                  <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-600">
+                  <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-400 font-mono">
                     <input
                       type="checkbox"
                       checked={Boolean(state.tried)}
@@ -167,10 +166,10 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                     type="button"
                     onClick={() => updateTracking(job.id, { saved: !state.saved })}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition",
+                      "inline-flex items-center gap-1 border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] transition font-mono",
                       state.saved
-                        ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-slate-900"
-                        : "border-slate-200 text-slate-500 hover:border-[rgba(var(--brand-rgb),0.5)]"
+                        ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-orange-400"
+                        : "border-stone-800 text-stone-500 hover:border-[rgba(var(--brand-rgb),0.5)]"
                     )}
                   >
                     <svg viewBox="0 0 20 20" className="h-3 w-3" aria-hidden="true">
@@ -184,7 +183,7 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                   <button
                     type="button"
                     onClick={() => toggleNote(job.id)}
-                    className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 transition hover:border-[rgba(var(--brand-rgb),0.5)]"
+                    className="inline-flex items-center gap-1 border border-stone-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-stone-500 transition hover:border-[rgba(var(--brand-rgb),0.5)] font-mono"
                   >
                     <svg viewBox="0 0 20 20" className="h-3 w-3" aria-hidden="true">
                       <path
@@ -197,7 +196,7 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                 </div>
 
                 {openNoteId === job.id ? (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                  <div className="border border-stone-800 bg-stone-900 p-3">
                     <textarea
                       value={noteDrafts[job.id] ?? ""}
                       onChange={(event) =>
@@ -208,7 +207,7 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
                       }
                       rows={3}
                       placeholder="Add a quick note..."
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]"
+                      className="w-full border border-stone-800 bg-stone-950 px-3 py-2 text-xs text-stone-300 placeholder:text-stone-600 focus:border-orange-600 focus:outline-none font-mono"
                     />
                     <div className="mt-2 flex justify-end gap-2">
                       <Button size="sm" variant="secondary" onClick={() => setOpenNoteId(null)}>
@@ -227,9 +226,9 @@ export function StemJobsTable({ jobs }: StemJobsTableProps) {
       })}
 
       {!isAuthenticated ? (
-        <div className="rounded-3xl border border-[rgba(var(--brand-rgb),0.3)] bg-[var(--brand-tint)] p-5 text-sm text-slate-700">
-          <p className="font-semibold text-slate-900">Track Applied & Tried jobs</p>
-          <p className="mt-1 text-slate-600">
+        <div className="border border-[rgba(var(--brand-rgb),0.3)] bg-[var(--brand-tint)] p-5 text-sm text-stone-300">
+          <p className="font-semibold text-stone-100 font-mono">Track Applied & Tried jobs</p>
+          <p className="mt-1 text-stone-400">
             Sign in to unlock one-click tracking, reminders, and notes across jobs.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">

@@ -29,11 +29,11 @@ export function RezoomAITrialNotice({
 
   const palette =
     theme === "dark"
-      ? "border border-teal-400/20 bg-teal-500/10 text-teal-100"
-      : "border border-cyan-200 bg-cyan-50 text-slate-700";
+      ? "border border-orange-600/20 bg-orange-600/10 text-orange-100"
+      : "border border-orange-600/30 bg-orange-600/5 text-stone-300";
 
   return (
-    <div className={cn("rounded-xl px-3 py-2 text-xs leading-relaxed", palette, className)}>
+    <div className={cn("px-3 py-2 text-xs leading-relaxed", palette, className)}>
       <div className="flex items-center justify-between gap-3">
         <span className="font-semibold uppercase tracking-[0.18em]">
           {requiresLogin ? "Login to continue" : `${remainingGuestCredits}/5 free tries left`}
@@ -41,10 +41,10 @@ export function RezoomAITrialNotice({
         <Link
           href={loginHref}
           className={cn(
-            "rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition",
+            "px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] transition",
             theme === "dark"
-              ? "bg-white text-slate-900 hover:bg-slate-100"
-              : "bg-slate-900 text-white hover:bg-slate-800"
+              ? "border border-orange-600/50 bg-orange-600/10 text-orange-400 hover:bg-orange-600/20"
+              : "border border-stone-700 bg-stone-900 text-stone-100 hover:bg-stone-800"
           )}
         >
           Log in

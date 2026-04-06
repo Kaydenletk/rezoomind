@@ -94,8 +94,8 @@ export default function InterestsPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Interests</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-3xl font-semibold font-mono text-stone-100 sm:text-4xl">Interests</h1>
+        <p className="mt-2 text-sm text-stone-400">
           Tell us what roles and locations you want to target.
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function InterestsPage() {
       <Card>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Role Types
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
@@ -114,9 +114,9 @@ export default function InterestsPage() {
                     key={role}
                     type="button"
                     onClick={() => toggleRole(role)}
-                    className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${selected
-                        ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-slate-900"
-                        : "border-slate-200 text-slate-600 hover:border-[rgba(var(--brand-rgb),0.4)]"
+                    className={`border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${selected
+                        ? "border-orange-600/50 bg-orange-600/10 text-orange-500"
+                        : "border-stone-800 text-stone-500 hover:border-orange-600/40"
                       }`}
                     disabled={loading}
                   >
@@ -128,7 +128,7 @@ export default function InterestsPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Locations (comma separated)
             </label>
             <Input
@@ -141,7 +141,7 @@ export default function InterestsPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Keywords (comma separated)
             </label>
             <Input
@@ -154,7 +154,7 @@ export default function InterestsPage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Graduation Year
             </label>
             <Input

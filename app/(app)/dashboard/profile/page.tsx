@@ -19,7 +19,7 @@ export default async function ProfilePage() {
 
      return (
           <div className="mx-auto max-w-5xl px-4 py-8">
-               <div className="h-[80vh] border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+               <div className="h-[80vh] border border-stone-800 overflow-hidden">
                     <AgentSidebar />
                </div>
           </div>
