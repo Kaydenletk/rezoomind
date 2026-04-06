@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { extractKeywords } from "@/lib/matching/keywords";
 import { generateEmbedding } from "@/lib/ai/embeddings";
+import { extractTextFromPDF } from "@/lib/pdf-extract";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -13,7 +14,7 @@ export async function GET() {
   const userId = (session.user as any).id;
   const data = await prisma.resume.findUnique({
     where: { userId },
-    select: { resume_text: true, file_url: true, resume_keywords: true, created_at: true },
+    select: { resume_text: true, file_url: true, resume_keywords: true, created_at: true, parsed_at: true },
   });
   return NextResponse.json({ ok: true, resume: data ?? null });
 }
@@ -28,18 +29,22 @@ export async function POST(request: Request) {
 
   try {
     const formData = await request.formData();
-    const resumeText = (formData.get("resumeText") as string | null)?.trim() || null;
+    let resumeText = (formData.get("resumeText") as string | null)?.trim() || null;
     const file = formData.get("file") as File | null;
 
-    // For now, file upload just extracts the name — actual S3/R2 upload is a future task
     let fileUrl: string | null = null;
     if (file) {
       fileUrl = `/uploads/${file.name}`;
+      // Extract text from PDF if no resumeText was provided
+      if (!resumeText) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        resumeText = await extractTextFromPDF(buffer);
+      }
     }
 
     if (!resumeText) {
       return NextResponse.json(
-        { ok: false, error: "Provide resume text." },
+        { ok: false, error: "No resume text found. Upload a PDF or paste text." },
         { status: 400 }
       );
     }
