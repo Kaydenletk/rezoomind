@@ -34,6 +34,12 @@ export async function POST(request: Request) {
 
     let fileUrl: string | null = null;
     if (file) {
+      if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+        return NextResponse.json(
+          { ok: false, error: "Only PDF files are supported." },
+          { status: 400 }
+        );
+      }
       fileUrl = `/uploads/${file.name}`;
       // Extract text from PDF if no resumeText was provided
       if (!resumeText) {
