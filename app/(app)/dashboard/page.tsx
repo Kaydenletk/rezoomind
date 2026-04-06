@@ -30,10 +30,10 @@ interface JobMatchRow {
   is_saved: boolean | null;
   is_applied: boolean | null;
   job_postings: JobPosting | null;
-  // AI-computed match breakdown
-  experience_match?: number;
-  skills_match?: number;
-  industry_match?: number;
+  // Real AI-computed scores from /api/dashboard/data
+  experience_match?: number | null;
+  skills_match?: number | null;
+  missing_skills?: string[] | null;
 }
 
 // Utility functions
@@ -143,6 +143,7 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<JobMatchRow | null>(null);
+  const [hasResume, setHasResume] = useState<boolean | null>(null);
 
   // AI Copilot state
   const [copilotMessages, setCopilotMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([
@@ -167,19 +168,13 @@ export default function DashboardPage() {
       const response = await fetch("/api/dashboard/data");
       if (!response.ok) throw new Error("Failed to load");
 
-      const { matchRows } = await response.json();
-      const enrichedMatches = (matchRows ?? []).map((match: JobMatchRow) => ({
-        ...match,
-        // Simulate AI-computed match breakdown (in production, this comes from API)
-        experience_match: Math.round((match.match_score ?? 0) * (0.8 + Math.random() * 0.4)),
-        skills_match: Math.round((match.match_score ?? 0) * (0.7 + Math.random() * 0.5)),
-        industry_match: Math.round((match.match_score ?? 0) * (0.6 + Math.random() * 0.6)),
-      }));
-      setMatches(enrichedMatches);
+      const { matchRows, hasResume: resumeExists } = await response.json();
+      setHasResume(resumeExists ?? false);
+      setMatches(matchRows ?? []);
 
       // Auto-select first job
-      if (enrichedMatches.length > 0) {
-        setSelectedJob(enrichedMatches[0]);
+      if (matchRows && matchRows.length > 0) {
+        setSelectedJob(matchRows[0]);
       }
     } catch (e) {
       console.error(e);
@@ -378,6 +373,16 @@ export default function DashboardPage() {
 
         {/* Job Feed */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {hasResume === false && (
+            <div className="mx-4 mt-4 p-4 border border-orange-600/30 bg-orange-600/5">
+              <p className="text-sm text-orange-400 font-mono">
+                ▸ Upload your resume to see real match scores
+              </p>
+              <Link href="/resume" className="text-xs text-orange-500 font-mono hover:underline mt-1 block">
+                ~/resume/upload →
+              </Link>
+            </div>
+          )}
           {visibleMatches.length === 0 ? (
             <div className="p-8 text-center">
               <div className="w-16 h-16 mx-auto mb-4 bg-stone-900 border border-stone-800 flex items-center justify-center">
@@ -420,6 +425,7 @@ export default function DashboardPage() {
             <div className="flex-1 overflow-y-auto custom-scrollbar border-b border-stone-800">
               <JobDetails
                 job={selectedJob.job_postings}
+                match={selectedJob}
                 expandedSections={expandedSections}
                 toggleSection={toggleSection}
               />
@@ -694,21 +700,28 @@ function MatchProgressBar({
 // Job Details Component
 function JobDetails({
   job,
+  match,
   expandedSections,
   toggleSection,
 }: {
   job: JobPosting;
+  match: JobMatchRow;
   expandedSections: string[];
   toggleSection: (section: string) => void;
 }) {
-  // Mock skills data (in production, this would come from resume + job analysis)
+  // Derive skills from real match data
+  const matchedSkills = (match.match_reasons ?? [])
+    .find((r) => r.startsWith("Matching skills:"))
+    ?.replace("Matching skills:", "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean) ?? [];
+
+  const missingSkills = match.missing_skills ?? [];
+
   const skills = [
-    { name: "Python", matched: true },
-    { name: "Django", matched: true },
-    { name: "PostgreSQL", matched: true },
-    { name: "React", matched: false },
-    { name: "AWS", matched: true },
-    { name: "Docker", matched: false },
+    ...matchedSkills.map((name) => ({ name, matched: true })),
+    ...missingSkills.map((name) => ({ name, matched: false })),
   ];
 
   return (
