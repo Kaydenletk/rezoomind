@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RezoomAITrialNotice } from "@/components/RezoomAITrialNotice";
 import { useRezoomAIAccess } from "@/hooks/useRezoomAIAccess";
+import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 
 // Types
 interface JobPosting {
@@ -144,6 +145,8 @@ export default function DashboardPage() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [selectedJob, setSelectedJob] = useState<JobMatchRow | null>(null);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
+  const [resumeText, setResumeText] = useState<string | null>(null);
+  const [tailorOpen, setTailorOpen] = useState(false);
 
   // AI Copilot state
   const [copilotMessages, setCopilotMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([
@@ -172,6 +175,17 @@ export default function DashboardPage() {
       setHasResume(resumeExists ?? false);
       setMatches(matchRows ?? []);
 
+      // Fetch resume text for Quick Tailor
+      try {
+        const resumeRes = await fetch("/api/resume/data");
+        const resumeData = await resumeRes.json();
+        if (resumeData.ok && resumeData.resume?.resume_text) {
+          setResumeText(resumeData.resume.resume_text);
+        }
+      } catch {
+        // Non-critical — Quick Tailor will still work with manual paste
+      }
+
       // Auto-select first job
       if (matchRows && matchRows.length > 0) {
         setSelectedJob(matchRows[0]);
@@ -182,6 +196,12 @@ export default function DashboardPage() {
       setLoading(false);
     }
   };
+
+  const tailorJobContext = useMemo(() => {
+    if (!selectedJob?.job_postings) return null;
+    const jp = selectedJob.job_postings;
+    return { company: jp.company, role: jp.role, description: jp.description ?? undefined };
+  }, [selectedJob]);
 
   const filterOptions = useMemo(() => [
     { id: "intern", label: "Intern/New Grad" },
@@ -271,11 +291,9 @@ export default function DashboardPage() {
   const handleTailorResume = (match: JobMatchRow) => {
     const job = match.job_postings;
     if (!job) return;
-    // Select the job
+    // Select the job and open Quick Tailor panel
     setSelectedJob(match);
-    // Auto-populate the copilot with a tailored resume request
-    const tailorMessage = `I want to tailor my resume for ${job.role} at ${job.company}. Please analyze the job requirements and suggest 3 specific, quantified bullet points per role that align with this position. Use active verbs and reference specific tools/technologies from the job description.`;
-    handleCopilotSend(tailorMessage);
+    setTailorOpen(true);
   };
 
   // Handle "Autofill" button on job cards
@@ -454,6 +472,14 @@ export default function DashboardPage() {
           </div>
         )}
       </aside>
+
+      {/* Quick Tailor Slide-over Panel */}
+      <QuickTailorPanel
+        isOpen={tailorOpen}
+        onClose={() => setTailorOpen(false)}
+        jobContext={tailorJobContext}
+        savedResumeText={resumeText}
+      />
     </div>
   );
 }
