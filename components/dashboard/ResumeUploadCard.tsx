@@ -65,8 +65,21 @@ export function ResumeUploadCard({ onUploaded }: ResumeUploadCardProps) {
       </div>
 
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Upload resume PDF"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
+        onDragLeave={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setDragOver(false);
+          }
+        }}
         onDrop={onDrop}
         onClick={() => inputRef.current?.click()}
         className={`
@@ -83,6 +96,7 @@ export function ResumeUploadCard({ onUploaded }: ResumeUploadCardProps) {
           type="file"
           accept=".pdf"
           className="hidden"
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleFile(file);
