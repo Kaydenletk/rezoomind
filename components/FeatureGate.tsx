@@ -32,11 +32,11 @@ export function FeatureGate({
       </div>
       {showOverlay ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 text-center shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900">
+          <div className="border border-stone-800 bg-stone-900/95 px-4 py-3 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-100 font-mono">
               {title}
             </p>
-            <p className="mt-1 text-xs text-slate-500">{description}</p>
+            <p className="mt-1 text-xs text-stone-500">{description}</p>
             <div className="mt-3 flex flex-wrap justify-center gap-2">
               <Button href="/login" size="sm">
                 Sign in

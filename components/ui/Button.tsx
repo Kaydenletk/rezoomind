@@ -1,8 +1,6 @@
 "use client";
 
-// NOTE: Use motion.a inside Link to avoid motion(Link) prop conflicts.
 import Link from "next/link";
-import { motion } from "framer-motion";
 import type {
   ButtonHTMLAttributes,
   HTMLAttributes,
@@ -27,56 +25,29 @@ type ButtonAsLink = CommonProps &
     href: LinkProps["href"];
     target?: string;
     rel?: string;
-  } & Omit<
-    HTMLAttributes<HTMLSpanElement>,
-    | "className"
-    | "children"
-    | "onAnimationStart"
-    | "onAnimationEnd"
-    | "onDrag"
-    | "onDragStart"
-    | "onDragEnd"
-    | "onDragEnter"
-    | "onDragLeave"
-    | "onDragOver"
-    | "onDragExit"
-    | "onDragCapture"
-  >;
+  } & Omit<HTMLAttributes<HTMLAnchorElement>, "className" | "children">;
 
 type ButtonAsButton = CommonProps &
-  Omit<
-    ButtonHTMLAttributes<HTMLButtonElement>,
-    | "className"
-    | "onAnimationStart"
-    | "onAnimationEnd"
-    | "onDrag"
-    | "onDragStart"
-    | "onDragEnd"
-    | "onDragEnter"
-    | "onDragLeave"
-    | "onDragOver"
-    | "onDragExit"
-    | "onDragCapture"
-  > & {
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className"> & {
     href?: undefined;
   };
 
 export type ButtonProps = ButtonAsLink | ButtonAsButton;
 
 const baseStyles =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-ring)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-60";
+  "inline-flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-600 disabled:pointer-events-none disabled:opacity-60";
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[rgb(var(--brand-rgb))] text-slate-900 shadow-[0_12px_30px_var(--brand-glow)] hover:bg-[rgb(var(--brand-hover-rgb))]",
+    "border border-orange-600/50 bg-orange-600/10 text-orange-500 hover:bg-orange-600/20",
   secondary:
-    "border border-[rgba(var(--brand-rgb),0.4)] bg-white text-brand hover:border-[rgba(var(--brand-rgb),0.6)] hover:bg-[var(--brand-tint)]",
-  ghost: "text-slate-600 hover:text-brand",
+    "border border-stone-700 bg-transparent text-stone-400 hover:border-orange-600/50 hover:text-orange-500",
+  ghost: "text-stone-500 hover:text-orange-500",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "px-4 py-2 text-xs",
-  md: "px-6 py-3 text-sm",
+  sm: "px-4 py-2",
+  md: "px-6 py-3",
 };
 
 export function Button({
@@ -101,30 +72,21 @@ export function Button({
         className={classes}
         target={target}
         rel={rel}
+        {...rest}
       >
-        <motion.span
-          whileHover={{ y: -2 }}
-          whileTap={{ y: 1, scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 260, damping: 18 }}
-          {...rest}
-        >
-          {children}
-        </motion.span>
+        {children}
       </Link>
     );
   }
 
   const { type, ...rest } = props as ButtonAsButton;
   return (
-    <motion.button
+    <button
       type={type ?? "button"}
       className={classes}
-      whileHover={{ y: -2 }}
-      whileTap={{ y: 1, scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 260, damping: 18 }}
       {...rest}
     >
       {children}
-    </motion.button>
+    </button>
   );
 }

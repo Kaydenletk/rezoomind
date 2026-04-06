@@ -145,10 +145,10 @@ export default function DebugPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading debug info...</p>
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-stone-400">Loading debug info...</p>
         </div>
       </div>
     );
@@ -159,59 +159,59 @@ export default function DebugPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-stone-950 p-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-slate-900 mb-8">
+        <h1 className="text-4xl font-bold font-mono text-stone-100 mb-8">
           Debug Dashboard
         </h1>
 
         {/* Status Cards */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-lg border-2 border-slate-200">
-            <div className="text-3xl font-bold text-cyan-600 mb-2">
+          <div className="bg-stone-900 p-6 border-2 border-stone-800">
+            <div className="text-3xl font-bold text-orange-500 mb-2">
               {stats.totalJobs}
             </div>
-            <p className="text-sm text-slate-600">Total Jobs</p>
+            <p className="text-sm text-stone-400">Total Jobs</p>
           </div>
 
-          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${stats.lastHour > 0 ? 'border-green-500' : 'border-red-500'
+          <div className={`bg-stone-900 p-6 border-2 ${stats.lastHour > 0 ? 'border-green-500' : 'border-red-500'
             }`}>
-            <div className={`text-3xl font-bold mb-2 ${stats.lastHour > 0 ? 'text-green-600' : 'text-red-600'
+            <div className={`text-3xl font-bold mb-2 ${stats.lastHour > 0 ? 'text-green-400' : 'text-red-400'
               }`}>
               {stats.lastHour}
             </div>
-            <p className="text-sm text-slate-600">Last Hour</p>
+            <p className="text-sm text-stone-400">Last Hour</p>
             {stats.lastHour === 0 && (
-              <p className="text-xs text-red-600 mt-2">No hourly updates!</p>
+              <p className="text-xs text-red-400 mt-2">No hourly updates!</p>
             )}
           </div>
 
-          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${stats.last24Hours > 50 ? 'border-green-500' : 'border-amber-500'
+          <div className={`bg-stone-900 p-6 border-2 ${stats.last24Hours > 50 ? 'border-green-500' : 'border-amber-500'
             }`}>
-            <div className={`text-3xl font-bold mb-2 ${stats.last24Hours > 50 ? 'text-green-600' : 'text-amber-600'
+            <div className={`text-3xl font-bold mb-2 ${stats.last24Hours > 50 ? 'text-green-400' : 'text-amber-400'
               }`}>
               {stats.last24Hours}
             </div>
-            <p className="text-sm text-slate-600">Last 24 Hours</p>
+            <p className="text-sm text-stone-400">Last 24 Hours</p>
           </div>
 
-          <div className={`bg-white rounded-xl p-6 shadow-lg border-2 ${latestJobAge !== null && latestJobAge < 2 ? 'border-green-500' : 'border-red-500'
+          <div className={`bg-stone-900 p-6 border-2 ${latestJobAge !== null && latestJobAge < 2 ? 'border-green-500' : 'border-red-500'
             }`}>
-            <div className={`text-3xl font-bold mb-2 ${latestJobAge !== null && latestJobAge < 2 ? 'text-green-600' : 'text-red-600'
+            <div className={`text-3xl font-bold mb-2 ${latestJobAge !== null && latestJobAge < 2 ? 'text-green-400' : 'text-red-400'
               }`}>
               {latestJobAge !== null ? `${latestJobAge}h` : 'N/A'}
             </div>
-            <p className="text-sm text-slate-600">Latest Job Age</p>
+            <p className="text-sm text-stone-400">Latest Job Age</p>
             {latestJobAge !== null && latestJobAge > 2 && (
-              <p className="text-xs text-red-600 mt-2">Jobs are stale!</p>
+              <p className="text-xs text-red-400 mt-2">Jobs are stale!</p>
             )}
           </div>
         </div>
 
         {/* Latest Job Info */}
         {stats.latestJob && (
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200 mb-8">
-            <h2 className="text-xl font-bold text-slate-900 mb-4">Latest Job</h2>
+          <div className="bg-stone-900 p-6 border border-stone-800 mb-8">
+            <h2 className="text-xl font-bold font-mono text-stone-100 mb-4">Latest Job</h2>
             <div className="space-y-2 text-sm">
               <p><span className="font-semibold">Role:</span> {stats.latestJob.role}</p>
               <p><span className="font-semibold">Company:</span> {stats.latestJob.company}</p>
@@ -223,47 +223,47 @@ export default function DebugPage() {
         )}
 
         {/* Test Buttons */}
-        <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200 mb-8">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Manual Tests</h2>
+        <div className="bg-stone-900 p-6 border border-stone-800 mb-8">
+          <h2 className="text-xl font-bold font-mono text-stone-100 mb-4">Manual Tests</h2>
           <div className="flex flex-wrap gap-4">
             <button
               onClick={clearAllJobs}
               disabled={testing}
-              className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 disabled:opacity-50"
+              className="px-6 py-3 bg-red-600 text-stone-100 font-bold hover:bg-red-700 disabled:opacity-50"
             >
               {testing ? 'Clearing...' : 'Clear All Jobs'}
             </button>
             <button
               onClick={syncFromGitHub}
               disabled={testing}
-              className="px-6 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 disabled:opacity-50"
+              className="px-6 py-3 bg-green-600 text-stone-100 font-bold hover:bg-green-700 disabled:opacity-50"
             >
               {testing ? 'Syncing...' : 'Sync from GitHub'}
             </button>
             <button
               onClick={testCronJob}
               disabled={testing}
-              className="px-6 py-3 bg-cyan-600 text-white font-bold rounded-lg hover:bg-cyan-700 disabled:opacity-50"
+              className="px-6 py-3 border border-orange-600/50 bg-orange-600/10 text-orange-500 font-bold hover:bg-orange-600/20 disabled:opacity-50"
             >
               {testing ? 'Testing...' : 'Test Cron Job'}
             </button>
             <button
               onClick={loadStats}
-              className="px-6 py-3 bg-slate-600 text-white font-bold rounded-lg hover:bg-slate-700"
+              className="px-6 py-3 border border-stone-800 bg-stone-900 text-stone-400 font-bold hover:text-stone-200"
             >
               Refresh Stats
             </button>
           </div>
-          <p className="mt-3 text-sm text-slate-600">
+          <p className="mt-3 text-sm text-stone-400">
             Click &quot;Clear All Jobs&quot; first, then &quot;Sync from GitHub&quot; to get fresh jobs
           </p>
         </div>
 
         {/* Logs */}
         {logs.length > 0 && (
-          <div className="bg-slate-900 rounded-xl p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-white mb-4">Test Logs</h2>
-            <div className="bg-black rounded-lg p-4 font-mono text-sm text-green-400 space-y-1 max-h-96 overflow-y-auto">
+          <div className="bg-stone-900 border border-stone-800 p-6">
+            <h2 className="text-xl font-bold font-mono text-stone-100 mb-4">Test Logs</h2>
+            <div className="bg-[#0c0c0c] border border-stone-800 p-4 font-mono text-sm text-green-400 space-y-1 max-h-96 overflow-y-auto">
               {logs.map((log, i) => (
                 <div key={i}>{log}</div>
               ))}
@@ -272,9 +272,9 @@ export default function DebugPage() {
         )}
 
         {/* Recommendations */}
-        <div className="mt-8 bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
-          <h2 className="text-xl font-bold text-amber-900 mb-4">Diagnostic Checklist</h2>
-          <ul className="space-y-2 text-sm text-amber-800">
+        <div className="mt-8 bg-stone-900 border-2 border-stone-800 p-6">
+          <h2 className="text-xl font-bold font-mono text-stone-100 mb-4">Diagnostic Checklist</h2>
+          <ul className="space-y-2 text-sm text-stone-400">
             <li className="flex items-start gap-2">
               <span>{stats.lastHour > 0 ? 'OK' : 'FAIL'}</span>
               <span>Hourly updates working (should have jobs from last hour)</span>

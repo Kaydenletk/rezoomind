@@ -25,16 +25,16 @@ export default function UnsubscribeClient() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-24">
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
+        <h1 className="text-3xl font-semibold font-mono text-stone-100 sm:text-4xl">
           Unsubscribe
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-stone-400">
           Manage your Rezoomind email updates.
         </p>
       </div>
 
       <Card>
-        <p className="text-sm text-slate-600">{message}</p>
+        <p className="text-sm text-stone-400">{message}</p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button href="/" variant="secondary" className="w-full sm:w-auto">
             Return Home

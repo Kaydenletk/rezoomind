@@ -247,30 +247,30 @@ export function RezoomindCopilotSidebar({
   }, [actionRequest, quickActions, sendMessage]);
 
   const renderPanelBody = () => (
-    <div className="flex h-full flex-col bg-slate-950 text-slate-100">
-      <div className="border-b border-slate-800 px-4 py-4">
+    <div className="flex h-full flex-col bg-stone-950 text-stone-100">
+      <div className="border-b border-stone-800 px-4 py-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold tracking-wide text-teal-300">RezoomAI</h2>
-          <span className="rounded-full border border-teal-400/40 bg-teal-400/10 px-2 py-0.5 text-[11px] font-medium text-teal-200">
+          <h2 className="text-sm font-semibold tracking-wide text-orange-400 font-mono">RezoomAI</h2>
+          <span className="border border-orange-600/40 bg-orange-600/10 px-2 py-0.5 text-[11px] font-medium text-orange-300 font-mono">
             AI
           </span>
         </div>
 
         {activeJob ? (
-          <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400">Active Job</p>
-            <p className="mt-1 text-sm font-semibold text-slate-100">{activeJob.role}</p>
-            <p className="text-xs text-slate-300">{activeJob.company}</p>
+          <div className="border border-stone-800 bg-stone-900 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-stone-400 font-mono">Active Job</p>
+            <p className="mt-1 text-sm font-semibold text-stone-100">{activeJob.role}</p>
+            <p className="text-xs text-stone-300">{activeJob.company}</p>
             <div className="mt-2 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Match Score</span>
-              <span className="font-semibold text-teal-300">
+              <span className="text-stone-400">Match Score</span>
+              <span className="font-semibold text-orange-400 font-mono">
                 {matchLoading ? "Calculating..." : matchScore !== null ? `${matchScore}%` : "N/A"}
               </span>
             </div>
             {matchError ? <p className="mt-1 text-[11px] text-amber-300">{matchError}</p> : null}
           </div>
         ) : (
-          <div className="rounded-lg border border-slate-800 bg-slate-900 p-3 text-xs text-slate-300">
+          <div className="border border-stone-800 bg-stone-900 p-3 text-xs text-stone-300">
             Select a job to unlock job-specific RezoomAI actions.
           </div>
         )}
@@ -289,7 +289,7 @@ export function RezoomindCopilotSidebar({
 
       <div ref={scrollerRef} className="custom-scrollbar flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {needsProfileSetup ? (
-          <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-50">
+          <div className="border border-amber-400/25 bg-amber-500/10 p-4 text-sm text-amber-50">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200">
               Add resume first
             </p>
@@ -298,7 +298,7 @@ export function RezoomindCopilotSidebar({
             </p>
             <Link
               href={setupHref}
-              className="mt-3 inline-flex rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-slate-100"
+              className="mt-3 inline-flex border border-orange-600/50 bg-orange-600/10 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-600/20 font-mono"
             >
               Add Resume and Profile
             </Link>
@@ -308,14 +308,14 @@ export function RezoomindCopilotSidebar({
         {messages.map((msg, index) => (
           <div key={`${msg.role}-${index}`} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[90%] rounded-2xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
+              className={`max-w-[90%] px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
                 msg.role === "user"
-                  ? "bg-slate-700 text-slate-100"
-                  : "border border-teal-400/35 bg-teal-500/10 text-teal-100"
+                  ? "bg-stone-700 text-stone-100"
+                  : "border border-orange-600/35 bg-orange-600/10 text-orange-100"
               }`}
             >
               {msg.role === "assistant" ? (
-                <span className="mb-1 inline-block rounded-full bg-teal-400/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-teal-200">
+                <span className="mb-1 inline-block bg-orange-600/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-300 font-mono">
                   Actionable
                 </span>
               ) : null}
@@ -324,10 +324,10 @@ export function RezoomindCopilotSidebar({
           </div>
         ))}
 
-        {sending ? <p className="text-xs text-slate-400">RezoomAI is thinking...</p> : null}
+        {sending ? <p className="text-xs text-stone-400 font-mono">RezoomAI is thinking...</p> : null}
       </div>
 
-      <div className="border-t border-slate-800 bg-slate-950/95 p-3">
+      <div className="border-t border-stone-800 bg-stone-950/95 p-3">
         <div className="mb-3 flex flex-wrap gap-2">
           {quickActions.map((action) => (
             <button
@@ -337,7 +337,7 @@ export function RezoomindCopilotSidebar({
               onClick={() => {
                 void sendMessage(action.userText, action.systemPrompt);
               }}
-              className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:border-teal-400/70 hover:text-teal-200 disabled:opacity-50"
+              className="border border-stone-700 bg-stone-900 px-3 py-1.5 text-xs font-medium text-stone-200 transition hover:border-orange-600/70 hover:text-orange-400 disabled:opacity-50 font-mono"
             >
               {action.label}
             </button>
@@ -362,12 +362,12 @@ export function RezoomindCopilotSidebar({
                 : "Ask RezoomAI for targeted help..."
             }
             disabled={sending || aiAccess.requiresLogin || needsProfileSetup}
-            className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
+            className="min-w-0 flex-1 border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-100 placeholder:text-stone-500 focus:border-orange-600 focus:outline-none font-mono"
           />
           <button
             type="submit"
             disabled={sending || !input.trim() || aiAccess.requiresLogin || needsProfileSetup}
-            className="rounded-lg bg-teal-500 px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="border border-orange-600/50 bg-orange-600/10 px-3 py-2 text-sm font-semibold text-orange-500 transition hover:bg-orange-600/20 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
           >
             Send
           </button>
@@ -379,21 +379,21 @@ export function RezoomindCopilotSidebar({
   return (
     <>
       {layout === "embedded" ? (
-        <div className={`h-full overflow-hidden rounded-2xl border border-slate-800 ${className}`}>
+        <div className={`h-full overflow-hidden border border-stone-800 ${className}`}>
           {renderPanelBody()}
         </div>
       ) : null}
 
       {layout !== "fixed" ? null : (
         <>
-      <aside className="fixed inset-y-0 right-0 z-30 hidden w-[25rem] border-l border-slate-800 bg-slate-950 pt-16 lg:block">
+      <aside className="fixed inset-y-0 right-0 z-30 hidden w-[25rem] border-l border-stone-800 bg-stone-950 pt-16 lg:block">
         {renderPanelBody()}
       </aside>
 
       <button
         type="button"
         onClick={() => setIsMobileOpen(true)}
-        className="fixed bottom-5 right-5 z-30 rounded-full bg-teal-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-teal-500/30 lg:hidden"
+        className="fixed bottom-5 right-5 z-30 border border-orange-600/50 bg-orange-600/10 px-4 py-3 text-sm font-semibold text-orange-500 lg:hidden font-mono"
       >
         RezoomAI
       </button>
@@ -409,18 +409,18 @@ export function RezoomindCopilotSidebar({
               setIsMobileOpen(false);
             }
           }}
-          className={`absolute inset-0 bg-slate-950/60 transition-opacity ${isMobileOpen ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-stone-950/60 transition-opacity ${isMobileOpen ? "opacity-100" : "opacity-0"}`}
         />
 
         <aside
-          className={`absolute right-0 top-0 h-full w-[90vw] max-w-sm border-l border-slate-800 bg-slate-950 transition-transform ${
+          className={`absolute right-0 top-0 h-full w-[90vw] max-w-sm border-l border-stone-800 bg-stone-950 transition-transform ${
             isMobileOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <button
             type="button"
             onClick={() => setIsMobileOpen(false)}
-            className="absolute right-3 top-3 z-10 rounded-md border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800"
+            className="absolute right-3 top-3 z-10 border border-stone-700 px-2 py-1 text-xs text-stone-300 hover:bg-stone-800 font-mono"
           >
             Close
           </button>

@@ -74,16 +74,16 @@ export default async function MatchesPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Matches</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-3xl font-semibold font-mono text-stone-100 sm:text-4xl">Matches</h1>
+        <p className="mt-2 text-sm text-stone-400">
           Top roles based on your resume and preferences.
         </p>
       </div>
 
       {needsProfile ? (
         <Card>
-          <h2 className="text-lg font-semibold text-slate-900">Add your signals</h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <h2 className="text-lg font-semibold text-stone-100">Add your signals</h2>
+          <p className="mt-2 text-sm text-stone-400">
             Upload a resume or set preferences to see personalized matches.
           </p>
         </Card>
@@ -91,8 +91,8 @@ export default async function MatchesPage() {
 
       {typedMatches.length === 0 ? (
         <Card>
-          <h2 className="text-lg font-semibold text-slate-900">No matches yet</h2>
-          <p className="mt-2 text-sm text-slate-600">
+          <h2 className="text-lg font-semibold text-stone-100">No matches yet</h2>
+          <p className="mt-2 text-sm text-stone-400">
             Add more keywords or roles, or upload a stronger resume.
           </p>
         </Card>
@@ -106,15 +106,15 @@ export default async function MatchesPage() {
             return (
               <Card key={job.id} highlighted={score >= 70}>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-slate-900">{job.role}</h2>
+                  <h2 className="text-lg font-semibold text-stone-100">{job.role}</h2>
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
                     {score}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-stone-400">
                   {job.company ?? "Unknown company"}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-stone-500">
                   {job.location ?? "Location flexible"}
                 </p>
                 {reasons.length > 0 ? (
@@ -122,7 +122,7 @@ export default async function MatchesPage() {
                     {reasons.slice(0, 3).map((reason) => (
                       <span
                         key={`${job.id}-${reason}`}
-                        className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+                        className="border border-stone-800 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500"
                       >
                         {reason}
                       </span>
@@ -133,7 +133,7 @@ export default async function MatchesPage() {
                     {job.tags.slice(0, 6).map((tag) => (
                       <span
                         key={`${job.id}-${tag}`}
-                        className="rounded-full border border-slate-200 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500"
+                        className="border border-stone-800 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-500"
                       >
                         {tag}
                       </span>

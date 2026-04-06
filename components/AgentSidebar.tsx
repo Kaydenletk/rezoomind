@@ -276,15 +276,15 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500 text-sm">Loading RezoomAI...</div>;
+    return <div className="p-8 text-center text-stone-500 text-sm font-mono">Loading RezoomAI...</div>;
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 border-l border-slate-200 shadow-xl overflow-y-auto w-full relative">
+    <div className="flex flex-col h-full bg-stone-950 border-l border-stone-800 overflow-y-auto w-full relative">
       {onClose && (
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-50 p-2 bg-white/50 hover:bg-white rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+          className="absolute top-4 right-4 z-50 p-2 bg-stone-900/50 hover:bg-stone-900 border border-stone-800 text-stone-400 hover:text-stone-200 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -300,12 +300,12 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-50 flex items-center justify-center text-emerald-600 text-2xl shadow-sm border border-emerald-100/50">
+            <div className="w-12 h-12 border border-orange-600/30 bg-orange-600/10 flex items-center justify-center text-orange-500 text-2xl">
               🚀
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">RezoomAI</h1>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h1 className="text-xl font-bold text-stone-100 tracking-tight font-mono">RezoomAI</h1>
+              <p className="text-xs text-stone-500 mt-0.5 font-mono">
                 Your AI application assistant
               </p>
             </div>
@@ -322,14 +322,14 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
           />
 
           {/* Custom Tab Navigation */}
-          <div className="flex border-b border-slate-200 mb-6 sticky top-0 bg-slate-50/95 backdrop-blur-md z-10 w-full overflow-x-auto no-scrollbar pb-1">
+          <div className="flex border-b border-stone-800 mb-6 sticky top-0 bg-stone-950/95 backdrop-blur-md z-10 w-full overflow-x-auto no-scrollbar pb-1">
             {TABS.map((tab, idx) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(idx)}
-                className={`pb-3 px-4 text-[13px] font-semibold transition-all whitespace-nowrap border-b-2 ${activeTab === idx
-                  ? "border-emerald-500 text-slate-900"
-                  : "border-transparent text-slate-400 hover:text-slate-700"
+                className={`pb-3 px-4 text-[13px] font-semibold transition-all whitespace-nowrap border-b-2 font-mono ${activeTab === idx
+                  ? "border-orange-500 text-stone-100"
+                  : "border-transparent text-stone-500 hover:text-stone-300"
                   }`}
               >
                 {tab}
@@ -341,9 +341,9 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
           {activeTab === 0 && (
             <form onSubmit={handleSave} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               {/* Master Resume Upload */}
-              <section className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
-                <h2 className="text-[15px] font-semibold text-slate-900 mb-1">Master Resume (PDF)</h2>
-                <p className="text-[13px] text-slate-500 mb-5 leading-relaxed">
+              <section className="border border-stone-800 bg-stone-900 p-5">
+                <h2 className="text-[15px] font-semibold text-stone-100 mb-1 font-mono">Master Resume (PDF)</h2>
+                <p className="text-[13px] text-stone-500 mb-5 leading-relaxed">
                   Upload your base resume. RezoomAI uses this as the source of truth to dynamically tailor new resumes for each job.
                 </p>
 
@@ -358,15 +358,15 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
                   <Button
                     type="button"
                     variant="secondary"
-                    className="w-full justify-center bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700"
+                    className="w-full justify-center border-stone-700 bg-stone-800 hover:bg-stone-700 text-stone-300"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingResume}
                   >
                     {uploadingResume ? "Reading PDF..." : "Select Master PDF"}
                   </Button>
                   {form.masterResumeName && (
-                    <div className="inline-flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-[13px] font-medium border border-emerald-100">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                    <div className="inline-flex items-center gap-2 px-3 py-2 bg-orange-600/10 text-orange-400 text-[13px] font-medium border border-orange-600/30 font-mono">
+                      <div className="w-1.5 h-1.5 bg-orange-500"></div>
                       <span className="truncate">{form.masterResumeName}</span>
                     </div>
                   )}
@@ -374,43 +374,43 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
               </section>
 
               {/* Basic Info */}
-              <section className="rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm">
-                <h2 className="text-[15px] font-semibold text-slate-900 mb-4">Core Details</h2>
+              <section className="border border-stone-800 bg-stone-900 p-5">
+                <h2 className="text-[15px] font-semibold text-stone-100 mb-4 font-mono">Core Details</h2>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">First Name</label>
+                      <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 font-mono">First Name</label>
                       <Input name="firstName" value={form.firstName} onChange={handleChange} className="h-9 text-sm" />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Last Name</label>
+                      <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 font-mono">Last Name</label>
                       <Input name="lastName" value={form.lastName} onChange={handleChange} className="h-9 text-sm" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Phone</label>
+                    <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 font-mono">Phone</label>
                     <Input name="phone" value={form.phone} onChange={handleChange} className="h-9 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">LinkedIn URL</label>
+                    <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 font-mono">LinkedIn URL</label>
                     <Input name="linkedinUrl" value={form.linkedinUrl} onChange={handleChange} className="h-9 text-sm" />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">GitHub URL</label>
+                    <label className="block text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-1.5 font-mono">GitHub URL</label>
                     <Input name="githubUrl" value={form.githubUrl} onChange={handleChange} className="h-9 text-sm" />
                   </div>
                 </div>
               </section>
 
-              <div className="flex flex-col gap-3 pt-4 sticky bottom-0 bg-slate-50 py-4 border-t mt-8 border-slate-200/60 z-10 w-full">
+              <div className="flex flex-col gap-3 pt-4 sticky bottom-0 bg-stone-950 py-4 border-t mt-8 border-stone-800 z-10 w-full">
                 {message && (
-                  <p className={`text-[13px] font-medium text-center ${message.includes("success") || message.includes("parsed") ? "text-emerald-600" : "text-rose-500"}`}>
+                  <p className={`text-[13px] font-medium text-center font-mono ${message.includes("success") || message.includes("parsed") ? "text-orange-400" : "text-rose-500"}`}>
                     {message}
                   </p>
                 )}
                 <Button
                   type="submit"
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white shadow-md shadow-slate-900/10"
+                  className="w-full border-orange-600/50 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500"
                   disabled={saving}
                 >
                   {saving ? "Saving Profile..." : "Save & Continue"}
@@ -422,11 +422,11 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
           {/* Tab 2: Targeting */}
           {activeTab === 1 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <section className="rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 p-6 shadow-sm relative overflow-hidden">
+              <section className="border border-orange-600/30 bg-orange-600/5 p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10 blur-sm pointer-events-none text-8xl">🎯</div>
 
-                <h2 className="text-[15px] font-bold text-slate-900 mb-2 relative z-10">Target Job</h2>
-                <p className="text-[13px] text-slate-600 mb-5 leading-relaxed relative z-10">
+                <h2 className="text-[15px] font-bold text-stone-100 mb-2 relative z-10 font-mono">Target Job</h2>
+                <p className="text-[13px] text-stone-400 mb-5 leading-relaxed relative z-10">
                   RezoomAI will analyze the job posting and instantly tailor your resume to the exact role.
                 </p>
 
@@ -435,10 +435,10 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
                     value={jobUrl}
                     onChange={(e) => setJobUrl(e.target.value)}
                     placeholder="https://boards.greenhouse.io/..."
-                    className="w-full text-sm bg-white border-slate-200 h-10 shadow-sm"
+                    className="w-full text-sm bg-stone-900 border-stone-700 h-10"
                   />
                   <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white border-0 py-2.5 shadow-md shadow-emerald-600/20"
+                    className="w-full border-orange-600/50 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 py-2.5"
                     disabled={!jobUrl || generateStatus === "generating"}
                     onClick={handleGenerateTargetedResume}
                   >
@@ -450,19 +450,19 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
-                    className="mt-6 pt-5 border-t border-emerald-200/50"
+                    className="mt-6 pt-5 border-t border-stone-800"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-[14px] font-bold text-slate-900">Custom Resume Ready</h3>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">100% Match</span>
+                      <h3 className="text-[14px] font-bold text-stone-100 font-mono">Custom Resume Ready</h3>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400 bg-orange-600/10 border border-orange-600/30 px-2 py-0.5 font-mono">100% Match</span>
                     </div>
 
-                    <div className="prose prose-sm max-w-none text-[12px] leading-relaxed text-slate-700 bg-white/80 backdrop-blur-sm p-4 border border-emerald-100 rounded-xl h-64 overflow-y-auto whitespace-pre-wrap shadow-inner custom-scrollbar">
+                    <div className="text-[12px] leading-relaxed text-stone-300 bg-stone-900 p-4 border border-stone-800 h-64 overflow-y-auto whitespace-pre-wrap custom-scrollbar font-mono">
                       {customResumeText}
                     </div>
 
                     <div className="mt-5 flex w-full">
-                      <Button className="w-full bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/10" onClick={() => setActiveTab(2)}>
+                      <Button className="w-full border-orange-600/50 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500" onClick={() => setActiveTab(2)}>
                         Approve & Prepare to Apply →
                       </Button>
                     </div>
@@ -475,19 +475,19 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
           {/* Tab 3: Execution */}
           {activeTab === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-              <section className="rounded-2xl border border-slate-200/60 bg-white p-8 text-center shadow-sm relative overflow-hidden">
-                <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full shadow-sm mx-auto flex items-center justify-center text-3xl mb-5 border border-white relative z-10">
+              <section className="border border-stone-800 bg-stone-900 p-8 text-center relative overflow-hidden">
+                <div className="w-20 h-20 border border-orange-600/30 bg-orange-600/10 mx-auto flex items-center justify-center text-3xl mb-5 relative z-10">
                   🚀
                 </div>
-                <h2 className="text-xl font-bold text-slate-900 mb-3 relative z-10 tracking-tight">System Ready.</h2>
-                <p className="text-[13px] text-slate-500 mb-8 leading-relaxed max-w-[240px] mx-auto relative z-10">
+                <h2 className="text-xl font-bold text-stone-100 mb-3 relative z-10 tracking-tight font-mono">System Ready.</h2>
+                <p className="text-[13px] text-stone-500 mb-8 leading-relaxed max-w-[240px] mx-auto relative z-10">
                   RezoomAI will now launch a secure browser session to autofill every field and upload your generated PDF.
                 </p>
 
                 <div className="relative z-10">
                   <Button
                     variant={executeStatus === "success" ? "secondary" : "primary"}
-                    className={executeStatus === "idle" ? "w-full shadow-emerald-500/30 shadow-xl bg-emerald-600 hover:bg-emerald-500 text-white border-0 py-3 text-[15px] tracking-wide font-bold transition-transform hover:scale-[1.02]" : "w-full py-3"}
+                    className={executeStatus === "idle" ? "w-full border-orange-600/50 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 py-3 text-[15px] tracking-wide font-bold" : "w-full py-3"}
                     onClick={handleExecuteAgent}
                     disabled={executeStatus === "executing" || executeStatus === "success" || !customResumeText}
                   >
@@ -502,22 +502,22 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-8 text-left bg-[#0f172a] rounded-xl p-4 overflow-hidden relative shadow-inner border border-slate-800 z-10"
+                    className="mt-8 text-left bg-stone-950 p-4 overflow-hidden relative border border-stone-800 z-10"
                   >
-                    <div className="flex items-center gap-1.5 mb-3 border-b border-slate-800/80 pb-3">
+                    <div className="flex items-center gap-1.5 mb-3 border-b border-stone-800/80 pb-3">
                       <div className="w-2.5 h-2.5 rounded-full bg-rose-500 opacity-80"></div>
                       <div className="w-2.5 h-2.5 rounded-full bg-amber-500 opacity-80"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 opacity-80"></div>
-                      <span className="text-[10px] text-slate-500 ml-2 font-mono uppercase tracking-widest">rezoomai-terminal</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500 opacity-80"></div>
+                      <span className="text-[10px] text-stone-500 ml-2 font-mono uppercase tracking-widest">rezoomai-terminal</span>
                     </div>
 
                     <div className="font-mono text-[11px] space-y-2 h-48 overflow-y-auto no-scrollbar">
                       {executeStatus === "executing" && executionLogs.length === 0 && (
-                        <div className="text-emerald-400 animate-pulse">Initializing headless edge engine...</div>
+                        <div className="text-orange-400 animate-pulse">Initializing headless edge engine...</div>
                       )}
                       {executionLogs.map((log, i) => (
-                        <div key={i} className={log.includes("FAILED") || log.includes("error") ? "text-rose-400" : log.includes("SKIPPED") ? "text-amber-400" : "text-emerald-400/90"}>
-                          <span className="text-slate-600 mr-2 opacity-60">[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
+                        <div key={i} className={log.includes("FAILED") || log.includes("error") ? "text-rose-400" : log.includes("SKIPPED") ? "text-amber-400" : "text-orange-400/90"}>
+                          <span className="text-stone-600 mr-2 opacity-60">[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
                           {log}
                         </div>
                       ))}
@@ -530,15 +530,15 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
 
           {/* Tab 4: AI Chat */}
           {activeTab === 3 && (
-            <div className="flex flex-col h-[calc(100vh-280px)] animate-in fade-in slide-in-from-right-4 duration-300 rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl overflow-hidden relative">
+            <div className="flex flex-col h-[calc(100vh-280px)] animate-in fade-in slide-in-from-right-4 duration-300 border border-stone-800 bg-stone-950 overflow-hidden relative">
               {/* Terminal Header Bar */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-800 bg-slate-900 absolute top-0 w-full z-10">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-stone-800 bg-stone-900 absolute top-0 w-full z-10">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-rose-500/80"></div>
                   <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
                 </div>
-                <div className="mx-auto text-[11px] font-mono text-slate-400">rezoomai-sh</div>
+                <div className="mx-auto text-[11px] font-mono text-stone-400">rezoomai-sh</div>
               </div>
 
               {/* Chat Messages */}
@@ -550,14 +550,14 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
                   <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                     <div className="flex items-center gap-2 mb-1.5">
                       {msg.role === "assistant" && <span className="text-xl">🚀</span>}
-                      <span className="text-[10px] font-mono tracking-widest uppercase text-slate-500">
+                      <span className="text-[10px] font-mono tracking-widest uppercase text-stone-500">
                         {msg.role === "user" ? "You" : "RezoomAI"}
                       </span>
                       {msg.role === "user" && <span className="text-xl">🧑‍💻</span>}
                     </div>
-                    <div className={`text-[13px] leading-relaxed max-w-[85%] px-4 py-3 rounded-2xl ${msg.role === "user"
-                        ? "bg-emerald-600/20 text-emerald-100 border border-emerald-500/30 rounded-tr-sm"
-                        : "bg-slate-800/60 text-slate-300 border border-slate-700 rounded-tl-sm whitespace-pre-wrap font-sans"
+                    <div className={`text-[13px] leading-relaxed max-w-[85%] px-4 py-3 ${msg.role === "user"
+                        ? "bg-orange-600/20 text-orange-100 border border-orange-500/30"
+                        : "bg-stone-800/60 text-stone-300 border border-stone-700 whitespace-pre-wrap font-sans"
                       }`}>
                       {msg.content}
                     </div>
@@ -568,32 +568,32 @@ export function AgentSidebar({ initialJobUrl = "", onClose }: AgentSidebarProps)
                   <div className="flex flex-col items-start animate-pulse">
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className="text-xl">🚀</span>
-                      <span className="text-[10px] font-mono tracking-widest uppercase text-slate-500">RezoomAI</span>
+                      <span className="text-[10px] font-mono tracking-widest uppercase text-stone-500">RezoomAI</span>
                     </div>
-                    <div className="bg-slate-800/60 border border-slate-700 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                    <div className="bg-stone-800/60 border border-stone-700 px-4 py-3 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                      <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                      <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Sticky Input */}
-              <div className="p-3 bg-slate-900 border-t border-slate-800">
+              <div className="p-3 bg-stone-900 border-t border-stone-800">
                 <form onSubmit={handleSendMessage} className="relative flex items-center">
-                  <span className="absolute left-4 text-emerald-500 font-mono font-bold">$</span>
+                  <span className="absolute left-4 text-orange-500 font-mono font-bold">$</span>
                   <input
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder={aiAccess.requiresLogin ? "Log in to continue with RezoomAI..." : "Ask RezoomAI for resume help or prep advice..."}
                     disabled={isChatLoading || aiAccess.requiresLogin}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 pl-8 pr-12 text-[13px] text-emerald-100 font-mono focus:outline-none focus:border-emerald-500/50 shadow-inner placeholder:text-slate-600"
+                    className="w-full bg-stone-950 border border-stone-800 py-3 pl-8 pr-12 text-[13px] text-orange-100 font-mono focus:outline-none focus:border-orange-600/50 placeholder:text-stone-600"
                   />
                   <button
                     type="submit"
                     disabled={!chatInput.trim() || isChatLoading || aiAccess.requiresLogin}
-                    className="absolute right-2 p-1.5 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-lg transition-colors disabled:opacity-50"
+                    className="absolute right-2 p-1.5 bg-orange-600/20 hover:bg-orange-600/40 text-orange-400 transition-colors disabled:opacity-50"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

@@ -97,10 +97,10 @@ export default function ResumeAnalysisPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
           RezoomAI Resume Analysis
         </p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-900 sm:text-4xl">
+        <h1 className="mt-2 text-3xl font-semibold font-mono text-stone-100 sm:text-4xl">
           Tailor your resume to this role in minutes.
         </h1>
-        <p className="mt-3 text-sm text-slate-600">
+        <p className="mt-3 text-sm text-stone-400">
           Get ATS-friendly bullets, match score, and keyword suggestions.
         </p>
       </div>
@@ -108,8 +108,8 @@ export default function ResumeAnalysisPage() {
       {!isAuthenticated ? (
         <Card className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">5 free RezoomAI tries</h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <h2 className="text-lg font-semibold text-stone-100">5 free RezoomAI tries</h2>
+            <p className="mt-1 text-sm text-stone-400">
               Start with 5 free RezoomAI actions in this browser, then log in to keep unlimited access and save your results.
             </p>
           </div>
@@ -129,7 +129,7 @@ export default function ResumeAnalysisPage() {
           />
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Resume file (PDF or DOCX)
             </label>
             <Input
@@ -147,14 +147,14 @@ export default function ResumeAnalysisPage() {
               disabled={formDisabled}
             />
             {fileMeta ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-stone-500">
                 Selected: {fileMeta.name} ({Math.round(fileMeta.size / 1024)}kb)
               </p>
             ) : null}
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Resume text
             </label>
             <textarea
@@ -162,13 +162,13 @@ export default function ResumeAnalysisPage() {
               value={resumeText}
               onChange={(event) => setResumeText(event.target.value)}
               placeholder="Paste your resume text here..."
-              className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]"
+              className="mt-3 w-full border border-stone-800 bg-stone-900 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-600 focus:border-orange-600 focus:outline-none font-mono"
               disabled={formDisabled}
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Job description (optional)
             </label>
             <textarea
@@ -176,7 +176,7 @@ export default function ResumeAnalysisPage() {
               value={jobDescription}
               onChange={(event) => setJobDescription(event.target.value)}
               placeholder="Paste the job description to tailor the analysis..."
-              className="mt-3 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[rgb(var(--brand-hover-rgb))] focus:outline-none focus:ring-2 focus:ring-[var(--brand-ring)]"
+              className="mt-3 w-full border border-stone-800 bg-stone-900 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-600 focus:border-orange-600 focus:outline-none font-mono"
               disabled={formDisabled}
             />
           </div>
@@ -199,22 +199,22 @@ export default function ResumeAnalysisPage() {
       {result ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           <Card>
-            <h2 className="text-lg font-semibold text-slate-900">Match score</h2>
-            <p className="mt-2 text-4xl font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-stone-100">Match score</h2>
+            <p className="mt-2 text-4xl font-semibold text-stone-100">
               {result.score}
-              <span className="text-base text-slate-500">/100</span>
+              <span className="text-base text-stone-500">/100</span>
             </p>
             <div className="mt-4">
-              <h3 className="text-sm font-semibold text-slate-700">Strengths</h3>
-              <ul className="mt-2 space-y-2 text-sm text-slate-600">
+              <h3 className="text-sm font-semibold text-stone-300">Strengths</h3>
+              <ul className="mt-2 space-y-2 text-sm text-stone-400">
                 {result.strengths.map((item) => (
                   <li key={item}>• {item}</li>
                 ))}
               </ul>
             </div>
             <div className="mt-4">
-              <h3 className="text-sm font-semibold text-slate-700">Gaps</h3>
-              <ul className="mt-2 space-y-2 text-sm text-slate-600">
+              <h3 className="text-sm font-semibold text-stone-300">Gaps</h3>
+              <ul className="mt-2 space-y-2 text-sm text-stone-400">
                 {result.gaps.map((item) => (
                   <li key={item}>• {item}</li>
                 ))}
@@ -224,27 +224,27 @@ export default function ResumeAnalysisPage() {
 
           <Card>
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-stone-100">
                 Suggested bullets
               </h2>
               <Button size="sm" variant="secondary" onClick={handleCopy}>
                 Copy
               </Button>
             </div>
-            <ul className="mt-4 space-y-3 text-sm text-slate-600">
+            <ul className="mt-4 space-y-3 text-sm text-stone-400">
               {result.bulletSuggestions.map((item) => (
                 <li key={item}>• {item}</li>
               ))}
             </ul>
             <div className="mt-6">
-              <h3 className="text-sm font-semibold text-slate-700">
+              <h3 className="text-sm font-semibold text-stone-300">
                 Recommended keywords
               </h3>
               <div className="mt-2 flex flex-wrap gap-2">
                 {result.keywords.map((keyword) => (
                   <span
                     key={keyword}
-                    className="rounded-full border border-[rgba(var(--brand-rgb),0.3)] bg-[var(--brand-tint)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-700"
+                    className="border border-orange-600/30 bg-orange-600/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-orange-500"
                   >
                     {keyword}
                   </span>

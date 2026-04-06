@@ -129,57 +129,57 @@ export function Pricing() {
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-brand">
           Pricing
         </p>
-        <h2 className="text-3xl font-semibold text-slate-950 sm:text-4xl">
+        <h2 className="text-3xl font-semibold text-stone-100 sm:text-4xl font-mono">
           Start free. Upgrade only when you&apos;re ready.
         </h2>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-stone-400">
           Get full access with a free account. Upgrade to Pro only if you want unlimited AI, cover letters, and daily alerts.
         </p>
       </div>
 
       {promo?.isActive ? (
-        <p className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-slate-700">
+        <p className="rounded-none border border-orange-600/30 bg-orange-600/10 px-4 py-3 text-sm text-orange-200">
           {promo.holidayName} sale is live. Pro is {promo.discountPercent}% off until the countdown ends.
         </p>
       ) : null}
 
       {note ? (
-        <p className="text-sm text-slate-600">{note}</p>
+        <p className="text-sm text-stone-400">{note}</p>
       ) : null}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {displayedTiers.map((tier) => (
           <div
             key={tier.name}
-            className={`relative rounded-3xl border bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_60px_rgba(15,23,42,0.12)] ${tier.highlighted
-                ? "border-[rgba(var(--brand-rgb),0.4)] shadow-[0_26px_70px_var(--brand-glow)] lg:scale-[1.02]"
-                : "border-slate-200"
+            className={`relative border bg-[#0c0c0c] p-6 transition hover:-translate-y-1 ${tier.highlighted
+                ? "border-[rgba(var(--brand-rgb),0.4)] lg:scale-[1.02]"
+                : "border-stone-800"
               } ${selectedPlan === tier.id
                 ? "ring-2 ring-[var(--brand-ring)]"
                 : ""
               }`}
           >
             {tier.highlighted ? (
-              <span className="absolute right-6 top-6 rounded-full border border-[rgba(var(--brand-rgb),0.3)] bg-[var(--brand-tint)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-700">
+              <span className="absolute right-6 top-6 border border-[rgba(var(--brand-rgb),0.3)] bg-[var(--brand-tint)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-orange-400 font-mono">
                 Recommended
               </span>
             ) : null}
             {promo?.isActive && tier.id === "pro" ? (
-              <span className="absolute left-6 top-6 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-700">
+              <span className="absolute left-6 top-6 border border-orange-600/30 bg-orange-600/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-orange-400 font-mono">
                 {promo.discountPercent}% Off
               </span>
             ) : null}
-            <h3 className="text-xl font-semibold text-slate-900">
+            <h3 className="text-xl font-semibold text-stone-100 font-mono">
               {tier.name}
             </h3>
-            <p className="mt-2 text-sm text-slate-600">{tier.description}</p>
+            <p className="mt-2 text-sm text-stone-400">{tier.description}</p>
             <div className="mt-6 flex items-end gap-2">
-              <span className="text-4xl font-semibold text-slate-900">
+              <span className="text-4xl font-semibold text-stone-100 font-mono">
                 {tier.price}
               </span>
-              <span className="text-xs text-slate-500">{tier.period}</span>
+              <span className="text-xs text-stone-500">{tier.period}</span>
             </div>
-            <ul className="mt-6 space-y-2 text-sm text-slate-600">
+            <ul className="mt-6 space-y-2 text-sm text-stone-400">
               {tier.features.map((feature) => (
                 <li key={feature} className="flex items-center gap-2">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--brand-tint)] text-brand">

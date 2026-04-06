@@ -72,29 +72,29 @@ export default function AlertsPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">Alerts</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-3xl font-semibold font-mono text-stone-100 sm:text-4xl">Alerts</h1>
+        <p className="mt-2 text-sm text-stone-400">
           Control how often Rezoomind emails you about new matches.
         </p>
       </div>
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="flex items-center justify-between border border-stone-800 bg-stone-900 px-4 py-4">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Email alerts</p>
-              <p className="text-xs text-slate-500">Toggle internship alert emails.</p>
+              <p className="text-sm font-semibold text-stone-100">Email alerts</p>
+              <p className="text-xs text-stone-500">Toggle internship alert emails.</p>
             </div>
             <button
               type="button"
               onClick={() => setEnabled((prev) => !prev)}
               className={`relative h-8 w-14 rounded-full transition ${
-                enabled ? "bg-[rgb(var(--brand-rgb))]" : "bg-slate-200"
+                enabled ? "bg-[rgb(var(--brand-rgb))]" : "bg-stone-700"
               }`}
               disabled={loading}
             >
               <span
-                className={`absolute top-1 h-6 w-6 rounded-full bg-white transition ${
+                className={`absolute top-1 h-6 w-6 rounded-full bg-stone-200 transition ${
                   enabled ? "left-7" : "left-1"
                 }`}
               />
@@ -102,7 +102,7 @@ export default function AlertsPage() {
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
               Frequency
             </p>
             <div className="mt-3 grid gap-3 md:grid-cols-2">
@@ -113,10 +113,10 @@ export default function AlertsPage() {
                     key={option}
                     type="button"
                     onClick={() => setFrequency(option)}
-                    className={`rounded-2xl border px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition ${
+                    className={`border px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition ${
                       selected
-                        ? "border-[rgba(var(--brand-rgb),0.5)] bg-[var(--brand-tint)] text-slate-900"
-                        : "border-slate-200 text-slate-600 hover:border-[rgba(var(--brand-rgb),0.4)]"
+                        ? "border-orange-600/50 bg-orange-600/10 text-orange-500"
+                        : "border-stone-800 text-stone-400 hover:border-orange-600/40"
                     }`}
                     disabled={loading}
                   >

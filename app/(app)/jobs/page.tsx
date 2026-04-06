@@ -281,7 +281,7 @@ function getFitPresentation(insight: JobInsight) {
   if (insight.scoreSource === 'estimated') {
     return {
       label: 'Estimated fit',
-      tone: 'border-slate-300 bg-slate-50 text-slate-700',
+      tone: 'border-stone-700 bg-stone-800 text-stone-300',
       caption: 'Based on role, tags, and available job data',
     };
   }
@@ -289,14 +289,14 @@ function getFitPresentation(insight: JobInsight) {
   if (insight.score >= 85) {
     return {
       label: 'Strong fit',
-      tone: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+      tone: 'border-emerald-700 bg-emerald-900/30 text-emerald-400',
       caption: 'AI-backed from your resume and job overlap',
     };
   }
 
   return {
     label: 'Likely fit',
-    tone: 'border-cyan-300 bg-cyan-50 text-cyan-700',
+    tone: 'border-orange-600/50 bg-orange-600/10 text-orange-400',
     caption: 'AI-backed from your resume and job overlap',
   };
 }
@@ -854,50 +854,50 @@ export default function JobsPage() {
 
   if (loading && !hasLoadedOnce) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] pt-24 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-950 pt-24 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="relative h-10 w-10">
-            <span className="absolute inset-0 animate-ping rounded-full bg-cyan-400 opacity-30" />
-            <span className="relative block h-10 w-10 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
+            <span className="absolute inset-0 animate-ping bg-orange-600 opacity-20" />
+            <span className="relative block h-10 w-10 border-2 border-orange-600 border-t-transparent animate-spin" />
           </div>
-          <p className="text-sm font-medium text-slate-700">Finding your best matches…</p>
-          <p className="text-xs text-slate-400">Pulling fresh internship and new-grad roles.</p>
+          <p className="text-sm font-mono font-medium text-stone-300">Finding your best matches…</p>
+          <p className="text-xs text-stone-500">Pulling fresh internship and new-grad roles.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb]">
+    <div className="min-h-screen bg-stone-950">
 
       {/* ── Breadcrumb bar ─────────────────────────────────────────── */}
-      <div className="sticky top-[64px] z-20 border-b border-slate-200/60 bg-[#f8f9fb]/90 backdrop-blur-md">
+      <div className="sticky top-[64px] z-20 border-b border-stone-800 bg-stone-950/95 backdrop-blur-md">
         <div className="mx-auto max-w-[1600px] flex items-center justify-between px-4 sm:px-6 py-2.5">
-          <div className="flex items-center gap-1.5 text-sm">
-            <span className="font-medium text-slate-400">Jobs</span>
-            <span className="text-slate-300">/</span>
-            <span className="font-medium text-slate-700">Discover</span>
+          <div className="flex items-center gap-1.5 text-sm font-mono">
+            <span className="font-medium text-stone-500">Jobs</span>
+            <span className="text-stone-600">/</span>
+            <span className="font-medium text-stone-300">Discover</span>
             {filteredJobs.length > 0 && (
-              <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500">
+              <span className="ml-2 bg-stone-800 px-2 py-0.5 text-xs font-medium text-stone-500">
                 {filteredJobs.length.toLocaleString()}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-stone-500 font-mono">
             {lastSyncTime && <span>Updated {getRelativeTime(lastSyncTime)}</span>}
             <button
               type="button"
               onClick={() => void triggerBackgroundSync()}
               disabled={syncing}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              className={`px-3 py-1.5 text-xs font-mono font-medium transition ${
                 syncing
-                  ? 'text-slate-400'
-                  : 'bg-slate-900 text-white hover:bg-slate-700 cursor-pointer'
+                  ? 'text-stone-500'
+                  : 'border border-stone-700 bg-stone-900/30 text-stone-400 hover:border-orange-600/50 hover:text-orange-500 cursor-pointer'
               }`}
             >
               {syncing ? (
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 animate-spin rounded-full border border-slate-400 border-t-transparent" />
+                  <span className="h-2 w-2 animate-spin border border-stone-500 border-t-transparent" />
                   Syncing…
                 </span>
               ) : (
@@ -909,13 +909,13 @@ export default function JobsPage() {
       </div>
 
       {/* ── Search + filter strip ──────────────────────────────────── */}
-      <div className="sticky top-[107px] z-10 border-b border-slate-200/50 bg-[#f8f9fb]/90 backdrop-blur-md">
+      <div className="sticky top-[107px] z-10 border-b border-stone-800 bg-stone-950/95 backdrop-blur-md">
         <div className="mx-auto max-w-[1600px] px-4 sm:px-6 py-3">
           <div className="flex flex-wrap items-center gap-2">
 
             {/* Search */}
             <div className="relative min-w-[220px] flex-1 max-w-xs">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" />
               </svg>
               <input
@@ -923,7 +923,7 @@ export default function JobsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Role, company, or skill…"
-                className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm text-slate-700 placeholder-slate-400 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
+                className="w-full bg-transparent border-0 border-b border-stone-800 py-2 pl-8 pr-3 text-sm font-mono text-stone-300 placeholder-stone-600 outline-none transition focus:border-orange-600"
               />
             </div>
 
@@ -962,19 +962,19 @@ export default function JobsPage() {
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none transition focus:border-cyan-400"
+              className="bg-transparent border-0 border-b border-stone-800 px-3 py-2 text-sm font-mono text-stone-400 outline-none transition focus:border-orange-600"
             >
               {locationOptions.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+                <option key={o.value} value={o.value} className="bg-stone-900 text-stone-300">{o.label}</option>
               ))}
             </select>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none transition focus:border-cyan-400"
+              className="bg-transparent border-0 border-b border-stone-800 px-3 py-2 text-sm font-mono text-stone-400 outline-none transition focus:border-orange-600"
             >
               {ROLE_CATEGORIES.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+                <option key={o.value} value={o.value} className="bg-stone-900 text-stone-300">{o.label}</option>
               ))}
             </select>
 
@@ -983,17 +983,17 @@ export default function JobsPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-xl border-0 bg-transparent text-sm text-slate-500 outline-none focus:text-slate-700"
+                className="border-0 bg-transparent text-sm font-mono text-stone-500 outline-none focus:text-stone-300"
               >
                 {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
+                  <option key={o.value} value={o.value} className="bg-stone-900 text-stone-300">{o.label}</option>
                 ))}
               </select>
               {activeFilters.length > 0 && (
                 <button
                   type="button"
                   onClick={clearAllFilters}
-                  className="text-xs text-slate-400 hover:text-slate-700 transition"
+                  className="text-xs font-mono text-stone-500 hover:text-orange-500 transition"
                 >
                   Clear all
                 </button>
@@ -1004,22 +1004,22 @@ export default function JobsPage() {
       </div>
 
       {/* ── 3-column grid ─────────────────────────────────────────── */}
-      <div className="mx-auto max-w-[1600px] grid xl:grid-cols-[200px_1fr_380px] divide-x divide-slate-200/60 pt-0">
+      <div className="mx-auto max-w-[1600px] grid xl:grid-cols-[200px_1fr_380px] divide-x divide-stone-800 pt-0">
 
         {/* ── LEFT RAIL ── */}
         <aside className="hidden xl:block sticky top-[155px] self-start max-h-[calc(100vh-155px)] overflow-y-auto py-8 px-4 space-y-7">
           <div>
-            <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Category</p>
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">Category</p>
             <nav className="space-y-0.5">
               {ROLE_CATEGORIES.map((cat) => (
                 <button
                   key={cat.value}
                   type="button"
                   onClick={() => setSelectedCategory(cat.value)}
-                  className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
+                  className={`w-full px-3 py-2 text-left text-sm font-mono transition ${
                     selectedCategory === cat.value
-                      ? 'bg-white font-medium text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:bg-white/60 hover:text-slate-800'
+                      ? 'bg-orange-600/10 font-medium text-orange-500'
+                      : 'text-stone-500 hover:bg-stone-900/80 hover:text-stone-300'
                   }`}
                 >
                   {cat.label}
@@ -1032,16 +1032,16 @@ export default function JobsPage() {
           {!profileState.hasResume && (
             <Link
               href={setupHref}
-              className="block rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-100 p-3 text-xs leading-5 text-slate-600 hover:border-cyan-300 transition"
+              className="block bg-orange-600/5 border border-orange-600/30 p-3 text-xs leading-5 text-stone-400 hover:border-orange-600/50 transition"
             >
-              <span className="block font-semibold text-slate-800 mb-0.5">Add your resume</span>
+              <span className="block font-mono font-semibold text-stone-200 mb-0.5">Add your resume</span>
               Turn estimated fits into AI-powered match scores.
             </Link>
           )}
 
           {profileState.hasResume && (
-            <div className="text-xs text-slate-400 space-y-1">
-              <p className="font-medium text-slate-600">AI active</p>
+            <div className="text-xs text-stone-500 space-y-1 font-mono">
+              <p className="font-medium text-stone-400">AI active</p>
               <p>Scoring visible roles against your resume.</p>
             </div>
           )}
@@ -1076,10 +1076,10 @@ export default function JobsPage() {
                   <button
                     type="button"
                     onClick={() => setDisplayCount((c) => c + 40)}
-                    className="rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:border-cyan-300 hover:text-cyan-700 hover:shadow-sm"
+                    className="border border-stone-700 bg-stone-900/30 px-6 py-2.5 text-sm font-mono text-stone-400 transition hover:border-orange-600/50 hover:text-orange-500"
                   >
                     Load {Math.min(40, filteredJobs.length - displayCount)} more roles
-                    <span className="ml-2 text-slate-400">({(filteredJobs.length - displayCount).toLocaleString()} left)</span>
+                    <span className="ml-2 text-stone-600">({(filteredJobs.length - displayCount).toLocaleString()} left)</span>
                   </button>
                 </div>
               )}
@@ -1187,8 +1187,8 @@ function TopMatchCard({
   const freshness = getJobFreshness(job);
 
   const scoreColor = insight.scoreSource === 'ai'
-    ? insight.score >= 85 ? 'text-emerald-600' : 'text-cyan-600'
-    : 'text-slate-500';
+    ? insight.score >= 85 ? 'text-emerald-400' : 'text-orange-500'
+    : 'text-stone-500';
 
   return (
     <motion.div
@@ -1198,13 +1198,13 @@ function TopMatchCard({
       onClick={onSelect}
       className={`group relative flex cursor-pointer items-start gap-4 border-b px-5 py-4 transition-colors ${
         selected
-          ? 'border-b-transparent bg-white shadow-[inset_2px_0_0_0] shadow-cyan-400'
-          : 'border-slate-100 hover:bg-white/80'
+          ? 'border-b-transparent bg-stone-800/50 border-l-2 border-l-orange-600'
+          : 'border-stone-800 hover:bg-stone-900/80'
       }`}
     >
       {/* Company monogram */}
-      <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold transition-colors ${
-        selected ? 'bg-cyan-50 text-cyan-700' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+      <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center text-[11px] font-bold font-mono transition-colors ${
+        selected ? 'bg-orange-600/20 text-orange-500' : 'bg-stone-800 text-stone-400 group-hover:bg-stone-700'
       }`}>
         {job.company.slice(0, 2).toUpperCase()}
       </div>
@@ -1213,47 +1213,47 @@ function TopMatchCard({
       <div className="min-w-0 flex-1">
         {/* Row 1: title + score */}
         <div className="flex items-start justify-between gap-3">
-          <h3 className={`truncate text-sm font-semibold leading-tight ${selected ? 'text-slate-950' : 'text-slate-800'}`}>
+          <h3 className={`truncate text-sm font-mono font-semibold leading-tight ${selected ? 'text-stone-100' : 'text-stone-200'}`}>
             {job.role}
           </h3>
-          <span className={`shrink-0 text-sm font-bold tabular-nums ${scoreColor}`}>
+          <span className={`shrink-0 text-sm font-bold font-mono tabular-nums ${scoreColor}`}>
             {insight.score}%
           </span>
         </div>
 
         {/* Row 2: meta */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
-          <span className="font-medium text-slate-500">{job.company}</span>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-stone-500">
+          <span className="font-medium text-stone-400">{job.company}</span>
           {normalizeLocation(job.location) && (
             <><span>·</span><span>{normalizeLocation(job.location)}</span></>
           )}
           {salary && (
-            <><span>·</span><span className="text-emerald-600 font-medium">{salary}</span></>
+            <><span>·</span><span className="text-emerald-400 font-medium">{salary}</span></>
           )}
           <span>·</span>
           <span>{getRelativeTime(job.date_posted || job.created_at)}</span>
           {freshness === 'new' && (
-            <span className="rounded-full bg-cyan-100 px-1.5 py-0.5 font-semibold text-cyan-700 text-[10px]">New</span>
+            <span className="bg-orange-600/20 px-1.5 py-0.5 font-mono font-semibold text-orange-500 text-[10px]">New</span>
           )}
           {freshness === 'recent' && (
-            <span className="rounded-full bg-blue-100 px-1.5 py-0.5 font-semibold text-blue-700 text-[10px]">Recent</span>
+            <span className="bg-stone-800 px-1.5 py-0.5 font-mono font-semibold text-stone-400 text-[10px]">Recent</span>
           )}
         </div>
 
         {/* Fit badge — subtle */}
         <div className="mt-1.5 flex items-center gap-2">
-          <span className={`text-[10px] font-medium ${
-            insight.scoreSource === 'ai' ? 'text-cyan-600' : 'text-slate-400'
+          <span className={`text-[10px] font-mono font-medium ${
+            insight.scoreSource === 'ai' ? 'text-orange-500' : 'text-stone-500'
           }`}>
             {fit.label}
           </span>
           {/* Micro progress bar */}
-          <div className="flex-1 max-w-[80px] h-0.5 rounded-full bg-slate-100 overflow-hidden">
+          <div className="flex-1 max-w-[80px] h-0.5 bg-stone-800 overflow-hidden">
             <div
-              className={`h-full rounded-full ${
+              className={`h-full ${
                 insight.scoreSource === 'ai'
-                  ? 'bg-gradient-to-r from-cyan-400 to-emerald-400'
-                  : 'bg-slate-300'
+                  ? 'bg-orange-600'
+                  : 'bg-stone-600'
               }`}
               style={{ width: `${insight.score}%` }}
             />
@@ -1269,10 +1269,10 @@ function TopMatchCard({
         <button
           type="button"
           onClick={onToggleSaved}
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+          className={`px-2.5 py-1 text-[11px] font-mono font-semibold transition ${
             saved
-              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
-              : 'bg-white border border-slate-200 text-slate-500 hover:border-slate-400'
+              ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-700'
+              : 'bg-stone-900 border border-stone-700 text-stone-400 hover:border-stone-500'
           }`}
         >
           {saved ? '✓' : 'Save'}
@@ -1282,7 +1282,7 @@ function TopMatchCard({
             href={job.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-500 hover:border-slate-400 transition"
+            className="border border-stone-700 bg-stone-900 px-2.5 py-1 text-[11px] font-mono font-semibold text-stone-400 hover:border-orange-600/50 hover:text-orange-500 transition"
           >
             Open ↗
           </a>
@@ -1319,9 +1319,9 @@ function DetailPanel({
   if (!job || !insight) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24 px-8 text-center">
-        <div className="text-3xl">←</div>
-        <p className="text-sm font-semibold text-slate-700">Select a role</p>
-        <p className="text-xs text-slate-400 leading-5">
+        <div className="text-3xl text-stone-600">←</div>
+        <p className="text-sm font-mono font-semibold text-stone-400">Select a role</p>
+        <p className="text-xs text-stone-500 leading-5">
           Click any job and this panel will explain the fit, flag missing skills, and surface your next move.
         </p>
       </div>
@@ -1332,53 +1332,53 @@ function DetailPanel({
   const salary = formatSalary(job);
 
   const scoreColor = insight.scoreSource === 'ai'
-    ? insight.score >= 85 ? 'text-emerald-600' : 'text-cyan-600'
-    : 'text-slate-600';
+    ? insight.score >= 85 ? 'text-emerald-400' : 'text-orange-500'
+    : 'text-stone-400';
 
   return (
     <div className="py-6">
       {/* Header */}
-      <div className="px-6 pb-5 border-b border-slate-100">
+      <div className="px-6 pb-5 border-b border-stone-800">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-medium text-slate-400">{job.company}</p>
-            <h2 className="mt-1 text-lg font-semibold leading-snug text-slate-950">{job.role}</h2>
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
+            <p className="text-xs font-mono font-medium text-stone-500">{job.company}</p>
+            <h2 className="mt-1 text-lg font-mono font-semibold leading-snug text-stone-100">{job.role}</h2>
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-stone-500">
               {normalizeLocation(job.location) && <span>{normalizeLocation(job.location)}</span>}
-              {salary && <span className="text-emerald-600 font-medium">{salary}</span>}
+              {salary && <span className="text-emerald-400 font-medium">{salary}</span>}
               <span>Posted {getRelativeTime(job.date_posted || job.created_at)}</span>
             </div>
           </div>
           {/* Score */}
           <div className="shrink-0 text-right">
-            <p className={`text-3xl font-bold tabular-nums leading-none ${scoreColor}`}>
+            <p className={`text-3xl font-bold font-mono tabular-nums leading-none ${scoreColor}`}>
               {insight.score}%
             </p>
-            <p className="mt-1 text-[10px] text-slate-400">{fit.label}</p>
+            <p className="mt-1 text-[10px] font-mono text-stone-500">{fit.label}</p>
           </div>
         </div>
         {/* Score bar */}
-        <div className="mt-4 h-1 w-full rounded-full bg-slate-100 overflow-hidden">
+        <div className="mt-4 h-1 w-full bg-stone-800 overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${
+            className={`h-full transition-all duration-500 ${
               insight.scoreSource === 'ai'
-                ? 'bg-gradient-to-r from-cyan-400 to-emerald-400'
-                : 'bg-slate-300'
+                ? 'bg-orange-600'
+                : 'bg-stone-600'
             }`}
             style={{ width: `${insight.score}%` }}
           />
         </div>
-        <p className="mt-1.5 text-[10px] text-slate-400">{fit.caption}</p>
+        <p className="mt-1.5 text-[10px] font-mono text-stone-500">{fit.caption}</p>
       </div>
 
       {/* Why it fits */}
       {insight.matchReasons.length > 0 && (
-        <div className="px-6 py-5 border-b border-slate-100">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Why it fits</p>
+        <div className="px-6 py-5 border-b border-stone-800">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">Why it fits</p>
           <ul className="mt-3 space-y-2.5">
             {insight.matchReasons.map((reason) => (
-              <li key={reason} className="flex items-start gap-2.5 text-sm text-slate-700 leading-relaxed">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" />
+              <li key={reason} className="flex items-start gap-2.5 text-sm text-stone-300 leading-relaxed">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 bg-orange-600" />
                 {reason}
               </li>
             ))}
@@ -1388,15 +1388,15 @@ function DetailPanel({
 
       {/* Missing skills */}
       {insight.missingSkills.length > 0 && (
-        <div className="px-6 py-5 border-b border-slate-100">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+        <div className="px-6 py-5 border-b border-stone-800">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">
             To strengthen your application
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {insight.missingSkills.map((skill) => (
               <span
                 key={skill}
-                className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700"
+                className="border border-amber-700 bg-amber-900/30 px-2.5 py-1 text-xs font-mono font-medium text-amber-400"
               >
                 {skill}
               </span>
@@ -1407,9 +1407,9 @@ function DetailPanel({
 
       {/* Role snapshot */}
       {job.description && (
-        <div className="px-6 py-5 border-b border-slate-100">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Snapshot</p>
-          <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        <div className="px-6 py-5 border-b border-stone-800">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-500">Snapshot</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-400">
             {job.description.length > 320
               ? `${job.description.slice(0, 320)}…`
               : job.description}
@@ -1429,7 +1429,7 @@ function DetailPanel({
               href={job.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 rounded-xl bg-slate-950 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="flex-1 border border-orange-600/50 bg-orange-600/10 py-2.5 text-center text-sm font-mono font-semibold text-orange-500 transition hover:bg-orange-600/20"
             >
               Open role ↗
             </a>
@@ -1437,10 +1437,10 @@ function DetailPanel({
           <button
             type="button"
             onClick={onToggleSaved}
-            className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+            className={`border px-4 py-2.5 text-sm font-mono font-semibold transition ${
               isSaved
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                : 'border-slate-200 text-slate-700 hover:border-slate-400'
+                ? 'border-emerald-700 bg-emerald-900/30 text-emerald-400'
+                : 'border-stone-700 text-stone-400 hover:border-stone-500'
             }`}
           >
             {isSaved ? '✓ Saved' : 'Save'}
@@ -1454,7 +1454,7 @@ function DetailPanel({
               type="button"
               onClick={() => onQueueAction('why-fit')}
               disabled={aiLocked}
-              className="rounded-xl bg-cyan-600 py-2 text-xs font-semibold text-white transition hover:bg-cyan-700 disabled:opacity-40"
+              className="border border-orange-600/50 bg-orange-600/10 py-2 text-xs font-mono font-semibold text-orange-500 transition hover:bg-orange-600/20 disabled:opacity-40"
             >
               Explain fit
             </button>
@@ -1462,7 +1462,7 @@ function DetailPanel({
               type="button"
               onClick={() => onQueueAction('tailor-bullets')}
               disabled={aiLocked}
-              className="rounded-xl bg-slate-100 py-2 text-xs font-semibold text-slate-800 transition hover:bg-slate-200 disabled:opacity-40"
+              className="border border-stone-700 bg-stone-900/30 py-2 text-xs font-mono font-semibold text-stone-400 transition hover:border-stone-600 hover:text-stone-300 disabled:opacity-40"
             >
               Tailor resume
             </button>
@@ -1470,7 +1470,7 @@ function DetailPanel({
               type="button"
               onClick={() => onQueueAction('skill-gap')}
               disabled={aiLocked}
-              className="rounded-xl bg-slate-100 py-2 text-xs font-semibold text-slate-800 transition hover:bg-slate-200 disabled:opacity-40"
+              className="border border-stone-700 bg-stone-900/30 py-2 text-xs font-mono font-semibold text-stone-400 transition hover:border-stone-600 hover:text-stone-300 disabled:opacity-40"
             >
               Find gaps
             </button>
@@ -1478,7 +1478,7 @@ function DetailPanel({
               type="button"
               onClick={() => onQueueAction('custom')}
               disabled={aiLocked}
-              className="rounded-xl bg-slate-100 py-2 text-xs font-semibold text-slate-800 transition hover:bg-slate-200 disabled:opacity-40"
+              className="border border-stone-700 bg-stone-900/30 py-2 text-xs font-mono font-semibold text-stone-400 transition hover:border-stone-600 hover:text-stone-300 disabled:opacity-40"
             >
               Draft outreach
             </button>
@@ -1486,7 +1486,7 @@ function DetailPanel({
         ) : (
           <Link
             href={setupHref}
-            className="block w-full rounded-xl border border-dashed border-cyan-300 py-2.5 text-center text-xs font-semibold text-cyan-700 transition hover:border-cyan-400 hover:bg-cyan-50"
+            className="block w-full border border-dashed border-orange-600/50 py-2.5 text-center text-xs font-mono font-semibold text-orange-500 transition hover:border-orange-600 hover:bg-orange-600/10"
           >
             Add resume for AI match scores →
           </Link>
@@ -1513,9 +1513,9 @@ function EmptyState({
   if (syncing) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-32 text-center">
-        <span className="block h-6 w-6 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-        <p className="text-sm font-medium text-slate-700">Refreshing job listings…</p>
-        <p className="text-xs text-slate-400">Fresh roles are being pulled in.</p>
+        <span className="block h-6 w-6 animate-spin border-2 border-orange-600 border-t-transparent" />
+        <p className="text-sm font-mono font-medium text-stone-300">Refreshing job listings…</p>
+        <p className="text-xs text-stone-500">Fresh roles are being pulled in.</p>
       </div>
     );
   }
@@ -1523,8 +1523,8 @@ function EmptyState({
   if (savedOnly) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-32 text-center">
-        <p className="text-sm font-semibold text-slate-700">No saved jobs yet</p>
-        <p className="text-xs text-slate-400 max-w-xs leading-5">
+        <p className="text-sm font-mono font-semibold text-stone-300">No saved jobs yet</p>
+        <p className="text-xs text-stone-500 max-w-xs leading-5">
           Save roles as you browse to build a shortlist you can compare and revisit.
         </p>
       </div>
@@ -1533,14 +1533,14 @@ function EmptyState({
 
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-32 text-center">
-      <p className="text-sm font-semibold text-slate-700">No roles match these filters</p>
-      <p className="text-xs text-slate-400 max-w-xs leading-5">
+      <p className="text-sm font-mono font-semibold text-stone-300">No roles match these filters</p>
+      <p className="text-xs text-stone-500 max-w-xs leading-5">
         Broaden your search, clear a filter, or refresh to get the latest listings.
       </p>
       {!hasResume && (
         <Link
           href={setupHref}
-          className="mt-2 rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition"
+          className="mt-2 border border-stone-700 bg-stone-900/30 px-4 py-2 text-xs font-mono font-semibold text-stone-400 hover:border-orange-600/50 hover:text-orange-500 transition"
         >
           Add Resume &amp; Profile
         </Link>
@@ -1565,10 +1565,10 @@ function FilterChip({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+      className={`px-3 py-1.5 text-xs font-mono font-medium transition ${
         active
-          ? 'bg-slate-900 text-white'
-          : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-400 hover:text-slate-800'
+          ? 'bg-orange-600/10 text-orange-500 border border-orange-600'
+          : 'border border-stone-700 bg-stone-900/30 text-stone-400 hover:border-stone-600 hover:text-stone-300'
       }`}
     >
       {label}

@@ -7,16 +7,16 @@ export default function SubscribeSuccessPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-6 py-24">
       <div>
-        <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
+        <h1 className="text-3xl font-semibold font-mono text-stone-100 sm:text-4xl">
           Subscription confirmed
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-stone-400">
           You’ll start receiving verified internship alerts.
         </p>
       </div>
 
       <Card>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-stone-400">
           Thanks for confirming. You can manage your alerts anytime from the dashboard.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">

@@ -97,7 +97,7 @@ export function Footer() {
             />
             <button
               type="button"
-              className="rounded-2xl bg-[rgb(var(--brand-rgb))] px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-[rgb(var(--brand-hover-rgb))]"
+              className="bg-[rgb(var(--brand-rgb))] px-4 py-2 text-sm font-semibold text-stone-950 transition hover:bg-[rgb(var(--brand-hover-rgb))]"
             >
               Subscribe
             </button>

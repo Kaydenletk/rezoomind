@@ -9,20 +9,17 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/components/AuthProvider";
 
 const publicNavLinks = [
-  { href: "/jobs", label: "Browse Jobs" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/about", label: "About" },
+  { href: "/jobs", label: "~/jobs" },
+  { href: "/#pricing", label: "~/pricing" },
+  { href: "/about", label: "~/about" },
 ];
 
 const authenticatedNavLinks = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/jobs", label: "Jobs" },
-  { href: "/preferences", label: "Preferences" },
-  { href: "/resume", label: "Resume" },
-  { href: "/dashboard/profile", label: "Profile" },
+  { href: "/dashboard", label: "~/dashboard" },
+  { href: "/jobs", label: "~/jobs" },
+  { href: "/resume", label: "~/resume" },
+  { href: "/preferences", label: "~/preferences" },
 ];
-
-const MotionLink = motion(Link);
 
 type NavItemProps = {
   href: string;
@@ -35,28 +32,16 @@ function NavItem({ href, label, onClick }: NavItemProps) {
   const isActive = pathname === href;
 
   return (
-    <MotionLink
+    <Link
       href={href}
       onClick={onClick}
       className={cn(
-        "relative px-2 py-1 text-[12px] font-semibold tracking-wide text-slate-500 transition-colors hover:text-brand",
-        isActive && "text-slate-900"
+        "font-mono text-xs transition-colors",
+        isActive ? "text-orange-500" : "text-stone-400 hover:text-orange-500"
       )}
-      initial="rest"
-      animate={isActive ? "active" : "rest"}
-      whileHover="hover"
     >
-      <span>{label}</span>
-      <motion.span
-        className="absolute left-0 right-0 -bottom-2 h-[2px] origin-left bg-[rgb(var(--brand-rgb))]"
-        variants={{
-          rest: { scaleX: 0, opacity: 0 },
-          hover: { scaleX: 1, opacity: 1 },
-          active: { scaleX: 1, opacity: 1 },
-        }}
-        transition={{ duration: 0.25 }}
-      />
-    </MotionLink>
+      {label}
+    </Link>
   );
 }
 
@@ -65,7 +50,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
-  const signInActive = pathname === "/login" || pathname === "/signup";
+
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
@@ -82,98 +67,96 @@ export default function Header() {
     setMenuOpen(false);
   };
 
+  const navLinks = user ? authenticatedNavLinks : publicNavLinks;
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur">
-      <div className="mx-auto grid h-20 max-w-6xl grid-cols-[1fr_auto_1fr] items-center px-6">
-        <div className="flex items-center">
-          <MotionLink
+    <header className="sticky top-0 z-50 w-full border-b border-stone-800 bg-stone-950">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+        {/* Left: dots + brand + pipe + nav */}
+        <div className="flex items-center gap-5">
+          {/* Terminal dots */}
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-orange-600 border-[1.5px] border-orange-600" />
+            <div className="w-2.5 h-2.5 rounded-full border-[1.5px] border-orange-700" />
+            <div className="w-2.5 h-2.5 rounded-full border-[1.5px] border-stone-700" />
+          </div>
+
+          {/* Brand */}
+          <Link
             href="/"
-            className="flex items-center gap-3 text-lg font-semibold text-slate-900"
-            initial="rest"
-            whileHover="hover"
-            animate="rest"
+            className="font-mono font-bold text-orange-600 text-[15px] tracking-wider lowercase"
           >
-            <motion.span
-              className="relative flex h-8 w-8 items-center justify-center"
-              variants={{ rest: { rotate: 0 }, hover: { rotate: 6 } }}
-              transition={{ type: "spring", stiffness: 220, damping: 12 }}
-            >
-              <span className="absolute left-0 top-0 h-3 w-3 bg-[rgb(var(--brand-rgb))]" />
-              <span className="absolute right-0 top-0 h-3 w-3 bg-slate-400" />
-              <span className="absolute left-0 bottom-0 h-3 w-3 bg-slate-300" />
-            </motion.span>
-            <span>Rezoomind</span>
-          </MotionLink>
+            rezoomind
+          </Link>
+
+          {/* Pipe separator */}
+          <span className="text-stone-700 select-none">|</span>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-5">
+            {navLinks.map((link) => (
+              <NavItem
+                key={link.href}
+                href={link.href}
+                label={link.label}
+                onClick={link.href === "/#pricing" ? handlePricingClick : undefined}
+              />
+            ))}
+          </nav>
         </div>
 
-        <nav className="hidden items-center justify-center gap-8 md:flex">
-          {(user ? authenticatedNavLinks : publicNavLinks).map((link) => (
-            <NavItem
-              key={link.href}
-              href={link.href}
-              label={link.label}
-              onClick={link.href === "/#pricing" ? handlePricingClick : undefined}
-            />
-          ))}
-        </nav>
-
-        <div className="flex items-center justify-end gap-3">
+        {/* Right: auth controls + mobile hamburger */}
+        <div className="flex items-center gap-3">
+          {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                {/* Avatar circle + name — more readable than all-caps tracking */}
+                {/* Avatar + greeting */}
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-xs font-bold select-none">
-                    {(user.name ?? user.email ?? 'U').charAt(0).toUpperCase()}
+                  <div className="flex h-7 w-7 items-center justify-center border border-orange-600/50 bg-orange-600/10 text-orange-500 font-mono text-xs font-bold select-none">
+                    {(user.name ?? user.email ?? "U").charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium text-slate-700">
-                    Hi, {user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'there'}
+                  <span className="font-mono text-xs text-stone-400">
+                    {user.name?.split(" ")[0] ?? user.email?.split("@")[0] ?? "user"}
                   </span>
                 </div>
-                <motion.button
+
+                {/* Sign out */}
+                <button
                   type="button"
                   onClick={handleSignOut}
-                  className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-500 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-brand transition-colors"
-                  whileHover={{ y: -1 }}
-                  whileTap={{ y: 1 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                  className="border border-stone-700 bg-stone-900/30 px-3 py-1.5 font-mono text-xs text-stone-400 hover:border-orange-600/50 hover:text-orange-500 transition-colors"
                 >
-                  Log out
-                </motion.button>
+                  log out
+                </button>
               </>
             ) : (
-              <MotionLink
+              <Link
                 href="/login"
-                className={cn(
-                  "rounded-full px-5 py-2 text-xs font-semibold text-white transition",
-                  signInActive
-                    ? "bg-[rgb(var(--brand-rgb))]"
-                    : "bg-[rgb(var(--brand-rgb))] hover:bg-[rgb(var(--brand-hover-rgb))]"
-                )}
-                whileHover={{ y: -1 }}
-                whileTap={{ y: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                className="border border-orange-600/50 bg-orange-600/10 px-3 py-1.5 font-mono text-xs text-orange-500 hover:bg-orange-600/20 transition-colors"
               >
-                {loading ? "Loading..." : "Sign In"}
-              </MotionLink>
+                {loading ? "..." : "sign in"}
+              </Link>
             )}
           </div>
 
+          {/* Mobile hamburger */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 md:hidden"
+            className="flex h-8 w-8 items-center justify-center border border-stone-800 bg-stone-900/30 md:hidden"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-label="Toggle menu"
           >
-            <span className="flex flex-col gap-1.5">
-              <span className="h-0.5 w-5 bg-slate-900" />
-              <span className="h-0.5 w-5 bg-slate-500" />
-              <span className="h-0.5 w-5 bg-slate-300" />
+            <span className="flex flex-col gap-1">
+              <span className="h-px w-4 bg-stone-400" />
+              <span className="h-px w-4 bg-stone-600" />
+              <span className="h-px w-4 bg-stone-700" />
             </span>
           </button>
         </div>
       </div>
 
+      {/* Mobile menu */}
       <AnimatePresence>
         {menuOpen ? (
           <motion.div
@@ -181,21 +164,24 @@ export default function Header() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="overflow-hidden border-t border-slate-200 bg-white md:hidden"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="overflow-hidden border-t border-stone-800 bg-stone-950 md:hidden"
           >
-            <div className="flex flex-col gap-4 px-6 py-6">
+            <div className="flex flex-col gap-4 px-6 py-5">
+              {/* Mobile user greeting */}
               {user ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-xs font-bold">
-                    {(user.name ?? user.email ?? 'U').charAt(0).toUpperCase()}
+                <div className="flex items-center gap-2 pb-1 border-b border-stone-800">
+                  <div className="flex h-7 w-7 items-center justify-center border border-orange-600/50 bg-orange-600/10 text-orange-500 font-mono text-xs font-bold select-none">
+                    {(user.name ?? user.email ?? "U").charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium text-slate-700">
-                    Hi, {user.name?.split(' ')[0] ?? user.email?.split('@')[0] ?? 'there'}
+                  <span className="font-mono text-xs text-stone-400">
+                    {user.name?.split(" ")[0] ?? user.email?.split("@")[0] ?? "user"}
                   </span>
                 </div>
               ) : null}
-              {(user ? authenticatedNavLinks : publicNavLinks).map((link) => (
+
+              {/* Mobile nav links */}
+              {navLinks.map((link) => (
                 <NavItem
                   key={link.href}
                   href={link.href}
@@ -207,31 +193,27 @@ export default function Header() {
                   }
                 />
               ))}
+
+              {/* Mobile auth button */}
               {user ? (
-                <motion.button
+                <button
                   type="button"
                   onClick={() => {
                     setMenuOpen(false);
                     handleSignOut();
                   }}
-                  className="mt-2 inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600 hover:border-[rgba(var(--brand-rgb),0.6)] hover:text-brand"
-                  whileHover={{ y: -1 }}
-                  whileTap={{ y: 1 }}
-                  transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                  className="mt-1 border border-stone-700 bg-stone-900/30 px-3 py-2 font-mono text-xs text-stone-400 hover:border-orange-600/50 hover:text-orange-500 transition-colors text-left"
                 >
-                  Log Out
-                </motion.button>
+                  log out
+                </button>
               ) : (
-                <MotionLink
+                <Link
                   href="/login"
-                  className="mt-2 inline-flex items-center justify-center rounded-full border border-[rgba(var(--brand-rgb),0.4)] bg-[rgb(var(--brand-rgb))] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-900"
                   onClick={() => setMenuOpen(false)}
-                  whileHover={{ y: -1 }}
-                  whileTap={{ y: 1 }}
-                  transition={{ type: "spring", stiffness: 240, damping: 18 }}
+                  className="mt-1 inline-block border border-orange-600/50 bg-orange-600/10 px-3 py-2 font-mono text-xs text-orange-500 hover:bg-orange-600/20 transition-colors"
                 >
-                  {loading ? "Loading" : "Sign In"}
-                </MotionLink>
+                  {loading ? "..." : "sign in"}
+                </Link>
               )}
             </div>
           </motion.div>

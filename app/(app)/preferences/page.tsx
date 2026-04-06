@@ -206,17 +206,17 @@ function PreferencesContent() {
 
   if (loading || authMode === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Loading preferences...</p>
+          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+          <p className="text-stone-400">Loading preferences...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-24 pb-16 px-6">
+    <div className="min-h-screen bg-stone-950 pt-24 pb-16 px-6">
       <div className="max-w-5xl mx-auto">
 
         {/* Back Button */}
@@ -224,7 +224,7 @@ function PreferencesContent() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-8 transition-colors"
+          className="flex items-center gap-2 text-stone-500 hover:text-orange-500 mb-8 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-medium">Back</span>
@@ -236,21 +236,21 @@ function PreferencesContent() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-100 to-blue-100 rounded-full text-sm font-semibold text-cyan-700 mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 border border-orange-600/50 bg-orange-600/10 text-sm font-semibold text-orange-500 font-mono mb-4">
             <Sparkles className="w-4 h-4" />
             <span>Personalized Job Matching</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-stone-100 font-mono mb-4">
             Set Your Job Preferences
           </h1>
-          <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-stone-400 max-w-2xl mx-auto">
             Tell us what you&apos;re looking for and we&apos;ll match you with the perfect internships every week
           </p>
 
           {/* Show subscriber email if in subscriber mode */}
           {authMode === 'subscriber' && subscriberEmail && (
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full text-sm font-medium text-green-700">
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 border border-green-600/50 bg-green-600/10 text-sm font-medium text-green-500 font-mono">
               <Mail className="w-4 h-4" />
               <span>Logged in as: {subscriberEmail}</span>
             </div>
@@ -262,17 +262,17 @@ function PreferencesContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 mb-8"
+          className="border border-stone-800 bg-[#0c0c0c] p-8 mb-8"
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 border border-orange-600/50 bg-orange-600/10 text-orange-500 flex items-center justify-center">
+              <Briefcase className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold text-stone-100 font-mono">
                 Interested Roles
               </h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-stone-400">
                 Select all roles you&apos;re interested in (choose at least 1)
               </p>
             </div>
@@ -283,20 +283,20 @@ function PreferencesContent() {
               <button
                 key={role.value}
                 onClick={() => toggleRole(role.value)}
-                className={`flex items-start gap-4 p-5 rounded-2xl border-2 transition-all text-left ${selectedRoles.includes(role.value)
-                    ? 'border-cyan-500 bg-gradient-to-br from-cyan-50 to-blue-50 shadow-lg scale-[1.02]'
-                    : 'border-slate-200 bg-white hover:border-cyan-300 hover:shadow-md'
+                className={`flex items-start gap-4 p-5 border transition-all text-left ${selectedRoles.includes(role.value)
+                    ? 'border-orange-600 bg-orange-600/10'
+                    : 'border-stone-700 bg-stone-900/30 hover:border-orange-600/50'
                   }`}
               >
                 <span className="text-4xl">{role.icon}</span>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-slate-900">{role.label}</span>
+                    <span className="font-bold text-stone-100">{role.label}</span>
                     {selectedRoles.includes(role.value) && (
-                      <CheckCircle className="w-5 h-5 text-cyan-600 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-sm text-slate-600">{role.description}</p>
+                  <p className="text-sm text-stone-400">{role.description}</p>
                 </div>
               </button>
             ))}
@@ -315,17 +315,17 @@ function PreferencesContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 mb-8"
+          className="border border-stone-800 bg-[#0c0c0c] p-8 mb-8"
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
-              <MapPin className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 border border-orange-600/50 bg-orange-600/10 text-orange-500 flex items-center justify-center">
+              <MapPin className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold text-stone-100 font-mono">
                 Preferred Locations
               </h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-stone-400">
                 Where do you want to work? (choose at least 1)
               </p>
             </div>
@@ -336,17 +336,17 @@ function PreferencesContent() {
               <button
                 key={location.value}
                 onClick={() => toggleLocation(location.value)}
-                className={`flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all ${selectedLocations.includes(location.value)
-                    ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg scale-[1.05]'
-                    : 'border-slate-200 bg-white hover:border-purple-300 hover:shadow-md'
+                className={`flex flex-col items-center gap-3 p-5 border transition-all ${selectedLocations.includes(location.value)
+                    ? 'border-orange-600 bg-orange-600/10'
+                    : 'border-stone-700 bg-stone-900/30 hover:border-orange-600/50'
                   }`}
               >
                 <span className="text-4xl">{location.emoji}</span>
-                <span className="font-bold text-slate-900 text-sm text-center leading-tight">
+                <span className="font-bold text-stone-100 text-sm text-center leading-tight">
                   {location.label}
                 </span>
                 {selectedLocations.includes(location.value) && (
-                  <CheckCircle className="w-5 h-5 text-purple-600" />
+                  <CheckCircle className="w-5 h-5 text-orange-500" />
                 )}
               </button>
             ))}
@@ -365,17 +365,17 @@ function PreferencesContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 mb-8"
+          className="border border-stone-800 bg-[#0c0c0c] p-8 mb-8"
         >
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center">
-              <Tags className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 border border-orange-600/50 bg-orange-600/10 text-orange-500 flex items-center justify-center">
+              <Tags className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold text-stone-100 font-mono">
                 Keywords (Optional)
               </h2>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-stone-400">
                 Add specific skills, technologies, or companies to refine your matches
               </p>
             </div>
@@ -386,9 +386,9 @@ function PreferencesContent() {
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             placeholder="e.g., Python, React, AI, Startup, Series A, Google"
-            className="w-full px-6 py-4 border-2 border-slate-200 rounded-xl focus:border-pink-500 focus:outline-none text-lg"
+            className="w-full px-0 py-2 bg-transparent border-0 border-b border-stone-800 rounded-none focus:border-orange-600 focus:outline-none focus:ring-0 text-sm font-mono text-stone-200 placeholder:text-stone-600"
           />
-          <p className="mt-3 text-sm text-slate-500">
+          <p className="mt-3 text-sm text-stone-500">
             Separate multiple keywords with commas
           </p>
         </motion.div>
@@ -398,10 +398,10 @@ function PreferencesContent() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl flex items-center gap-3"
+            className="mb-6 p-4 border border-red-500/50 bg-red-500/10 flex items-center gap-3"
           >
             <span className="text-2xl">⚠️</span>
-            <p className="text-red-700 font-medium">{error}</p>
+            <p className="text-red-400 font-medium">{error}</p>
           </motion.div>
         )}
 
@@ -415,13 +415,13 @@ function PreferencesContent() {
           <button
             onClick={handleSave}
             disabled={saving || selectedRoles.length === 0 || selectedLocations.length === 0}
-            className={`w-full py-6 rounded-2xl font-bold text-xl transition-all flex items-center justify-center gap-3 ${saved
-                ? 'bg-green-500 text-white shadow-xl'
+            className={`w-full py-6 font-bold text-xl transition-all flex items-center justify-center gap-3 font-mono ${saved
+                ? 'border border-green-500/50 bg-green-500/10 text-green-500'
                 : saving
-                  ? 'bg-slate-400 text-white cursor-not-allowed'
+                  ? 'border border-stone-700 text-stone-500 cursor-not-allowed'
                   : selectedRoles.length === 0 || selectedLocations.length === 0
-                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]'
+                    ? 'border border-stone-800 text-stone-600 cursor-not-allowed'
+                    : 'border border-orange-600/50 bg-orange-600/10 text-orange-500 hover:bg-orange-600/20'
               }`}
           >
             {saved ? (
@@ -443,26 +443,26 @@ function PreferencesContent() {
           </button>
 
           <div className="text-center space-y-2">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-stone-400">
               You&apos;ll receive personalized job alerts every Monday morning
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-stone-500">
               Selected: {selectedRoles.length} roles, {selectedLocations.length} locations
             </p>
           </div>
 
           {/* Upsell for email subscribers */}
           {authMode === 'subscriber' && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border-2 border-cyan-200 text-center">
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
+            <div className="mt-8 p-6 border border-orange-600/30 bg-orange-600/5 text-center">
+              <h3 className="text-lg font-bold text-stone-100 font-mono mb-2">
                 Want 3 Free AI Resume Analyses?
               </h3>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-stone-400 mb-4">
                 Create a free account to keep RezoomAI unlocked for resume analysis, cover letters, and more.
               </p>
               <button
                 onClick={() => router.push('/signup')}
-                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                className="px-6 py-3 border border-orange-600/50 bg-orange-600/10 text-orange-500 font-bold font-mono hover:bg-orange-600/20 transition-all"
               >
                 Create Free Account
               </button>
@@ -477,10 +477,10 @@ function PreferencesContent() {
 export default function PreferencesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-cyan-500 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Loading preferences...</p>
+          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+          <p className="text-stone-400">Loading preferences...</p>
         </div>
       </div>
     }>
