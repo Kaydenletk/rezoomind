@@ -206,3 +206,69 @@ npx prisma db push       # Push schema changes without migration
 - **Animation**: Framer Motion for transitions and micro-interactions
 - **Naming**: camelCase for functions/variables, PascalCase for components, snake_case for DB fields
 - **Files**: Components in `components/`, utilities in `lib/`, API routes in `app/api/`
+
+---
+
+## 🚧 IN PROGRESS: Unified Dashboard Rebuild
+
+**Branch:** `feat/unified-dashboard`
+**Started:** 2026-04-06
+**Status:** Paused mid-implementation (Tasks 1–2 of 21 complete)
+
+### How to Resume
+
+Open Claude and paste this prompt:
+
+> Continue the unified dashboard rebuild. Read `docs/superpowers/plans/2026-04-06-unified-dashboard.md` and pick up from Task 3. I'm on the `feat/unified-dashboard` branch. Use the superpowers:subagent-driven-development skill to dispatch fresh subagents per task.
+
+### What's Done ✅
+
+- **Task 1:** Theme infrastructure + CLAUDE.md update (commit `8875be9`)
+  - Light mode is now the default
+  - Dark mode toggle infrastructure via `localStorage.theme`
+  - `app/layout.tsx` has flash-prevention script
+- **Task 2:** MatchScoreRing — null state + light mode fix (commit `b7df3b1`)
+  - `score: number | null` now supported (null = "—" display)
+  - Track circle uses Tailwind `stroke-stone-200 dark:stroke-stone-800`
+
+### What's Remaining (19 tasks)
+
+**Phase A — Layout + Public Mode:**
+- Task 3: SmartFeedHeader component (`components/smart-feed/SmartFeedHeader.tsx`)
+- Task 4: JobCard component (`components/smart-feed/JobCard.tsx`)
+- Task 5: FilterBar component (`components/smart-feed/FilterBar.tsx`)
+- Task 6: DetailPanel component (`components/smart-feed/DetailPanel.tsx`)
+- Task 7: TabBar component (`components/smart-feed/TabBar.tsx`)
+- Task 8: JobFeed component (`components/smart-feed/JobFeed.tsx`)
+- Task 9: SummaryStrip — add personal mode (modify existing)
+- Task 10: SmartFeedShell — main orchestrator (`components/smart-feed/SmartFeedShell.tsx`)
+- Task 11: Rewrite `app/page.tsx` to use SmartFeedShell
+
+**Phase B — Auth Transformation + Matching:**
+- Task 12: Auth-aware SmartFeedShell (useSession, fetch resume, batch match)
+- Task 13: Save job functionality (wire up ♡ button)
+- Task 14: QuickTailor integration (wire up existing panel into DetailPanel)
+
+**Phase C — Tracking + AI Features:**
+- Task 15: Schema migration — add `status`, `appliedAt`, `interviewDate`, `notes` to SavedJob
+- Task 16: Update saved jobs API (PATCH + return full objects)
+- Task 17: Saved / Applied / Tracking tabs
+- Task 18: Ask AI contextual chat (`components/smart-feed/AskAIPanel.tsx`)
+- Task 19: Update `/insights` page header + move InsightCards/MainInsightCard there
+- Task 20: Clean up dead code (delete HomeClientShell, JobsTable, etc.)
+- Task 21: Final build + verification checklist
+
+### Key Decisions (locked in)
+
+- **Layout:** Feed + Detail Panel (like Jobright), NOT Command Center
+- **Theme:** Light default with dark toggle (NOT dark-only)
+- **Signup strategy:** Open browsing, gate AI features (Option B from brainstorming)
+- **AI placement:** Contextual buttons per job (Tailor Resume, Ask AI), NO persistent chat panel
+- **Navigation:** `/` = smart feed, `/insights` = full market data (chart stays there)
+- **New components:** Live in `components/smart-feed/` separate from `components/dashboard/`
+
+### Reference Documents
+
+- **Design spec:** `docs/superpowers/specs/2026-04-06-unified-dashboard-design.md`
+- **Implementation plan:** `docs/superpowers/plans/2026-04-06-unified-dashboard.md` (detailed task-by-task)
+- **Brainstorm mockups:** `.superpowers/brainstorm/77670-1775522794/` (HTML previews)
