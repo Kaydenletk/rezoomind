@@ -170,7 +170,7 @@ export function MarketBanner({ trend, collapsible = true }: Props) {
                 Collecting data — chart will build over time as daily snapshots accumulate.
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={filteredTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                   {getPeakSeasons(filteredTrend).map((s, i) => (
