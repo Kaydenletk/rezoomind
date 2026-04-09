@@ -8,6 +8,7 @@ import { FilterBar, type Filters, DEFAULT_FILTERS } from "./FilterBar";
 import { TabBar, type TabId } from "./TabBar";
 import { JobFeed } from "./JobFeed";
 import { DetailPanel } from "./DetailPanel";
+import { OnboardingBanner } from "./OnboardingBanner";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 import type { SmartFeedJob, JobMatch, DetailPanelMode } from "./types";
@@ -260,13 +261,7 @@ export function SmartFeedShell({
 
       {/* No-resume onboarding banner */}
       {isAuth && hasResume === false && activeTab === "for-you" && (
-        <div className="mx-4 my-2 p-3 border border-orange-200 dark:border-orange-800/50 bg-orange-50 dark:bg-orange-950/20 font-mono text-xs text-orange-700 dark:text-orange-400">
-          ⚡ Upload your resume in{" "}
-          <a href="/resume" className="underline hover:text-orange-600 dark:hover:text-orange-300">
-            /resume
-          </a>{" "}
-          to unlock AI match scores
-        </div>
+        <OnboardingBanner />
       )}
 
       <div className="flex-1 flex">
