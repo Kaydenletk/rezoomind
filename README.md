@@ -11,6 +11,7 @@ Live app: https://rezoomind.vercel.app
 Rezoomind helps CS students and new grads cut through the noise of job hunting. It aggregates live internship and full-time postings, surfaces market trends (hiring velocity, peak seasons, role breakdowns), analyzes your resume with AI, and sends weekly email digests — all in one place.
 
 ---
+## SHOW TIME GIF
 ![REC-20260408221017-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/55b7921b-14a4-4e5f-96fa-eeceaffddc69)
 
 ## Screenshots
