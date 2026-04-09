@@ -116,7 +116,6 @@ export function SmartFeedShell({
       <SmartFeedHeader user={user} />
 
       <SummaryStrip
-        mode={isAuth ? "personal" : "public"}
         marketHeat={marketHeat}
         freshToday={freshToday}
         competitionLevel={competitionLevel}

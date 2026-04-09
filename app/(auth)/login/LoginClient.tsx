@@ -17,7 +17,7 @@ export default function LoginClient() {
     if (candidate?.startsWith("/") && !candidate.startsWith("//")) {
       return candidate;
     }
-    return "/";
+    return "/feed";
   }, [searchParams]);
 
   const [form, setForm] = useState({ email: "", password: "" });
