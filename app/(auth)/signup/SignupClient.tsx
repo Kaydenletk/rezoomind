@@ -17,7 +17,7 @@ export default function SignupClient() {
     if (candidate?.startsWith("/") && !candidate.startsWith("//")) {
       return candidate;
     }
-    return "/dashboard";
+    return "/feed";
   }, [searchParams]);
 
   const [form, setForm] = useState({

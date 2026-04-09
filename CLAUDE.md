@@ -4,6 +4,34 @@
 
 ---
 
+## UI/UX Design Guard (Production Sync)
+
+Before making ANY changes to landing page components, global CSS, or `page.tsx`:
+
+1. **Protect the Hierarchy:** The "Market Status" bar must remain compact, the trend chart must maintain its current aspect ratio, and the job table must preserve its current column layout.
+2. **No Intrusive Elements:** Do not inject prominent sign-up banners, pop-ups, or wide elements that push the primary market data down the page unless explicitly requested.
+3. **Verify Before Editing:** If modifying a UI component, assume the production version is correct. Revert any local deviations (like misaligned banners) back to the production state before adding new features.
+4. **Warn First:** If a requested feature or data point threatens to break the production grid layout, STOP, warn me exactly how it will break, and propose a non-disruptive alternative placement.
+
+### Protected Landing Page Files
+
+| File | What it controls | Rule |
+|------|-----------------|------|
+| `app/page.tsx` | Homepage server component | DO NOT replace `HomeClientShell` with anything else without explicit approval |
+| `components/dashboard/HomeClientShell.tsx` | Client shell with sidebar + jobs table | DO NOT restructure the grid layout |
+| `components/dashboard/SummaryStrip.tsx` | Market status bar (Market, Fresh today, Best window, Competition) | DO NOT add new props or modes without approval |
+| `components/dashboard/MainInsightCard.tsx` | Market insight card (season + summary) | Keep current styling |
+| `components/dashboard/MarketBanner.tsx` | Trend chart | Preserve aspect ratio and positioning |
+| `components/dashboard/InsightCards.tsx` | 3-column insight cards (Status, Trend, Guidance) | Keep current grid layout |
+| `components/dashboard/JobsTable.tsx` | Job listings table | Preserve column layout |
+| `components/dashboard/AuthHeader.tsx` | Terminal-style header with nav | Keep current styling |
+
+### Smart Feed Components (Separate from Production)
+
+The `components/smart-feed/` directory contains components for the upcoming unified dashboard rebuild. These are NOT used by the production homepage. They live alongside production code and must NOT replace or interfere with the files listed above until explicitly approved.
+
+---
+
 ## Project Overview
 
 Rezoomind is a **personal** Next.js application that aggregates internship/new-grad job postings, displays market trends, and (will) help the user boost their interview win rate to 80% through AI-powered resume tailoring, real match scoring, and interview prep.
