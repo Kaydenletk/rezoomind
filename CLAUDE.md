@@ -25,7 +25,7 @@ Rezoomind is a **personal** Next.js application that aggregates internship/new-g
 | Auth | NextAuth v4, Credentials provider, JWT sessions |
 | ORM | Prisma |
 | Database | PostgreSQL on **Neon** (serverless) |
-| AI | Google Gemini (`@google/genai`), OpenAI (fallback) |
+| AI | Vercel AI SDK v6 (`ai`, `@ai-sdk/google`), Google Gemini, OpenAI (fallback) |
 | Email | Resend |
 | Animations | Framer Motion |
 | Icons | Lucide React |
@@ -180,6 +180,18 @@ npx prisma db push       # Push schema changes without migration
 11. **Company intel** — Pull from `CompanyData` model (leadership, funding, culture)
 12. **AI mock questions** — Gemini generates behavioral + technical questions specific to the JD
 13. **Answer coach** — Practice STAR-format answers with AI feedback
+
+---
+
+## ✅ Completed Features
+
+| Feature | Location | Notes |
+|---------|----------|-------|
+| Streaming match explanation | `app/api/matches/explain/stream/` | Uses Vercel AI SDK v6 + Gemini, streams word-by-word |
+| Streaming cover letter | `app/api/resume/cover-letter/stream/` | Uses Vercel AI SDK v6 + Gemini, 4 tone options |
+| useStreamingText hook | `hooks/useStreamingText.ts` | Reusable hook for streaming text consumption |
+| MatchExplanationStream | `components/smart-feed/MatchExplanationStream.tsx` | Terminal-styled streaming UI |
+| CoverLetterStream | `components/smart-feed/CoverLetterStream.tsx` | Terminal-styled with tone selector + copy button |
 
 ---
 
