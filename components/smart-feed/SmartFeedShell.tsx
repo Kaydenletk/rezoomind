@@ -228,8 +228,9 @@ export function SmartFeedShell({
     setTailorJob(job);
   }, []);
 
-  const handleAskAI = useCallback((_job: SmartFeedJob) => {
-    // Task 18: open AskAIPanel
+  const handleAskAI = useCallback((job: SmartFeedJob) => {
+    setSelectedJobId(job.id);
+    setPanelMode("explain");
   }, []);
 
   // ── Render ───────────────────────────────────────────────────────────────
