@@ -61,6 +61,11 @@ export function SmartFeedShell({
   // DetailPanel tab mode
   const [panelMode, setPanelMode] = useState<DetailPanelMode>("overview");
 
+  // Reset panel to overview whenever user selects a different job
+  useEffect(() => {
+    setPanelMode("overview");
+  }, [selectedJobId]);
+
   // Task 13: useSavedJobs hook
   const { savedJobIds: savedJobIdsList, toggleSavedJob } = useSavedJobs();
   const savedJobIds = useMemo(() => new Set(savedJobIdsList), [savedJobIdsList]);
