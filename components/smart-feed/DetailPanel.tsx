@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { MatchScoreRing } from "@/components/dashboard/MatchScoreRing";
-import type { SmartFeedJob, JobMatch } from "./types";
+import { MatchExplanationStream } from "@/components/smart-feed/MatchExplanationStream";
+import { CoverLetterStream } from "@/components/smart-feed/CoverLetterStream";
+import type { SmartFeedJob, JobMatch, DetailPanelMode } from "./types";
 
 interface DetailPanelProps {
   job: SmartFeedJob | null;
@@ -13,6 +15,10 @@ interface DetailPanelProps {
   onTailorClick: (job: SmartFeedJob) => void;
   onAskAI: (job: SmartFeedJob) => void;
   jobDescription?: string | null;
+  // Controlled panel mode from SmartFeedShell
+  panelMode: DetailPanelMode;
+  onPanelModeChange: (mode: DetailPanelMode) => void;
+  savedResumeText: string | null;
 }
 
 function getRelativeTime(dateStr: string | null): string {
@@ -29,6 +35,12 @@ function getRelativeTime(dateStr: string | null): string {
   return `${diffDays}d ago`;
 }
 
+const TABS: { id: DetailPanelMode; label: string }[] = [
+  { id: "overview", label: "Overview" },
+  { id: "explain", label: "✦ Explain" },
+  { id: "cover-letter", label: "Cover Letter" },
+];
+
 export function DetailPanel({
   job,
   match,
@@ -36,8 +48,10 @@ export function DetailPanel({
   isAuthenticated,
   onToggleSave,
   onTailorClick,
-  onAskAI,
   jobDescription,
+  panelMode,
+  onPanelModeChange,
+  savedResumeText,
 }: DetailPanelProps) {
   const [descExpanded, setDescExpanded] = useState(false);
 
@@ -75,11 +89,7 @@ export function DetailPanel({
       ? description.slice(0, 400) + "…"
       : description;
 
-  const showMatch =
-    isAuthenticated &&
-    match != null &&
-    match.matchScore != null;
-
+  const hasMatch = isAuthenticated && match != null && match.matchScore != null;
   const matchedSkills = match?.matchReasons ?? [];
   const missingSkills = match?.missingSkills ?? [];
 
@@ -100,7 +110,10 @@ export function DetailPanel({
           {metaParts.length > 0 && (
             <div className="flex items-center flex-wrap gap-x-1.5 gap-y-0.5 mt-1">
               {metaParts.map((part, i) => (
-                <span key={i} className="text-xs text-stone-500 font-mono flex items-center gap-1.5">
+                <span
+                  key={i}
+                  className="text-xs text-stone-500 font-mono flex items-center gap-1.5"
+                >
                   {i > 0 && (
                     <span className="text-stone-300 dark:text-stone-700">·</span>
                   )}
@@ -126,62 +139,8 @@ export function DetailPanel({
         </button>
       </div>
 
-      {/* Match section */}
-      {showMatch && (
-        <div className="border border-stone-200 dark:border-stone-800 p-4 mb-4 space-y-3">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-mono">
-            Match Analysis
-          </p>
-
-          {/* Score ring + sub-scores */}
-          <div className="flex items-center gap-4">
-            <MatchScoreRing score={match!.matchScore} size={64} />
-            <div className="space-y-1">
-              {match!.skillsMatch != null && (
-                <p className="font-mono text-xs text-stone-600 dark:text-stone-400">
-                  Skills: {match!.skillsMatch}%
-                </p>
-              )}
-              {match!.experienceMatch != null && (
-                <p className="font-mono text-xs text-stone-600 dark:text-stone-400">
-                  Experience: {match!.experienceMatch}%
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Matched skills */}
-          {matchedSkills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {matchedSkills.map((skill) => (
-                <span
-                  key={`match-${skill}`}
-                  className="text-green-600 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 font-mono text-[11px] px-2 py-1"
-                >
-                  ✓ {skill}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Missing skills */}
-          {missingSkills.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {missingSkills.map((skill) => (
-                <span
-                  key={`missing-${skill}`}
-                  className="text-red-500 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 font-mono text-[11px] px-2 py-1"
-                >
-                  ✗ {skill}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Actions row */}
-      <div className="flex items-stretch gap-2 mb-5">
+      {/* Actions row — always visible */}
+      <div className="flex items-stretch gap-2 mb-4">
         {/* Apply */}
         <button
           type="button"
@@ -192,56 +151,155 @@ export function DetailPanel({
           Apply
         </button>
 
-        {/* Tailor Resume */}
+        {/* Tailor */}
         {isAuthenticated ? (
           <button
             type="button"
             onClick={() => onTailorClick(job)}
             className="border border-orange-600/50 bg-orange-600/10 text-orange-600 dark:text-orange-400 hover:bg-orange-600/20 font-mono text-sm px-4 py-2 transition-colors whitespace-nowrap"
           >
-            ✦ Tailor Resume
+            ✦ Tailor
           </button>
         ) : (
-          <span className="border border-stone-200 dark:border-stone-800 font-mono text-xs px-3 py-2 text-stone-400 dark:text-stone-600 flex items-center whitespace-nowrap">
-            Sign up to unlock tailoring
-          </span>
-        )}
-
-        {/* Ask AI */}
-        {isAuthenticated ? (
-          <button
-            type="button"
-            onClick={() => onAskAI(job)}
-            className="border border-orange-600/50 bg-orange-600/10 text-orange-600 dark:text-orange-400 hover:bg-orange-600/20 font-mono text-sm px-4 py-2 transition-colors whitespace-nowrap"
+          <a
+            href="/signup"
+            className="border border-stone-200 dark:border-stone-800 font-mono text-xs px-3 py-2 text-stone-400 dark:text-stone-600 flex items-center whitespace-nowrap hover:border-orange-400 hover:text-orange-500 transition-colors"
           >
-            ✦ Ask AI
-          </button>
-        ) : (
-          <span className="border border-stone-200 dark:border-stone-800 font-mono text-xs px-3 py-2 text-stone-400 dark:text-stone-600 flex items-center whitespace-nowrap">
-            Sign up to unlock AI
-          </span>
+            Sign up for AI →
+          </a>
         )}
       </div>
 
-      {/* Description */}
-      {description && (
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-mono mb-2">
-            Description
-          </p>
-          <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed whitespace-pre-line">
-            {descExpanded ? description : descTruncated}
-          </p>
-          {description.length > 400 && (
+      {/* Tab bar — only for authenticated users with a scored match */}
+      {hasMatch && (
+        <div className="flex border-b border-stone-200 dark:border-stone-800 mb-4 -mx-5 px-5">
+          {TABS.map((tab) => (
             <button
+              key={tab.id}
               type="button"
-              onClick={() => setDescExpanded((prev) => !prev)}
-              className="mt-2 font-mono text-xs text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+              onClick={() => onPanelModeChange(tab.id)}
+              className={[
+                "font-mono text-xs px-4 py-2.5 border-b-2 transition-colors whitespace-nowrap",
+                panelMode === tab.id
+                  ? "border-orange-500 text-orange-600 dark:text-orange-400"
+                  : "border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300",
+              ].join(" ")}
             >
-              {descExpanded ? "Show less" : "Show more"}
+              {tab.label}
             </button>
-          )}
+          ))}
         </div>
+      )}
+
+      {/* Tab content */}
+      {hasMatch && panelMode === "explain" ? (
+        /* ── Explain Match tab ───────────────────────────────── */
+        <MatchExplanationStream
+          jobTitle={job.role}
+          companyName={job.company}
+          overallScore={match!.matchScore!}
+          skillMatch={match!.skillsMatch ?? 0}
+          experienceMatch={match!.experienceMatch ?? 0}
+          matchingSkills={match!.matchReasons ?? []}
+          missingSkills={match!.missingSkills ?? []}
+          autoStart={true}
+        />
+      ) : hasMatch && panelMode === "cover-letter" ? (
+        /* ── Cover Letter tab ────────────────────────────────── */
+        savedResumeText ? (
+          <CoverLetterStream
+            resumeText={savedResumeText}
+            jobTitle={job.role}
+            companyName={job.company}
+            jobDescription={description ?? ""}
+          />
+        ) : (
+          <div className="border border-stone-200 dark:border-stone-800 p-5 text-center space-y-3">
+            <p className="font-mono text-xs text-stone-500">
+              Upload your resume to generate a tailored cover letter
+            </p>
+            <a
+              href="/resume"
+              className="inline-block border border-orange-600/50 bg-orange-600/10 text-orange-600 dark:text-orange-400 font-mono text-xs px-4 py-2 hover:bg-orange-600/20 transition-colors"
+            >
+              ~/resume →
+            </a>
+          </div>
+        )
+      ) : (
+        /* ── Overview tab (default) ──────────────────────────── */
+        <>
+          {/* Match section — only when authenticated and scored */}
+          {hasMatch && (
+            <div className="border border-stone-200 dark:border-stone-800 p-4 mb-4 space-y-3">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-mono">
+                Match Analysis
+              </p>
+              <div className="flex items-center gap-4">
+                <MatchScoreRing score={match!.matchScore} size={64} />
+                <div className="space-y-1">
+                  {match!.skillsMatch != null && (
+                    <p className="font-mono text-xs text-stone-600 dark:text-stone-400">
+                      Skills: {match!.skillsMatch}%
+                    </p>
+                  )}
+                  {match!.experienceMatch != null && (
+                    <p className="font-mono text-xs text-stone-600 dark:text-stone-400">
+                      Experience: {match!.experienceMatch}%
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {matchedSkills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {matchedSkills.map((skill) => (
+                    <span
+                      key={`match-${skill}`}
+                      className="text-green-600 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 font-mono text-[11px] px-2 py-1"
+                    >
+                      ✓ {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {missingSkills.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {missingSkills.map((skill) => (
+                    <span
+                      key={`missing-${skill}`}
+                      className="text-red-500 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 font-mono text-[11px] px-2 py-1"
+                    >
+                      ✗ {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Description */}
+          {description && (
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-stone-500 font-mono mb-2">
+                Description
+              </p>
+              <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed whitespace-pre-line">
+                {descExpanded ? description : descTruncated}
+              </p>
+              {description.length > 400 && (
+                <button
+                  type="button"
+                  onClick={() => setDescExpanded((prev) => !prev)}
+                  className="mt-2 font-mono text-xs text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                >
+                  {descExpanded ? "Show less" : "Show more"}
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
