@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { QuickTailorPanel } from "./QuickTailorPanel";
 import { MatchBadge } from "./MatchBadge";
 
@@ -47,6 +47,16 @@ export function JobsTable({
 }) {
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [tailorJob, setTailorJob] = useState<{ company: string; role: string } | null>(null);
+
+  // Sort by match score (highest first) when scores are available
+  const sortedPostings = useMemo(() => {
+    if (!matchScores || Object.keys(matchScores).length === 0) return postings;
+    return [...postings].sort((a, b) => {
+      const keyA = `${a.company.toLowerCase().trim()}|${a.role.toLowerCase().trim()}`;
+      const keyB = `${b.company.toLowerCase().trim()}|${b.role.toLowerCase().trim()}`;
+      return (matchScores[keyB] ?? -1) - (matchScores[keyA] ?? -1);
+    });
+  }, [postings, matchScores]);
 
   useEffect(() => {
     const saved = localStorage.getItem("rezoomind_applied_jobs");
@@ -97,21 +107,22 @@ export function JobsTable({
 
       {/* Scrollable job rows */}
       <div className="overflow-y-auto max-h-[60vh] min-h-[200px]">
-        {postings.length === 0 ? (
+        {sortedPostings.length === 0 ? (
           <div className="px-5 py-12 text-center text-sm text-stone-400">
             Loading jobs...
           </div>
         ) : (
-          postings.map((job, i) => {
+          sortedPostings.map((job, i) => {
             const isApplied = appliedJobs.has(job.id);
             const matchKey = `${job.company.toLowerCase().trim()}|${job.role.toLowerCase().trim()}`;
             const matchScore = matchScores?.[matchKey];
+            const isStrongMatch = matchScore != null && matchScore >= 60;
             return (
               <div
                 key={job.id}
                 className={`grid grid-cols-[2fr_1.5fr_1fr_60px_140px] gap-2 px-5 py-2.5 items-center hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors ${
-                  i < postings.length - 1 ? "border-b border-stone-50 dark:border-stone-800/50" : ""
-                } ${isApplied ? "opacity-60 bg-stone-50/50 dark:bg-stone-900/50" : ""}`}
+                  i < sortedPostings.length - 1 ? "border-b border-stone-50 dark:border-stone-800/50" : ""
+                } ${isApplied ? "opacity-60 bg-stone-50/50 dark:bg-stone-900/50" : ""} ${isStrongMatch ? "border-l-2 border-l-orange-500/60" : ""}`}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <div
@@ -122,7 +133,7 @@ export function JobsTable({
                     {job.company}
                   </span>
                   {matchScore != null && (
-                    <span className="hidden md:inline-flex">
+                    <span className="inline-flex">
                       <MatchBadge score={matchScore} />
                     </span>
                   )}
@@ -166,7 +177,7 @@ export function JobsTable({
                     className="text-[10px] font-mono font-bold text-amber-600 hover:text-amber-500 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-all shadow-[0_0_8px_rgba(217,119,6,0.15)] hover:shadow-[0_0_12px_rgba(217,119,6,0.3)] animate-pulse hover:animate-none"
                     title={!isAuthenticated ? "Sign in to tailor" : !savedResumeText ? "Upload resume to tailor" : "Boost win-rate to 80%!"}
                   >
-                    tailor ✨
+                    Tailor with AI ✨
                   </button>
                   {job.url ? (
                     <button

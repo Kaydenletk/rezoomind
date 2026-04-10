@@ -29,6 +29,11 @@ export function AuthHeader() {
           <Link href="/insights" className="font-mono text-xs text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
             ~/insights
           </Link>
+          {isAuth && (
+            <Link href="/feed" className="font-mono text-xs text-orange-600 dark:text-orange-500 hover:text-orange-500 dark:hover:text-orange-400 transition-colors font-semibold">
+              ~/feed
+            </Link>
+          )}
         </nav>
       </div>
       <div className="flex items-center gap-3">

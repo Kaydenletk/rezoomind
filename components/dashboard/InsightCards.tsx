@@ -8,7 +8,7 @@ export function InsightCards({ insights }: { insights: MarketInsights }) {
       <div className="border-[1.5px] border-stone-200 dark:border-stone-800 rounded-[10px] bg-white dark:bg-stone-900 p-3">
         <div className="flex items-center gap-1.5 mb-2">
           <span className="text-orange-600 font-mono text-xs font-bold">▸</span>
-          <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">market_status</span>
+          <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">Market status</span>
         </div>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: insights.seasonColor }} />
@@ -27,7 +27,7 @@ export function InsightCards({ insights }: { insights: MarketInsights }) {
       <div className="border-[1.5px] border-stone-200 dark:border-stone-800 rounded-[10px] bg-white dark:bg-stone-900 p-3">
         <div className="flex items-center gap-1.5 mb-2">
           <span className="text-orange-600 font-mono text-xs font-bold">▸</span>
-          <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">30d_trend</span>
+          <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">30-day trend</span>
         </div>
         <div className="space-y-0.5">
           {insights.trends.map((t) => (
@@ -45,13 +45,13 @@ export function InsightCards({ insights }: { insights: MarketInsights }) {
       <div className="border-[1.5px] border-stone-200 dark:border-stone-800 rounded-[10px] bg-white dark:bg-stone-900 p-3">
         <div className="flex items-center gap-1.5 mb-2">
           <span className="text-orange-600 font-mono text-xs font-bold">▸</span>
-          <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">action</span>
+          <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">What to do next</span>
         </div>
         <p className="text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed mb-2">
-          {insights.shortRecommendation}
+          {insights.weeklyGuidance}
         </p>
         <Link href="/insights" className="text-[11px] font-mono font-semibold text-orange-600 hover:underline">
-          view_insights →
+          learn more →
         </Link>
       </div>
     </div>

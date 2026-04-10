@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { RezoomAITrialNotice } from "@/components/RezoomAITrialNotice";
 import { useRezoomAIAccess } from "@/hooks/useRezoomAIAccess";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
+import { MatchScoreRing } from "@/components/dashboard/MatchScoreRing";
 
 // Types
 interface JobPosting {
@@ -169,11 +170,20 @@ export default function DashboardPage() {
   const loadUserData = async () => {
     try {
       const response = await fetch("/api/dashboard/data");
-      if (!response.ok) throw new Error("Failed to load");
+      if (response.status === 401) {
+        router.push("/login?next=/dashboard");
+        return;
+      }
 
-      const { matchRows, hasResume: resumeExists } = await response.json();
-      setHasResume(resumeExists ?? false);
-      setMatches(matchRows ?? []);
+      const data = await response.json();
+      if (!data.ok) {
+        console.error("[dashboard] API error:", data.error);
+        setHasResume(false);
+        setMatches([]);
+      } else {
+        setHasResume(data.hasResume ?? false);
+        setMatches(data.matchRows ?? []);
+      }
 
       // Fetch resume text for Quick Tailor
       try {
@@ -187,8 +197,9 @@ export default function DashboardPage() {
       }
 
       // Auto-select first job
-      if (matchRows && matchRows.length > 0) {
-        setSelectedJob(matchRows[0]);
+      const rows = data?.matchRows ?? [];
+      if (rows.length > 0) {
+        setSelectedJob(rows[0]);
       }
     } catch (e) {
       console.error(e);
@@ -540,46 +551,6 @@ function NavIcon({
   );
 }
 
-// Circular Match Score Ring
-function MatchScoreRing({ score, size = 52 }: { score: number; size?: number }) {
-  const strokeWidth = 3.5;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = Math.min(score, 100) / 100;
-  const offset = circumference * (1 - progress);
-  const color = score >= 80 ? '#ea580c' : score >= 60 ? '#f59e0b' : '#78716c';
-
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke="#292524"
-          strokeWidth={strokeWidth}
-        />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: 'easeOut' }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-bold" style={{ color }}>{score}%</span>
-      </div>
-    </div>
-  );
-}
 
 // Job Card Component
 function JobCard({
