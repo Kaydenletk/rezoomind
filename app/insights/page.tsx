@@ -1,6 +1,9 @@
 import { getDashboardStats } from "@/lib/dashboard";
 import { computeMarketInsights } from "@/lib/insights";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { SmartFeedHeader } from "@/components/smart-feed/SmartFeedHeader";
+import { SummaryStrip } from "@/components/dashboard/SummaryStrip";
 import { MarketBanner } from "@/components/dashboard/MarketBanner";
 import { DashboardFooter } from "@/components/dashboard/DashboardFooter";
 import { TrendTable } from "@/components/insights/TrendTable";
@@ -11,13 +14,31 @@ import { TipsSection } from "@/components/insights/TipsSection";
 export const revalidate = 3600;
 
 export default async function InsightsPage() {
-  const dbStats = await getDashboardStats().catch(() => null);
+  const [dbStats, session] = await Promise.all([
+    getDashboardStats().catch(() => null),
+    getServerSession(authOptions),
+  ]);
   const trend = dbStats?.marketTrend ?? [];
   const insights = computeMarketInsights(trend);
 
+  const latestSnap = trend[trend.length - 1];
+  const freshToday = latestSnap
+    ? (latestSnap.usaInternships ?? 0) +
+      (latestSnap.usaNewGrad ?? 0) +
+      (latestSnap.intlInternships ?? 0) +
+      (latestSnap.intlNewGrad ?? 0)
+    : 0;
+
+  const user = session?.user ?? null;
+
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col transition-colors">
-      <DashboardHeader />
+      <SmartFeedHeader user={user} />
+      <SummaryStrip
+        marketHeat={insights.marketHeat}
+        freshToday={freshToday}
+        competitionLevel={insights.competitionLevel}
+      />
 
       <div className="flex-1 max-w-4xl mx-auto w-full px-5 lg:px-7 py-6 space-y-6">
         {/* 1. Market Status Hero */}
