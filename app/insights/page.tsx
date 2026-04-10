@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getDashboardStats } from "@/lib/dashboard";
 import { computeMarketInsights } from "@/lib/insights";
 import { getServerSession } from "next-auth";
@@ -10,6 +11,17 @@ import { TrendTable } from "@/components/insights/TrendTable";
 import { SeasonCalendar } from "@/components/insights/SeasonCalendar";
 import { HistoricalComparison } from "@/components/insights/HistoricalComparison";
 import { TipsSection } from "@/components/insights/TipsSection";
+
+export const metadata: Metadata = {
+  title: "Internship Market Insights | Rezoomind",
+  description:
+    "Track internship and new-grad job market trends with real-time data. See seasonal patterns, category breakdowns, and optimal application windows for 2026.",
+  openGraph: {
+    title: "Internship Market Insights | Rezoomind",
+    description: "Real-time internship market trends and seasonal hiring patterns for students.",
+    type: "website",
+  },
+};
 
 export const revalidate = 3600;
 

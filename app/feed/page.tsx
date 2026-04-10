@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import { getDashboardStats } from "@/lib/dashboard";
 import { fetchGitHubJobs } from "@/lib/fetch-github-jobs";
 import { computeMarketInsights } from "@/lib/insights";
 import { parseDatePostedToAge } from "@/lib/job-priority";
 import { SmartFeedShell } from "@/components/smart-feed/SmartFeedShell";
 import type { SmartFeedJob } from "@/components/smart-feed/types";
+
+export const metadata: Metadata = {
+  title: "Smart Job Feed | Rezoomind",
+  description:
+    "Browse internships and new-grad jobs with AI-powered fit scoring. Filter by role, location, and freshness. Get personalized match recommendations.",
+  openGraph: {
+    title: "Smart Job Feed | Rezoomind",
+    description: "AI-powered internship and new-grad job matching for students.",
+    type: "website",
+  },
+};
 
 export const revalidate = 3600;
 
