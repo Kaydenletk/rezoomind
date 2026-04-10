@@ -14,6 +14,7 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Initialize theme from localStorage on mount
@@ -45,6 +46,8 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
 
   const handleDemoLogin = async () => {
     setIsDemoLoading(true);
+    setDemoError(false);
+    // Fallbacks match the seed script defaults — intentionally public demo account
     const result = await signIn("credentials", {
       email: process.env.NEXT_PUBLIC_DEMO_EMAIL ?? "demo@rezoomind.app",
       password: process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? "demo_rezoomind_2026",
@@ -55,6 +58,7 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
       window.location.href = "/feed";
     } else {
       setIsDemoLoading(false);
+      setDemoError(true);
     }
   };
 
@@ -137,13 +141,18 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
             ) : (
               /* Public mode: try demo + login + signup */
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleDemoLogin}
-                  disabled={isDemoLoading}
-                  className="px-4 py-1.5 border border-orange-600/50 bg-orange-600/10 font-mono text-xs text-orange-500 hover:bg-orange-600/20 transition-colors disabled:opacity-50"
-                >
-                  {isDemoLoading ? "loading..." : "try demo"}
-                </button>
+                <div className="flex flex-col items-start gap-0.5">
+                  <button
+                    onClick={handleDemoLogin}
+                    disabled={isDemoLoading}
+                    className="px-4 py-1.5 border border-orange-600/50 bg-orange-600/10 font-mono text-xs text-orange-500 hover:bg-orange-600/20 transition-colors disabled:opacity-50"
+                  >
+                    {isDemoLoading ? "loading..." : "try demo"}
+                  </button>
+                  {demoError && (
+                    <span className="font-mono text-[10px] text-red-400">demo unavailable</span>
+                  )}
+                </div>
                 <Link
                   href="/login"
                   className="px-4 py-1.5 border border-stone-300 dark:border-stone-700 font-mono text-xs text-stone-600 dark:text-stone-400 hover:border-stone-400 dark:hover:border-stone-600 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
@@ -222,13 +231,18 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
             </>
           ) : (
             <>
-              <button
-                onClick={() => { setMobileOpen(false); handleDemoLogin(); }}
-                disabled={isDemoLoading}
-                className="block w-full text-left px-3 py-2.5 font-mono text-xs text-orange-500 hover:bg-orange-600/10 transition-colors disabled:opacity-50"
-              >
-                {isDemoLoading ? "loading..." : "try demo"}
-              </button>
+              <div className="flex flex-col gap-0.5">
+                <button
+                  onClick={() => { setMobileOpen(false); handleDemoLogin(); }}
+                  disabled={isDemoLoading}
+                  className="block w-full text-left px-3 py-2.5 font-mono text-xs text-orange-500 hover:bg-orange-600/10 transition-colors disabled:opacity-50"
+                >
+                  {isDemoLoading ? "loading..." : "try demo"}
+                </button>
+                {demoError && (
+                  <span className="px-3 font-mono text-[10px] text-red-400">demo unavailable</span>
+                )}
+              </div>
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
