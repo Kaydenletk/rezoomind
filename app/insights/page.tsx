@@ -16,7 +16,7 @@ export const revalidate = 3600;
 export default async function InsightsPage() {
   const [dbStats, session] = await Promise.all([
     getDashboardStats().catch(() => null),
-    getServerSession(authOptions),
+    getServerSession(authOptions).catch(() => null),
   ]);
   const trend = dbStats?.marketTrend ?? [];
   const insights = computeMarketInsights(trend);
