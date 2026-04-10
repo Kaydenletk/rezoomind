@@ -83,33 +83,33 @@ export default function LoginClient() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1.5">
-            <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
+            <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500 dark:text-stone-500">
               email
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-stone-600">&gt;</span>
+              <span className="text-xs text-stone-400 dark:text-stone-600">&gt;</span>
               <input
                 type="email"
                 spellCheck={false}
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                className="w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm transition-colors"
+                className="w-full bg-transparent border-b border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-orange-600 outline-none py-1.5 font-mono text-sm transition-colors dark:border-stone-800 dark:text-stone-100 dark:placeholder:text-stone-600"
                 placeholder="user@domain.com"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
+            <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500 dark:text-stone-500">
               password
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-stone-600">&gt;</span>
+              <span className="text-xs text-stone-400 dark:text-stone-600">&gt;</span>
               <input
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                className="w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm tracking-[0.15em] transition-colors"
+                className="w-full bg-transparent border-b border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-orange-600 outline-none py-1.5 font-mono text-sm tracking-[0.15em] transition-colors dark:border-stone-800 dark:text-stone-100 dark:placeholder:text-stone-600"
                 placeholder="••••••••"
               />
             </div>
@@ -122,10 +122,10 @@ export default function LoginClient() {
                 animate={{ opacity: 1 }}
                 className={`text-[11px] font-mono ${
                   status === "success"
-                    ? "text-green-500"
+                    ? "text-green-700 dark:text-green-400"
                     : status === "error"
-                    ? "text-red-400"
-                    : "text-stone-400"
+                    ? "text-red-700 dark:text-red-400"
+                    : "text-stone-500 dark:text-stone-400"
                 }`}
               >
                 {status === "success" && "▸ "}
@@ -139,7 +139,7 @@ export default function LoginClient() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full flex items-center justify-center gap-2 border border-orange-600/50 bg-orange-600/10 py-2.5 text-xs font-bold tracking-[0.15em] text-orange-500 transition-all hover:bg-orange-600/20 disabled:cursor-not-allowed disabled:opacity-40"
+            className="group flex w-full items-center justify-center gap-2 border border-orange-200 bg-orange-50 py-2.5 text-xs font-bold tracking-[0.15em] text-orange-700 transition-all hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-orange-600/50 dark:bg-orange-600/10 dark:text-orange-500 dark:hover:bg-orange-600/20"
           >
             {status === "loading" ? (
               <span className="animate-pulse">processing...</span>
@@ -153,17 +153,17 @@ export default function LoginClient() {
 
           <button
             type="button"
-            className="w-full border border-stone-800 bg-stone-900/30 py-2.5 text-xs tracking-[0.15em] text-stone-500 transition-all hover:bg-stone-800/50"
+            className="w-full border border-stone-200 bg-stone-100 py-2.5 text-xs tracking-[0.15em] text-stone-700 transition-all hover:bg-stone-200 dark:border-stone-800 dark:bg-stone-900/30 dark:text-stone-500 dark:hover:bg-stone-800/50"
           >
             continue_with_google
           </button>
 
-          <div className="pt-4 border-t border-stone-800/50 text-center">
-            <p className="text-[11px] text-stone-500">
+          <div className="border-t border-stone-200/80 pt-4 text-center dark:border-stone-800/50">
+            <p className="text-[11px] text-stone-500 dark:text-stone-500">
               no account?{" "}
               <Link
                 href="/signup"
-                className="text-orange-500 underline decoration-orange-500/20 underline-offset-4 transition-colors hover:text-orange-400"
+                className="text-orange-600 underline decoration-orange-600/20 underline-offset-4 transition-colors hover:text-orange-500 dark:text-orange-500 dark:hover:text-orange-400"
               >
                 create_account
               </Link>
