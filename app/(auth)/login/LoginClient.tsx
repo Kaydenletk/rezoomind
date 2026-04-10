@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { ArrowRight } from "lucide-react";
+import { AuthCardShell } from "@/components/auth/AuthCardShell";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -64,38 +65,29 @@ export default function LoginClient() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full max-w-md"
-    >
-      {/* Form card */}
-      <div className="border border-stone-800 bg-[#0c0c0c] relative">
-        {/* Faux window bar */}
-        <div className="h-7 border-b border-stone-800 bg-[#111] flex items-center px-3 gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <span className="text-[10px] text-stone-600 ml-2 tracking-wider">auth.exe</span>
+    <AuthCardShell>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        <div>
+          <h1 className="text-sm font-bold text-stone-900 tracking-wider dark:text-stone-200">
+            sign_in
+          </h1>
+          <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-500">
+            &gt;_ access your dashboard and alerts
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-7 space-y-6">
-          {/* Title */}
-          <div>
-            <h1 className="text-sm font-bold text-stone-200 tracking-wider">sign_in</h1>
-            <p className="text-[11px] text-stone-500 mt-1">
-              &gt;_ access your dashboard and alerts
-            </p>
-          </div>
-
-          {/* Email */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
+            <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
               email
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-stone-600 text-xs">&gt;</span>
+              <span className="text-xs text-stone-600">&gt;</span>
               <input
                 type="email"
                 spellCheck={false}
@@ -107,13 +99,12 @@ export default function LoginClient() {
             </div>
           </div>
 
-          {/* Password */}
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
+            <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500">
               password
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-stone-600 text-xs">&gt;</span>
+              <span className="text-xs text-stone-600">&gt;</span>
               <input
                 type="password"
                 value={form.password}
@@ -124,7 +115,6 @@ export default function LoginClient() {
             </div>
           </div>
 
-          {/* Status */}
           <div className="h-5">
             {note && (
               <motion.p
@@ -146,44 +136,41 @@ export default function LoginClient() {
             )}
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full py-2.5 border border-orange-600/50 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 text-xs font-bold tracking-[0.15em] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+            className="w-full flex items-center justify-center gap-2 border border-orange-600/50 bg-orange-600/10 py-2.5 text-xs font-bold tracking-[0.15em] text-orange-500 transition-all hover:bg-orange-600/20 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {status === "loading" ? (
               <span className="animate-pulse">processing...</span>
             ) : (
               <>
                 sign_in
-                <ArrowRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
               </>
             )}
           </button>
 
-          {/* Google */}
           <button
             type="button"
-            className="w-full py-2.5 border border-stone-800 bg-stone-900/30 hover:bg-stone-800/50 text-stone-500 text-xs tracking-[0.15em] transition-all"
+            className="w-full border border-stone-800 bg-stone-900/30 py-2.5 text-xs tracking-[0.15em] text-stone-500 transition-all hover:bg-stone-800/50"
           >
             continue_with_google
           </button>
 
-          {/* Link */}
           <div className="pt-4 border-t border-stone-800/50 text-center">
             <p className="text-[11px] text-stone-500">
               no account?{" "}
               <Link
                 href="/signup"
-                className="text-orange-500 hover:text-orange-400 underline decoration-orange-500/20 underline-offset-4 transition-colors"
+                className="text-orange-500 underline decoration-orange-500/20 underline-offset-4 transition-colors hover:text-orange-400"
               >
                 create_account
               </Link>
             </p>
           </div>
         </form>
-      </div>
-    </motion.div>
+      </motion.div>
+    </AuthCardShell>
   );
 }
