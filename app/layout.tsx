@@ -25,8 +25,51 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rezoomind",
-  description: "Internship command center — real-time job data for students.",
+  title: {
+    default: "Rezoomind | AI-Powered Internship & New Grad Job Search",
+    template: "%s | Rezoomind",
+  },
+  description:
+    "Find internships and new-grad jobs with AI-powered fit scoring. Browse live roles, get match recommendations, and tailor your resume — all without creating an account first.",
+  keywords: [
+    "internships",
+    "new grad jobs",
+    "software engineering internships",
+    "entry level jobs",
+    "AI resume matching",
+    "job search for students",
+  ],
+  authors: [{ name: "Rezoomind" }],
+  creator: "Rezoomind",
+  metadataBase: new URL("https://rezoomind.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://rezoomind.vercel.app",
+    siteName: "Rezoomind",
+    title: "Rezoomind | AI-Powered Internship & New Grad Job Search",
+    description:
+      "Find internships and new-grad jobs with AI-powered fit scoring. Browse live roles and tailor your resume.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rezoomind | AI-Powered Internship & New Grad Job Search",
+    description: "Find internships with AI-powered fit scoring.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "TE4_CR-Q2pIYH_Ux24c9mt0fV74isRIY9-C9Y7GiiB4",
+  },
 };
 
 export default function RootLayout({
