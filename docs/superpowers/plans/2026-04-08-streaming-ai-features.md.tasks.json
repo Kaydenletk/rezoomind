@@ -1,0 +1,75 @@
+{
+  "planPath": "docs/superpowers/plans/2026-04-08-streaming-ai-features.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 0: Install Vercel AI SDK Dependencies",
+      "status": "completed",
+      "description": "**Goal:** Install Vercel AI SDK and Google provider packages\n\n**Files:**\n- Modify: `package.json`\n\n**Acceptance Criteria:**\n- `ai` package (Vercel AI SDK v6) installed\n- `@ai-sdk/google` package installed\n- `npm run dev` starts without errors\n\n**Verify:** `npm ls ai @ai-sdk/google` → shows both packages installed\n\n```json:metadata\n{\"files\": [\"package.json\"], \"verifyCommand\": \"npm ls ai @ai-sdk/google\", \"acceptanceCriteria\": [\"ai package installed\", \"@ai-sdk/google package installed\", \"npm run dev starts without errors\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 1: Create AI SDK Provider Configuration",
+      "status": "completed",
+      "blockedBy": [0],
+      "description": "**Goal:** Set up Vercel AI SDK provider for Google Gemini\n\n**Files:**\n- Create: `lib/ai/ai-sdk-provider.ts`\n\n**Acceptance Criteria:**\n- Exports `googleProvider` configured with GEMINI_API_KEY\n- Exports `geminiModel` ready for use with streamText\n- Handles missing API key gracefully\n\n**Verify:** `npx tsc --noEmit lib/ai/ai-sdk-provider.ts` → no errors\n\n```json:metadata\n{\"files\": [\"lib/ai/ai-sdk-provider.ts\"], \"verifyCommand\": \"npx tsc --noEmit lib/ai/ai-sdk-provider.ts\", \"acceptanceCriteria\": [\"Exports googleProvider configured with GEMINI_API_KEY\", \"Exports geminiModel ready for streamText\", \"Handles missing API key gracefully\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 2: Create Match Explanation Prompt",
+      "status": "completed",
+      "blockedBy": [0],
+      "description": "**Goal:** Create a structured prompt for explaining job match scores\n\n**Files:**\n- Create: `lib/ai/prompts/match-explain.ts`\n\n**Acceptance Criteria:**\n- System prompt instructs AI to explain match in conversational style\n- User prompt template includes resume skills, job skills, match scores, missing skills\n- Output is natural language, not JSON\n\n**Verify:** File exports `MATCH_EXPLAIN_SYSTEM_PROMPT` and `getMatchExplainUserPrompt` function\n\n```json:metadata\n{\"files\": [\"lib/ai/prompts/match-explain.ts\"], \"verifyCommand\": \"npx tsc --noEmit lib/ai/prompts/match-explain.ts\", \"acceptanceCriteria\": [\"System prompt for conversational explanation\", \"User prompt with match data template\", \"Natural language output\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 3: Create Streaming Match Explanation API Route",
+      "status": "completed",
+      "blockedBy": [1, 2],
+      "description": "**Goal:** Create API endpoint that streams match explanation text\n\n**Files:**\n- Create: `app/api/matches/explain/stream/route.ts`\n\n**Acceptance Criteria:**\n- POST endpoint accepts match data (jobTitle, scores, skills)\n- Uses Vercel AI SDK `streamText()` with `toTextStreamResponse()`\n- Handles missing API key with mock streaming response\n\n**Verify:** `curl -X POST http://localhost:3000/api/matches/explain/stream ...` → streams text\n\n```json:metadata\n{\"files\": [\"app/api/matches/explain/stream/route.ts\"], \"verifyCommand\": \"curl test\", \"acceptanceCriteria\": [\"POST endpoint with validation\", \"Uses streamText + toTextStreamResponse\", \"Mock fallback when no API key\"]}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 4: Create useStreamingText Hook",
+      "status": "completed",
+      "blockedBy": [0],
+      "description": "**Goal:** Create a reusable React hook for consuming streaming text responses\n\n**Files:**\n- Create: `hooks/useStreamingText.ts`\n\n**Acceptance Criteria:**\n- Hook accepts API endpoint URL and request body\n- Returns `{ text, isLoading, error, trigger, stop, reset }`\n- Handles plain text streams from toTextStreamResponse()\n- Supports abort/cancel mid-stream\n\n**Verify:** `npx tsc --noEmit hooks/useStreamingText.ts` → no errors\n\n```json:metadata\n{\"files\": [\"hooks/useStreamingText.ts\"], \"verifyCommand\": \"npx tsc --noEmit hooks/useStreamingText.ts\", \"acceptanceCriteria\": [\"Returns text, isLoading, error, trigger, stop, reset\", \"Handles plain text streaming\", \"Supports abort\"]}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 5: Create MatchExplanationStream Component",
+      "status": "completed",
+      "blockedBy": [3, 4],
+      "description": "**Goal:** Create a React component that displays streaming match explanation\n\n**Files:**\n- Create: `components/smart-feed/MatchExplanationStream.tsx`\n\n**Acceptance Criteria:**\n- Client component that triggers streaming on button click\n- Shows loading state while streaming\n- Displays text as it streams in (typewriter effect)\n- Follows terminal design system (mono font, orange accents)\n- Has stop/regenerate buttons\n\n**Verify:** `npx tsc --noEmit components/smart-feed/MatchExplanationStream.tsx` → no errors\n\n```json:metadata\n{\"files\": [\"components/smart-feed/MatchExplanationStream.tsx\"], \"verifyCommand\": \"npx tsc --noEmit components/smart-feed/MatchExplanationStream.tsx\", \"acceptanceCriteria\": [\"Client component with streaming\", \"Terminal design system styling\", \"Stop/regenerate buttons\"]}\n```"
+    },
+    {
+      "id": 6,
+      "subject": "Task 6: Create Streaming Cover Letter API Route",
+      "status": "completed",
+      "blockedBy": [1],
+      "description": "**Goal:** Create API endpoint that streams cover letter generation\n\n**Files:**\n- Create: `app/api/resume/cover-letter/stream/route.ts`\n\n**Acceptance Criteria:**\n- POST endpoint accepts resumeText, jobTitle, companyName, jobDescription, tone\n- Uses Vercel AI SDK `streamText()` with `toTextStreamResponse()`\n- Handles missing API key with mock streaming response\n\n**Verify:** `curl -X POST http://localhost:3000/api/resume/cover-letter/stream ...` → streams cover letter text\n\n```json:metadata\n{\"files\": [\"app/api/resume/cover-letter/stream/route.ts\"], \"verifyCommand\": \"curl test\", \"acceptanceCriteria\": [\"POST endpoint with validation\", \"Uses streamText + toTextStreamResponse\", \"Mock fallback when no API key\"]}\n```"
+    },
+    {
+      "id": 7,
+      "subject": "Task 7: Create CoverLetterStream Component",
+      "status": "completed",
+      "blockedBy": [4, 6],
+      "description": "**Goal:** Create a React component for streaming cover letter generation\n\n**Files:**\n- Create: `components/smart-feed/CoverLetterStream.tsx`\n\n**Acceptance Criteria:**\n- Client component that accepts resume text and job details\n- Triggers streaming on button click\n- Shows loading state, streaming text, and completion state\n- Includes copy-to-clipboard button when complete\n- Tone selector (professional/enthusiastic/creative/technical)\n- Follows terminal design system\n\n**Verify:** `npx tsc --noEmit components/smart-feed/CoverLetterStream.tsx` → no errors\n\n```json:metadata\n{\"files\": [\"components/smart-feed/CoverLetterStream.tsx\"], \"verifyCommand\": \"npx tsc --noEmit components/smart-feed/CoverLetterStream.tsx\", \"acceptanceCriteria\": [\"Client component with streaming\", \"Tone selector\", \"Copy to clipboard\", \"Terminal design system styling\"]}\n```"
+    },
+    {
+      "id": 8,
+      "subject": "Task 8: Integration Test - Wire Components to Test Page",
+      "status": "completed",
+      "blockedBy": [5, 7],
+      "description": "**Goal:** Verify streaming components work end-to-end\n\n**Files:**\n- Create: `app/test-streaming/page.tsx` (test page)\n\n**Acceptance Criteria:**\n- MatchExplanationStream renders with mock data and streams explanation\n- CoverLetterStream renders with mock data and streams cover letter\n- Both components follow terminal design system\n- Dev server runs without errors\n\n**Verify:** Visit `http://localhost:3000/test-streaming` → trigger both streams, see text appear word-by-word\n\n```json:metadata\n{\"files\": [\"app/test-streaming/page.tsx\"], \"verifyCommand\": \"npm run dev + manual test\", \"acceptanceCriteria\": [\"Both streaming components render\", \"Streaming works visually\", \"No console errors\"]}\n```"
+    },
+    {
+      "id": 9,
+      "subject": "Task 9: Final Verification and Documentation Update",
+      "status": "completed",
+      "blockedBy": [8],
+      "description": "**Goal:** Verify all features work end-to-end and update CLAUDE.md\n\n**Files:**\n- Modify: `CLAUDE.md` (update roadmap status)\n\n**Acceptance Criteria:**\n- `npm run build` passes\n- All new API routes respond correctly\n- Streaming works in production build (`npm run start`)\n- CLAUDE.md reflects completed streaming features\n\n**Verify:** `npm run build && npm run start` → visit test page → streaming works\n\n```json:metadata\n{\"files\": [\"CLAUDE.md\"], \"verifyCommand\": \"npm run build\", \"acceptanceCriteria\": [\"Build passes\", \"Production server works\", \"CLAUDE.md updated\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-04-08T12:00:00Z"
+}

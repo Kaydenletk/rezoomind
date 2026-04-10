@@ -23,9 +23,7 @@ interface Posting {
 }
 
 interface HomeClientShellProps {
-  // Server-rendered content passed through
-  children: React.ReactNode; // SummaryStrip + MainInsightCard + MarketBanner + InsightCards + stats bar
-  // Data from server
+  children: React.ReactNode;
   postings: Posting[];
   priorities: Record<string, PriorityBadge | null>;
   fitBadges: Record<string, string[]>;
@@ -54,7 +52,6 @@ export function HomeClientShell({
   const [loading, setLoading] = useState(false);
 
   // Fetch resume data when authenticated
-  // API shape: { ok: true, resume: { resume_text, resume_keywords, parsed_at, ... } }
   const fetchResume = useCallback(async () => {
     if (!isAuth) return;
     try {
@@ -71,50 +68,47 @@ export function HomeClientShell({
         }
       }
     } catch {
-      // Silently fail — user just won't see match scores
+      // Silently fail
     }
   }, [isAuth]);
 
-  // Fetch match scores when resume is available
-  // API shape: { ok, hasResume, matchRows: [{ match_score, job_postings: { company, role, ... } }] }
-  //
-  // IMPORTANT: The dashboard API returns jobs from the DATABASE (Prisma job_postings),
-  // but the homepage JobsTable displays jobs from the GITHUB CSV source.
-  // These have DIFFERENT IDs. We match by composite key: "company|role" (lowercased).
-  const fetchMatchScores = useCallback(async () => {
-    if (!resume) return;
+  // Batch-score CSV jobs against resume using Gemini
+  const fetchBatchScores = useCallback(async () => {
+    if (!resume || postings.length === 0) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/dashboard/data");
+      const res = await fetch("/api/matches/batch-score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobs: postings.map((p) => ({
+            company: p.company,
+            role: p.role,
+            location: p.location,
+            category: p.category,
+          })),
+        }),
+      });
       if (res.ok) {
         const data = await res.json();
-        const scores: Record<string, number> = {};
-        if (data.ok && data.matchRows) {
-          for (const row of data.matchRows) {
-            if (row.match_score == null || !row.job_postings) continue;
-            const jp = row.job_postings;
-            // Composite key matches GitHub jobs by company+role
-            const key = `${(jp.company || "").toLowerCase().trim()}|${(jp.role || "").toLowerCase().trim()}`;
-            scores[key] = Math.round(row.match_score);
-          }
+        if (data.ok && data.scores) {
+          setMatchScores(data.scores);
         }
-        setMatchScores(scores);
       }
     } catch {
-      // Silently fail
+      // Silently fail — user just won't see scores
     } finally {
       setLoading(false);
     }
-  }, [resume]);
+  }, [resume, postings]);
 
   useEffect(() => { fetchResume(); }, [fetchResume]);
-  useEffect(() => { fetchMatchScores(); }, [fetchMatchScores]);
+  useEffect(() => { fetchBatchScores(); }, [fetchBatchScores]);
 
   const handleUploaded = () => {
-    fetchResume(); // Re-fetch resume data after upload
+    fetchResume();
   };
 
-  // Determine sidebar content
   const renderSidebar = () => {
     if (!isAuth) {
       return <MatchingPreviewCard />;

@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginClient() {
+export default function SignupClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = useMemo(() => {
@@ -20,7 +20,13 @@ export default function LoginClient() {
     return "/feed";
   }, [searchParams]);
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({
+    email: "",
+    confirmEmail: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
@@ -29,25 +35,61 @@ export default function LoginClient() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!emailRegex.test(form.email) || form.password.length < 8) {
+    if (!emailRegex.test(form.email)) {
       setStatus("error");
-      setNote("invalid credentials format.");
+      setNote("invalid email format.");
+      return;
+    }
+
+    if (form.confirmEmail && form.confirmEmail !== form.email) {
+      setStatus("error");
+      setNote("emails do not match.");
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setStatus("error");
+      setNote("password must be 8+ characters.");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setStatus("error");
+      setNote("passwords do not match.");
       return;
     }
 
     try {
       setStatus("loading");
-      setNote("authenticating...");
+      setNote("registering...");
 
-      const res = await signIn("credentials", {
+      const email = form.email.trim().toLowerCase();
+
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: form.password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setStatus("error");
+        setNote(data.error?.toLowerCase() || "registration failed.");
+        return;
+      }
+
+      setNote("signing in...");
+
+      const loginRes = await signIn("credentials", {
         redirect: false,
-        email: form.email.trim().toLowerCase(),
+        email,
         password: form.password,
       });
 
-      if (res?.error) {
+      if (loginRes?.error) {
         setStatus("error");
-        setNote(res.error.toLowerCase());
+        setNote(loginRes.error.toLowerCase());
         return;
       }
 
@@ -63,6 +105,13 @@ export default function LoginClient() {
     }
   };
 
+  const fields = [
+    { key: "email", label: "email", type: "email", placeholder: "user@domain.com", tracking: "" },
+    { key: "confirmEmail", label: "confirm email", type: "email", placeholder: "user@domain.com", tracking: "" },
+    { key: "password", label: "password", type: "password", placeholder: "••••••••", tracking: "tracking-[0.15em]" },
+    { key: "confirmPassword", label: "confirm password", type: "password", placeholder: "••••••••", tracking: "tracking-[0.15em]" },
+  ] as const;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -77,52 +126,37 @@ export default function LoginClient() {
           <div className="w-2 h-2 rounded-full bg-stone-700" />
           <div className="w-2 h-2 rounded-full bg-stone-700" />
           <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <span className="text-[10px] text-stone-600 ml-2 tracking-wider">auth.exe</span>
+          <span className="text-[10px] text-stone-600 ml-2 tracking-wider">register.exe</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-7 space-y-6">
+        <form onSubmit={handleSubmit} className="p-7 space-y-5">
           {/* Title */}
           <div>
-            <h1 className="text-sm font-bold text-stone-200 tracking-wider">sign_in</h1>
+            <h1 className="text-sm font-bold text-stone-200 tracking-wider">create_account</h1>
             <p className="text-[11px] text-stone-500 mt-1">
-              &gt;_ access your dashboard and alerts
+              &gt;_ get verified internship alerts tailored to you
             </p>
           </div>
 
-          {/* Email */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
-              email
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-stone-600 text-xs">&gt;</span>
-              <input
-                type="email"
-                spellCheck={false}
-                value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                className="w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm transition-colors"
-                placeholder="user@domain.com"
-              />
+          {/* Fields */}
+          {fields.map((f) => (
+            <div key={f.key} className="space-y-1.5">
+              <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
+                {f.label}
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-stone-600 text-xs">&gt;</span>
+                <input
+                  type={f.type}
+                  spellCheck={false}
+                  value={form[f.key]}
+                  onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                  className={`w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm transition-colors ${f.tracking}`}
+                  placeholder={f.placeholder}
+                />
+              </div>
             </div>
-          </div>
-
-          {/* Password */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
-              password
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-stone-600 text-xs">&gt;</span>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                className="w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm tracking-[0.15em] transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
+          ))}
 
           {/* Status */}
           <div className="h-5">
@@ -156,7 +190,7 @@ export default function LoginClient() {
               <span className="animate-pulse">processing...</span>
             ) : (
               <>
-                sign_in
+                create_account
                 <ArrowRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
               </>
             )}
@@ -173,12 +207,12 @@ export default function LoginClient() {
           {/* Link */}
           <div className="pt-4 border-t border-stone-800/50 text-center">
             <p className="text-[11px] text-stone-500">
-              no account?{" "}
+              already have an account?{" "}
               <Link
-                href="/signup"
+                href="/login"
                 className="text-orange-500 hover:text-orange-400 underline decoration-orange-500/20 underline-offset-4 transition-colors"
               >
-                create_account
+                sign_in
               </Link>
             </p>
           </div>

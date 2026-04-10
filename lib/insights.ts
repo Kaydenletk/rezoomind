@@ -33,6 +33,10 @@ export interface MarketInsights {
   hottestCategory: string;
   recommendation: string;
   shortRecommendation: string;
+  marketHeat: "slow" | "normal" | "hot";
+  competitionLevel: "low" | "medium" | "high";
+  plainEnglishSummary: string;
+  weeklyGuidance: string;
 }
 
 const CATEGORIES: Array<{ label: string; key: keyof Omit<MarketTrendPoint, "date"> }> = [
@@ -123,6 +127,71 @@ function buildRecommendation(
   return { recommendation: tmpl.long, shortRecommendation: tmpl.short };
 }
 
+function deriveMarketHeat(
+  season: MarketInsights["season"],
+  trendingUpCount: number,
+): MarketInsights["marketHeat"] {
+  if (season === "peak" || (season === "ramping-up" && trendingUpCount >= 3)) return "hot";
+  if (season === "lull" && trendingUpCount <= 1) return "slow";
+  return "normal";
+}
+
+function deriveCompetitionLevel(
+  season: MarketInsights["season"],
+  trendingUpCount: number,
+): MarketInsights["competitionLevel"] {
+  // Peak + declining = fewer slots, more competition
+  if (season === "peak" && trendingUpCount <= 1) return "high";
+  if (season === "winding-down") return "high";
+  if (season === "lull") return "low";
+  return "medium";
+}
+
+function buildPlainEnglishSummary(
+  season: MarketInsights["season"],
+  hottestCategory: string,
+  hottestMom: number,
+  trendingUp: boolean,
+): string {
+  if (season === "peak" && trendingUp) {
+    return `Peak hiring season is underway with ${hottestCategory} leading at +${hottestMom}%. New roles are being posted daily — apply within 48 hours for best odds.`;
+  }
+  if (season === "peak" && !trendingUp) {
+    return "We're in peak season but postings are starting to taper. Roles posted now tend to fill fast — prioritize fresh listings.";
+  }
+  if (season === "winding-down") {
+    return `Peak season is winding down, but late-cycle roles often see less competition. ${hottestCategory} still has active openings worth targeting.`;
+  }
+  if (season === "ramping-up") {
+    return `The market is heating up as companies start posting early. ${hottestCategory} is leading the ramp — get your resume ready now.`;
+  }
+  // lull
+  if (trendingUp) {
+    return `The market is in a seasonal lull, but ${hottestCategory} is trending up (+${hottestMom}%). Some companies post early — watch for these opportunities.`;
+  }
+  return "Internship postings are in a seasonal lull. Use this time to polish your resume and practice interviews — peak season starts around September.";
+}
+
+function buildWeeklyGuidance(
+  season: MarketInsights["season"],
+  trendingUp: boolean,
+): string {
+  if (season === "peak") {
+    return "Focus on roles posted in the last 72 hours. Speed matters most during peak season — apply early, tailor your resume to each JD.";
+  }
+  if (season === "winding-down") {
+    return "Late-cycle roles have less competition. Target companies still actively posting and follow up within 5 days if you don't hear back.";
+  }
+  if (season === "ramping-up") {
+    return "Early postings are appearing. Get your resume polished and start applying to stand out before the September rush.";
+  }
+  // lull
+  if (trendingUp) {
+    return "Some companies are posting early. Apply to any fresh roles you see, but also invest time in resume optimization and interview practice.";
+  }
+  return "Prep season — polish your resume, practice behavioral interviews, and build projects. You'll be ready when postings surge in September.";
+}
+
 export function computeMarketInsights(trend: MarketTrendPoint[]): MarketInsights {
   const now = new Date();
   const month = now.getMonth();
@@ -141,6 +210,10 @@ export function computeMarketInsights(trend: MarketTrendPoint[]): MarketInsights
       hottestCategory: "USA Internships",
       recommendation,
       shortRecommendation,
+      marketHeat: deriveMarketHeat(season, 0),
+      competitionLevel: deriveCompetitionLevel(season, 0),
+      plainEnglishSummary: buildPlainEnglishSummary(season, "USA Internships", 0, false),
+      weeklyGuidance: buildWeeklyGuidance(season, false),
     };
   }
 
@@ -174,7 +247,8 @@ export function computeMarketInsights(trend: MarketTrendPoint[]): MarketInsights
   });
 
   const hottest = [...trends].sort((a, b) => b.momChange - a.momChange)[0];
-  const trendingUp = trends.filter((t) => t.momChange > 0).length >= 2;
+  const trendingUpCount = trends.filter((t) => t.momChange > 0).length;
+  const trendingUp = trendingUpCount >= 2;
 
   const { recommendation, shortRecommendation } = buildRecommendation(
     season, hottest.category, hottest.momChange, hottest.current, trendingUp
@@ -190,5 +264,9 @@ export function computeMarketInsights(trend: MarketTrendPoint[]): MarketInsights
     hottestCategory: hottest.category,
     recommendation,
     shortRecommendation,
+    marketHeat: deriveMarketHeat(season, trendingUpCount),
+    competitionLevel: deriveCompetitionLevel(season, trendingUpCount),
+    plainEnglishSummary: buildPlainEnglishSummary(season, hottest.category, hottest.momChange, trendingUp),
+    weeklyGuidance: buildWeeklyGuidance(season, trendingUp),
   };
 }
