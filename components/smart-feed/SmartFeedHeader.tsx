@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { Sun, Moon, Menu, X, ChevronDown } from "lucide-react";
 
 interface SmartFeedHeaderProps {
@@ -13,6 +13,7 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
   const [dark, setDark] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Initialize theme from localStorage on mount
@@ -41,6 +42,16 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
   }
+
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true);
+    await signIn("credentials", {
+      email: process.env.NEXT_PUBLIC_DEMO_EMAIL ?? "demo@rezoomind.app",
+      password: process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? "demo_rezoomind_2026",
+      callbackUrl: "/feed",
+    });
+    setIsDemoLoading(false);
+  };
 
   const avatarLetter = user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "?";
 
@@ -119,8 +130,15 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
                 )}
               </div>
             ) : (
-              /* Public mode: login + signup */
+              /* Public mode: try demo + login + signup */
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDemoLogin}
+                  disabled={isDemoLoading}
+                  className="px-4 py-1.5 border border-orange-600/50 bg-orange-600/10 font-mono text-xs text-orange-500 hover:bg-orange-600/20 transition-colors disabled:opacity-50"
+                >
+                  {isDemoLoading ? "loading..." : "try demo"}
+                </button>
                 <Link
                   href="/login"
                   className="px-4 py-1.5 border border-stone-300 dark:border-stone-700 font-mono text-xs text-stone-600 dark:text-stone-400 hover:border-stone-400 dark:hover:border-stone-600 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
@@ -199,6 +217,13 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
             </>
           ) : (
             <>
+              <button
+                onClick={() => { setMobileOpen(false); handleDemoLogin(); }}
+                disabled={isDemoLoading}
+                className="block w-full text-left px-3 py-2.5 font-mono text-xs text-orange-500 hover:bg-orange-600/10 transition-colors disabled:opacity-50"
+              >
+                {isDemoLoading ? "loading..." : "try demo"}
+              </button>
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
