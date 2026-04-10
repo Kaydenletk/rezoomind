@@ -6,7 +6,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { ArrowRight } from "lucide-react";
-import { AuthCardShell } from "@/components/auth/AuthCardShell";
+import {
+  AuthCardShell,
+  authCardSubtitleClassName,
+  authCardTitleClassName,
+  authFieldLabelClassName,
+  authFooterClassName,
+  authInlineLinkClassName,
+  authInputClassName,
+  authPrimaryButtonClassName,
+  authSecondaryButtonClassName,
+  authStatusClassName,
+  authStatusToneClassNames,
+} from "@/components/auth/AuthCardShell";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -107,10 +119,30 @@ export default function SignupClient() {
   };
 
   const fields = [
-    { key: "email", label: "email", type: "email", placeholder: "user@domain.com", tracking: "" },
-    { key: "confirmEmail", label: "confirm email", type: "email", placeholder: "user@domain.com", tracking: "" },
-    { key: "password", label: "password", type: "password", placeholder: "••••••••", tracking: "tracking-[0.15em]" },
-    { key: "confirmPassword", label: "confirm password", type: "password", placeholder: "••••••••", tracking: "tracking-[0.15em]" },
+    {
+      key: "email",
+      label: "Email",
+      type: "email",
+      placeholder: "name@school.edu",
+    },
+    {
+      key: "confirmEmail",
+      label: "Confirm email",
+      type: "email",
+      placeholder: "Re-enter your email",
+    },
+    {
+      key: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "Create a password",
+    },
+    {
+      key: "confirmPassword",
+      label: "Confirm password",
+      type: "password",
+      placeholder: "Re-enter your password",
+    },
   ] as const;
 
   return (
@@ -119,53 +151,43 @@ export default function SignupClient() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-5"
+        className="space-y-6"
       >
         <div>
-          <h1 className="text-sm font-bold tracking-wider text-stone-900 dark:text-stone-200">
-            create_account
-          </h1>
-          <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-500">
-            &gt;_ get verified internship alerts tailored to you
+          <h1 className={authCardTitleClassName}>Create your account</h1>
+          <p className={authCardSubtitleClassName}>
+            Set up your profile and start tracking new roles.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {fields.map((f) => (
-            <div key={f.key} className="space-y-1.5">
-              <label className="block text-[10px] uppercase tracking-[0.2em] text-stone-500 dark:text-stone-500">
-                {f.label}
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-stone-400 dark:text-stone-600">&gt;</span>
-                <input
-                  type={f.type}
-                  spellCheck={false}
-                  value={form[f.key]}
-                  onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
-                  className={`w-full bg-transparent border-b border-stone-200 text-stone-900 placeholder:text-stone-400 focus:border-orange-600 outline-none py-1.5 font-mono text-sm transition-colors dark:border-stone-800 dark:text-stone-100 dark:placeholder:text-stone-600 ${f.tracking}`}
-                  placeholder={f.placeholder}
-                />
-              </div>
+            <div key={f.key} className="space-y-2">
+              <label className={authFieldLabelClassName}>{f.label}</label>
+              <input
+                type={f.type}
+                spellCheck={false}
+                value={form[f.key]}
+                onChange={(e) => setForm((p) => ({ ...p, [f.key]: e.target.value }))}
+                className={authInputClassName}
+                placeholder={f.placeholder}
+              />
             </div>
           ))}
 
-          <div className="h-5">
+          <div className="min-h-11">
             {note && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`text-[11px] font-mono ${
+                className={`${authStatusClassName} ${
                   status === "success"
-                    ? "text-green-700 dark:text-green-400"
+                    ? authStatusToneClassNames.success
                     : status === "error"
-                    ? "text-red-700 dark:text-red-400"
-                    : "text-stone-500 dark:text-stone-400"
+                    ? authStatusToneClassNames.error
+                    : authStatusToneClassNames.neutral
                 }`}
               >
-                {status === "success" && "▸ "}
-                {status === "error" && "✗ "}
-                {status === "loading" && "⋯ "}
                 {note}
               </motion.p>
             )}
@@ -174,13 +196,13 @@ export default function SignupClient() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="group flex w-full items-center justify-center gap-2 border border-orange-200 bg-orange-50 py-2.5 text-xs font-bold tracking-[0.15em] text-orange-700 transition-all hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-orange-600/50 dark:bg-orange-600/10 dark:text-orange-500 dark:hover:bg-orange-600/20"
+            className={authPrimaryButtonClassName}
           >
             {status === "loading" ? (
-              <span className="animate-pulse">processing...</span>
+              <span className="animate-pulse">Creating account...</span>
             ) : (
               <>
-                create_account
+                Create account
                 <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
               </>
             )}
@@ -188,19 +210,16 @@ export default function SignupClient() {
 
           <button
             type="button"
-            className="w-full border border-stone-200 bg-stone-100 py-2.5 text-xs tracking-[0.15em] text-stone-700 transition-all hover:bg-stone-200 dark:border-stone-800 dark:bg-stone-900/30 dark:text-stone-500 dark:hover:bg-stone-800/50"
+            className={authSecondaryButtonClassName}
           >
-            continue_with_google
+            Continue with Google
           </button>
 
-          <div className="border-t border-stone-200/80 pt-4 text-center dark:border-stone-800/50">
-            <p className="text-[11px] text-stone-500 dark:text-stone-500">
-              already have an account?{" "}
-              <Link
-                href="/login"
-                className="text-orange-600 underline decoration-orange-600/20 underline-offset-4 transition-colors hover:text-orange-500 dark:text-orange-500 dark:hover:text-orange-400"
-              >
-                sign_in
+          <div className={authFooterClassName}>
+            <p>
+              Already have an account?{" "}
+              <Link href="/login" className={authInlineLinkClassName}>
+                Sign in
               </Link>
             </p>
           </div>
