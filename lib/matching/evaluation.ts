@@ -61,7 +61,7 @@ export function precisionAtK(
  */
 export const EVALUATION_DATASET: Array<{
   label: string;
-  groundTruth: number; // 0 | 1 | 2
+  groundTruth: 0 | 1 | 2;
 }> = [
   { label: "Software Engineer Intern — React/Node.js startup", groundTruth: 2 },
   { label: "Frontend Engineer Intern — TypeScript SaaS", groundTruth: 2 },
