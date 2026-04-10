@@ -45,12 +45,17 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
 
   const handleDemoLogin = async () => {
     setIsDemoLoading(true);
-    await signIn("credentials", {
+    const result = await signIn("credentials", {
       email: process.env.NEXT_PUBLIC_DEMO_EMAIL ?? "demo@rezoomind.app",
       password: process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? "demo_rezoomind_2026",
       callbackUrl: "/feed",
+      redirect: false,
     });
-    setIsDemoLoading(false);
+    if (result?.ok) {
+      window.location.href = "/feed";
+    } else {
+      setIsDemoLoading(false);
+    }
   };
 
   const avatarLetter = user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase() ?? "?";

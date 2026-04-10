@@ -54,7 +54,7 @@ async function main() {
 
   await prisma.resume.upsert({
     where: { userId: user.id },
-    update: { resume_text: DEMO_RESUME_TEXT },
+    update: { resume_text: DEMO_RESUME_TEXT, embedding: [], resume_keywords: [] },
     create: {
       userId: user.id,
       resume_text: DEMO_RESUME_TEXT,
