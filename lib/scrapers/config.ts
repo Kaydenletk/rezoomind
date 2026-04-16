@@ -119,14 +119,12 @@ export const GREENHOUSE_COMPANIES: { slug: string; name: string }[] = [
 // Add fresh slugs here and flip LeverScraper.enabled to true to re-activate.
 export const LEVER_COMPANIES: { slug: string; name: string }[] = [];
 
+// Validated 2026-04: turso, calcom, dub return null boards on Ashby public API; removed.
 export const ASHBY_COMPANIES: { slug: string; name: string }[] = [
   { slug: 'linear', name: 'Linear' },
   { slug: 'vercel', name: 'Vercel' },
   { slug: 'loom', name: 'Loom' },
   { slug: 'resend', name: 'Resend' },
-  { slug: 'turso', name: 'Turso' },
-  { slug: 'calcom', name: 'Cal.com' },
   { slug: 'plane', name: 'Plane' },
-  { slug: 'dub', name: 'Dub' },
   { slug: 'raycast', name: 'Raycast' },
 ];
