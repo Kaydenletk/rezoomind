@@ -114,18 +114,10 @@ export const GREENHOUSE_COMPANIES: { slug: string; name: string }[] = [
   { slug: 'n8n', name: 'n8n' },
 ];
 
-export const LEVER_COMPANIES: { slug: string; name: string }[] = [
-  { slug: 'shopify', name: 'Shopify' },
-  { slug: 'netflix', name: 'Netflix' },
-  { slug: 'databricks', name: 'Databricks' },
-  { slug: 'lyft', name: 'Lyft' },
-  { slug: 'zapier', name: 'Zapier' },
-  { slug: 'webflow', name: 'Webflow' },
-  { slug: 'airtable', name: 'Airtable' },
-  { slug: 'brex', name: 'Brex' },
-  { slug: 'ramp', name: 'Ramp' },
-  { slug: 'mercury', name: 'Mercury' },
-];
+// Empty: prior candidates (shopify, netflix, databricks, lyft, zapier, webflow,
+// airtable, brex, ramp, mercury) all migrated off Lever (404 or 0 jobs as of 2026-04).
+// Add fresh slugs here and flip LeverScraper.enabled to true to re-activate.
+export const LEVER_COMPANIES: { slug: string; name: string }[] = [];
 
 export const ASHBY_COMPANIES: { slug: string; name: string }[] = [
   { slug: 'linear', name: 'Linear' },
