@@ -86,32 +86,17 @@ export const GITHUB_JOB_REPOS = [
   },
 ];
 
-// Company slugs for direct ATS scrapers
+// Validated 2026-04: 18 proposed slugs returned 404 on Greenhouse public API
+// (openai, elevenlabs, retool, rippling, notion, replit, huggingface, perplexityai,
+//  mistral, cohere, runway, harvey, modal-labs, wandb, inflection-ai, characterai,
+//  browserbase, n8n). These companies likely moved to other ATSs. Only verified slugs kept.
 export const GREENHOUSE_COMPANIES: { slug: string; name: string }[] = [
   { slug: 'anthropic', name: 'Anthropic' },
-  { slug: 'openai', name: 'OpenAI' },
-  { slug: 'elevenlabs', name: 'ElevenLabs' },
-  { slug: 'retool', name: 'Retool' },
-  { slug: 'rippling', name: 'Rippling' },
-  { slug: 'notion', name: 'Notion' },
   { slug: 'figma', name: 'Figma' },
-  { slug: 'replit', name: 'Replit' },
-  { slug: 'huggingface', name: 'Hugging Face' },
-  { slug: 'perplexityai', name: 'Perplexity AI' },
-  { slug: 'mistral', name: 'Mistral AI' },
-  { slug: 'cohere', name: 'Cohere' },
-  { slug: 'runway', name: 'Runway' },
-  { slug: 'harvey', name: 'Harvey' },
   { slug: 'coreweave', name: 'CoreWeave' },
   { slug: 'togetherai', name: 'Together AI' },
-  { slug: 'modal-labs', name: 'Modal' },
-  { slug: 'wandb', name: 'Weights & Biases' },
-  { slug: 'scale-ai', name: 'Scale AI' },
-  { slug: 'inflection-ai', name: 'Inflection AI' },
-  { slug: 'characterai', name: 'Character.AI' },
   { slug: 'stabilityai', name: 'Stability AI' },
-  { slug: 'browserbase', name: 'Browserbase' },
-  { slug: 'n8n', name: 'n8n' },
+  { slug: 'scaleai', name: 'Scale AI' },
 ];
 
 // Empty: prior candidates (shopify, netflix, databricks, lyft, zapier, webflow,
