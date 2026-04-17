@@ -7,12 +7,7 @@ module.exports = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        brand: "rgb(var(--brand-rgb))",
-        "brand-hover": "rgb(var(--brand-hover-rgb))",
-      },
-    },
+    extend: {},
   },
   plugins: [],
 };
