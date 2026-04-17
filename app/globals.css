@@ -97,6 +97,25 @@
 @theme inline {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand hues */
+  --color-brand-primary: rgb(var(--brand-primary));
+  --color-brand-info: rgb(var(--brand-info));
+  --color-brand-ai: rgb(var(--brand-ai));
+
+  /* Brand tints for backgrounds */
+  --color-brand-primary-tint: rgb(var(--brand-primary) / 0.1);
+  --color-brand-info-tint: rgb(var(--brand-info) / 0.1);
+  --color-brand-ai-tint: rgb(var(--brand-ai) / 0.1);
+
+  /* Status */
+  --color-status-success: rgb(var(--status-success));
+  --color-status-error: rgb(var(--status-error));
+
+  /* Motion durations */
+  --duration-fast: var(--motion-fast);
+  --duration-normal: var(--motion-normal);
+  --duration-slow: var(--motion-slow);
 }
 
 *,
