@@ -116,6 +116,19 @@
   --duration-fast: var(--motion-fast);
   --duration-normal: var(--motion-normal);
   --duration-slow: var(--motion-slow);
+
+  /* Type scale — Geist Mono. Produces `text-caption`, `text-label`, etc. */
+  --text-caption: 10px;
+  --text-label: 11px;
+  --text-body: 13px;
+  --text-heading-sm: 18px;
+  --text-heading-md: 24px;
+  --text-heading-lg: 32px;
+
+  /* Radius — 3 tiers. Produces `rounded-none`, `rounded-sm`, `rounded-pill`. */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-pill: 9999px;
 }
 
 *,

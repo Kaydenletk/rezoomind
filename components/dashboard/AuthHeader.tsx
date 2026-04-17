@@ -1,12 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LogOut } from "lucide-react";
 
+type AccentKey = "orange" | "cyan" | "violet" | "neutral";
+
+const NAV_ITEMS: ReadonlyArray<{ href: string; label: string; accent: AccentKey }> = [
+  { href: "/", label: "~/feed", accent: "orange" },
+  { href: "/insights", label: "~/insights", accent: "cyan" },
+  { href: "/resume", label: "~/tailor", accent: "violet" },
+  { href: "/saved", label: "~/saved", accent: "neutral" },
+];
+
+const ACCENT_CLASSES: Record<AccentKey, { active: string; underline: string }> = {
+  orange: { active: "text-orange-600 dark:text-orange-400", underline: "bg-brand-primary" },
+  cyan: { active: "text-cyan-700 dark:text-cyan-300", underline: "bg-brand-info" },
+  violet: { active: "text-violet-600 dark:text-violet-300", underline: "bg-brand-ai" },
+  neutral: { active: "text-stone-900 dark:text-stone-100", underline: "bg-stone-900 dark:bg-stone-100" },
+};
+
 export function AuthHeader() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
   const isAuth = status === "authenticated";
 
   return (
@@ -22,18 +40,32 @@ export function AuthHeader() {
           rezoomind
         </span>
         <span className="text-stone-300 dark:text-stone-700">|</span>
-        <nav className="hidden sm:flex gap-4">
-          <a href="#jobs" className="font-mono text-xs text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
-            ~/jobs
-          </a>
-          <Link href="/insights" className="font-mono text-xs text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
-            ~/insights
-          </Link>
-          {isAuth && (
-            <Link href="/feed" className="font-mono text-xs text-orange-600 dark:text-orange-500 hover:text-orange-500 dark:hover:text-orange-400 transition-colors font-semibold">
-              ~/feed
-            </Link>
-          )}
+        <nav className="hidden sm:flex items-center gap-0 text-xs font-mono">
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" && !!pathname?.startsWith(item.href));
+            const accent = ACCENT_CLASSES[item.accent];
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`relative px-4 py-2 transition-colors ${
+                  isActive
+                    ? accent.active
+                    : "text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400"
+                }`}
+              >
+                {item.label}
+                {isActive && (
+                  <span
+                    aria-hidden
+                    className={`absolute left-2 right-2 bottom-0 h-0.5 ${accent.underline}`}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </nav>
       </div>
       <div className="flex items-center gap-3">
