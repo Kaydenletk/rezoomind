@@ -85,3 +85,31 @@ export const GITHUB_JOB_REPOS = [
     region: 'international' as const,
   },
 ];
+
+// Validated 2026-04: 18 proposed slugs returned 404 on Greenhouse public API
+// (openai, elevenlabs, retool, rippling, notion, replit, huggingface, perplexityai,
+//  mistral, cohere, runway, harvey, modal-labs, wandb, inflection-ai, characterai,
+//  browserbase, n8n). These companies likely moved to other ATSs. Only verified slugs kept.
+export const GREENHOUSE_COMPANIES: { slug: string; name: string }[] = [
+  { slug: 'anthropic', name: 'Anthropic' },
+  { slug: 'figma', name: 'Figma' },
+  { slug: 'coreweave', name: 'CoreWeave' },
+  { slug: 'togetherai', name: 'Together AI' },
+  { slug: 'stabilityai', name: 'Stability AI' },
+  { slug: 'scaleai', name: 'Scale AI' },
+];
+
+// Empty: prior candidates (shopify, netflix, databricks, lyft, zapier, webflow,
+// airtable, brex, ramp, mercury) all migrated off Lever (404 or 0 jobs as of 2026-04).
+// Add fresh slugs here and flip LeverScraper.enabled to true to re-activate.
+export const LEVER_COMPANIES: { slug: string; name: string }[] = [];
+
+// Validated 2026-04: turso, calcom, dub return null boards on Ashby public API; removed.
+export const ASHBY_COMPANIES: { slug: string; name: string }[] = [
+  { slug: 'linear', name: 'Linear' },
+  { slug: 'vercel', name: 'Vercel' },
+  { slug: 'loom', name: 'Loom' },
+  { slug: 'resend', name: 'Resend' },
+  { slug: 'plane', name: 'Plane' },
+  { slug: 'raycast', name: 'Raycast' },
+];

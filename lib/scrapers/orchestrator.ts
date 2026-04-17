@@ -12,6 +12,9 @@ import {
 import { shouldRunAtHour } from './config';
 import { GitHubJobsScraper } from './github-jobs';
 import { JSearchScraper } from './jsearch-scraper';
+import { GreenhouseScraper } from './greenhouse-scraper';
+import { LeverScraper } from './lever-scraper';
+import { AshbyScraper } from './ashby-scraper';
 
 export class ScraperOrchestrator {
   private scrapers: JobScraper[];
@@ -22,6 +25,10 @@ export class ScraperOrchestrator {
       new GitHubJobsScraper(),
       // JSearch API scraper - fetches from RapidAPI JSearch
       new JSearchScraper(),
+      // Direct ATS scrapers - hourly, full descriptions
+      new GreenhouseScraper(),
+      new LeverScraper(),
+      new AshbyScraper(),
     ];
   }
 
