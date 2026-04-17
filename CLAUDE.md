@@ -15,16 +15,20 @@ Before making ANY changes to landing page components, global CSS, or `page.tsx`:
 
 ### Protected Landing Page Files
 
+After 2026-04-17 redesign (feed-is-the-hero). Spec: `docs/superpowers/specs/2026-04-17-phase1-landing-design.md`.
+
 | File | What it controls | Rule |
 |------|-----------------|------|
-| `app/page.tsx` | Homepage server component | DO NOT replace `HomeClientShell` with anything else without explicit approval |
-| `components/dashboard/HomeClientShell.tsx` | Client shell with sidebar + jobs table | DO NOT restructure the grid layout |
-| `components/dashboard/SummaryStrip.tsx` | Market status bar (Market, Fresh today, Best window, Competition) | DO NOT add new props or modes without approval |
-| `components/dashboard/MainInsightCard.tsx` | Market insight card (season + summary) | Keep current styling |
-| `components/dashboard/MarketBanner.tsx` | Trend chart | Preserve aspect ratio and positioning |
-| `components/dashboard/InsightCards.tsx` | 3-column insight cards (Status, Trend, Guidance) | Keep current grid layout |
-| `components/dashboard/JobsTable.tsx` | Job listings table | Preserve column layout |
-| `components/dashboard/AuthHeader.tsx` | Terminal-style header with nav | Keep current styling |
+| `app/page.tsx` | Homepage server component | DO NOT add heavy computations here; keep thin. Hero count + initial jobs only. |
+| `components/landing/LandingShell.tsx` | Client orchestrator | DO NOT add features not in the Phase 1 spec without explicit approval |
+| `components/landing/LandingTopbar.tsx` | Sticky topbar + auth-aware nav | Keep logo+dots placement; don't add nav links without approval |
+| `components/landing/LandingHero.tsx` | Hero count + one-line sub | Headline must stay under 12 words |
+| `components/landing/SearchBar.tsx` | Sticky search + filter chips + Cmd+K | DO NOT add a third filter row or change the prompt `>` cursor style |
+| `components/landing/RoleRow.tsx` | Single role row | Tier-color logic is load-bearing — don't change the score thresholds (75/50/30) without approval |
+| `components/landing/RoleList.tsx` | Filter + skeleton + empty state | Filtering is client-side on the loaded array (Phase 3 will change this) |
+| `components/landing/copy.ts` | Locked copy strings | Any copy change goes through this file, not inline |
+
+**Retired from `/` (kept for `(app)` layout):** `HomeClientShell.tsx`, `SummaryStrip.tsx`, `MainInsightCard.tsx`, `MarketBanner.tsx`, `InsightCards.tsx`, `JobsTable.tsx`.
 
 ### Smart Feed Components (Separate from Production)
 
