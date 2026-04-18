@@ -37,6 +37,36 @@ export const LANDING_COPY = {
     sortLabel: "sort: newest ↕",
   },
   filters: {
+    sections: {
+      role: "ROLE",
+      level: "LEVEL",
+      location: "LOCATION",
+      fresh: "FRESH",
+    },
+    role: {
+      swe: "software eng",
+      pm: "product",
+      dsml: "data / ml",
+      quant: "quant",
+      hardware: "hardware",
+    },
+    level: {
+      internship: "internship",
+      newGrad: "new grad",
+    },
+    location: {
+      remote: "remote",
+      usa: "usa",
+      intl: "international",
+    },
+    fresh: {
+      last24h: "last 24h",
+      week: "this week",
+    },
+    activeCount: (n: number) => `${n} active`,
+    clearAll: "clear all",
+    // Legacy — still referenced by useSearchFilters tests and URL serialization.
+    // Do not remove until a migration plan is in place.
     internship: "internship",
     newGrad: "new grad",
     remote: "remote",

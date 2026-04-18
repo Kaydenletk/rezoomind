@@ -55,7 +55,7 @@ export function LandingShell({
   insiderTip,
 }: LandingShellProps) {
   const { data: session, status } = useSession();
-  const { query, setQuery, filters, toggleFilter } = useSearchFilters();
+  const { query, setQuery, filters, toggleFilter, clearFilters } = useSearchFilters();
   const [, setSelectedRole] = useState<LandingRole | null>(null);
   const [scores, setScores] = useState<Record<string, number | null>>({});
   const [hasResume, setHasResume] = useState(false);
@@ -161,6 +161,7 @@ export function LandingShell({
           onQueryChange={setQuery}
           activeFilters={filters}
           onToggleFilter={toggleFilter}
+          onClearFilters={clearFilters}
         />
         {showAuthNudge && <AuthNudgeCard />}
         <div className="max-w-[980px] mx-auto">

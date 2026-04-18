@@ -4,6 +4,14 @@ import { MouseEvent, KeyboardEvent } from "react";
 import { Chip } from "@/components/ui/Chip";
 import { LANDING_COPY } from "./copy";
 
+export type RoleCategory =
+  | "swe"
+  | "pm"
+  | "dsml"
+  | "quant"
+  | "hardware"
+  | "other";
+
 export interface LandingRole {
   id: string;
   role: string;
@@ -12,6 +20,7 @@ export interface LandingRole {
   url: string | null;
   datePosted: string | null;
   tags: string[];
+  category?: RoleCategory;
 }
 
 type Tier = "apply" | "explore" | "tailor" | "skip";
