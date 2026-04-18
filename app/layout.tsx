@@ -94,7 +94,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${plusJakarta.variable} ${dmMono.variable} bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 antialiased`}
+        className={`${inter.variable} ${plusJakarta.variable} ${dmMono.variable} bg-surface text-fg antialiased`}
       >
         <AuthProvider>
           {children}

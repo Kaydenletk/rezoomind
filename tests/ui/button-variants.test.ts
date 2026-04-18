@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { buttonVariants } from '@/components/ui/Button';
 
 describe('buttonVariants', () => {
-  it('primary-solid uses solid orange bg with dark text', () => {
+  it('primary-solid uses solid orange bg with readable text', () => {
     expect(buttonVariants['primary-solid']).toContain('bg-brand-primary');
-    expect(buttonVariants['primary-solid']).toContain('text-stone-950');
+    expect(buttonVariants['primary-solid']).toContain('text-white');
   });
 
   it('primary-tint uses orange-tint bg', () => {
@@ -12,24 +12,26 @@ describe('buttonVariants', () => {
     expect(buttonVariants['primary-tint']).toContain('text-orange-500');
   });
 
-  it('ai variant uses violet tint', () => {
+  it('ai variant uses violet tint with mode-aware text', () => {
     expect(buttonVariants.ai).toContain('bg-brand-ai-tint');
-    expect(buttonVariants.ai).toContain('text-violet-300');
+    expect(buttonVariants.ai).toContain('text-violet-700');
+    expect(buttonVariants.ai).toContain('dark:text-violet-300');
   });
 
-  it('danger variant uses red border, transparent bg', () => {
-    expect(buttonVariants.danger).toContain('text-red-400');
+  it('danger variant uses red text, transparent bg', () => {
+    expect(buttonVariants.danger).toContain('text-red-600');
+    expect(buttonVariants.danger).toContain('dark:text-red-400');
     expect(buttonVariants.danger).toContain('bg-transparent');
   });
 
-  it('ghost variant is text-only with no background class', () => {
-    expect(buttonVariants.ghost).toContain('text-stone-500');
+  it('ghost variant is text-only with semantic fg token', () => {
+    expect(buttonVariants.ghost).toContain('text-fg-muted');
     expect(buttonVariants.ghost).not.toMatch(/\bbg-(?!transparent)/);
   });
 
-  it('secondary has a visible border and muted text', () => {
-    expect(buttonVariants.secondary).toContain('border');
-    expect(buttonVariants.secondary).toContain('text-stone-400');
+  it('secondary has a semantic border and muted fg text', () => {
+    expect(buttonVariants.secondary).toContain('border-line');
+    expect(buttonVariants.secondary).toContain('text-fg-muted');
   });
 
   it('legacy "primary" is aliased to primary-tint', () => {

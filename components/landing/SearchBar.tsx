@@ -39,10 +39,10 @@ export function SearchBar({
   }, []);
 
   return (
-    <div className={`sticky z-20 bg-stone-950/90 backdrop-blur border-b border-stone-800 ${topOffsetClass}`}>
+    <div className={`sticky z-20 bg-surface/90 backdrop-blur border-b border-line-subtle ${topOffsetClass}`}>
       <div className="px-4 sm:px-7 py-3">
-        <div className="flex items-center gap-2 px-3 py-2 border border-brand-primary bg-brand-primary-tint">
-          <span className="font-mono text-brand-primary text-sm font-bold">&gt;</span>
+        <div className="flex items-center gap-2 px-3 py-2 border border-orange-600/40 bg-brand-primary-tint">
+          <span className="font-mono text-orange-700 dark:text-orange-400 text-sm font-bold">&gt;</span>
           <input
             ref={inputRef}
             type="text"
@@ -50,9 +50,9 @@ export function SearchBar({
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder={LANDING_COPY.search.placeholder}
             aria-label="Search roles, companies, or skills"
-            className="flex-1 bg-transparent outline-none font-mono text-[11px] text-stone-100 placeholder:text-stone-500"
+            className="flex-1 bg-transparent outline-none font-mono text-label text-fg placeholder:text-fg-subtle"
           />
-          <span className="hidden sm:inline font-mono text-[9px] text-stone-500">⌘K</span>
+          <span className="hidden sm:inline font-mono text-[9px] text-fg-subtle">⌘K</span>
         </div>
         <div className="mt-2 flex gap-1.5 overflow-x-auto scrollbar-thin">
           {FILTER_DEFS.map(({ key, label }) => (

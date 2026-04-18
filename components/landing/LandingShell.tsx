@@ -1,22 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { LandingTopbar } from "./LandingTopbar";
 import { LandingHero } from "./LandingHero";
+import { DailyDigestStrip } from "./DailyDigestStrip";
 import { SearchBar } from "./SearchBar";
 import { AuthNudgeCard } from "./AuthNudgeCard";
 import { RoleList } from "./RoleList";
+import { TrustBlock } from "./TrustBlock";
+import { LandingFooter } from "./LandingFooter";
 import type { LandingRole } from "./RoleRow";
 import { useSearchFilters } from "@/hooks/useSearchFilters";
 import { LANDING_COPY } from "./copy";
+import { formatTimeAgo } from "@/lib/format-time";
+import type { LandingTrustStats } from "@/lib/dashboard";
 
 interface LandingShellProps {
   initialJobs: LandingRole[];
   liveCount: number;
+  trustData: LandingTrustStats;
 }
 
-export function LandingShell({ initialJobs, liveCount }: LandingShellProps) {
+interface MirrorBreakdown {
+  strong: number;
+  stretch: number;
+  breadth: number;
+  matchCount: number;
+}
+
+function computeBreakdown(
+  scores: Record<string, number | null>,
+): MirrorBreakdown {
+  let strong = 0;
+  let stretch = 0;
+  let breadth = 0;
+  for (const value of Object.values(scores)) {
+    if (typeof value !== "number") continue;
+    if (value >= 75) strong += 1;
+    else if (value >= 50) stretch += 1;
+    else if (value >= 30) breadth += 1;
+  }
+  return { strong, stretch, breadth, matchCount: strong + stretch + breadth };
+}
+
+export function LandingShell({
+  initialJobs,
+  liveCount,
+  trustData,
+}: LandingShellProps) {
   const { data: session, status } = useSession();
   const { query, setQuery, filters, toggleFilter } = useSearchFilters();
   const [, setSelectedRole] = useState<LandingRole | null>(null);
@@ -25,6 +57,7 @@ export function LandingShell({ initialJobs, liveCount }: LandingShellProps) {
   const [scoresLoading, setScoresLoading] = useState(false);
 
   const isAuthed = status === "authenticated" && !!session?.user;
+  const ago = formatTimeAgo(trustData.lastSynced);
 
   useEffect(() => {
     if (!isAuthed) return;
@@ -77,7 +110,28 @@ export function LandingShell({ initialJobs, liveCount }: LandingShellProps) {
     };
   }, [isAuthed, initialJobs]);
 
-  const showAuthNudge = isAuthed && !hasResume;
+  const breakdown = useMemo(() => computeBreakdown(scores), [scores]);
+  const showAuthNudge = isAuthed && !hasResume && !scoresLoading;
+
+  const heroState = useMemo(() => {
+    if (!isAuthed) {
+      return { kind: "unauthed" as const, liveCount, ago };
+    }
+    if (!hasResume) {
+      return { kind: "authedNoResume" as const, liveCount, ago };
+    }
+    return {
+      kind: "authedMirror" as const,
+      matchCount: breakdown.matchCount,
+      breakdown: {
+        strong: breakdown.strong,
+        stretch: breakdown.stretch,
+        breadth: breakdown.breadth,
+      },
+      liveCount,
+      ago,
+    };
+  }, [isAuthed, hasResume, liveCount, ago, breakdown]);
 
   const handleSelect = (role: LandingRole) => {
     setSelectedRole(role);
@@ -87,32 +141,41 @@ export function LandingShell({ initialJobs, liveCount }: LandingShellProps) {
   };
 
   const remaining = Math.max(liveCount - initialJobs.length, 0);
+  const mirrorLoading =
+    heroState.kind === "authedMirror" && scoresLoading && breakdown.matchCount === 0;
 
   return (
-    <div className="min-h-dvh bg-stone-950 text-stone-100">
+    <div className="min-h-dvh bg-surface text-fg">
       <LandingTopbar />
-      <LandingHero liveCount={liveCount} />
-      <SearchBar
-        query={query}
-        onQueryChange={setQuery}
-        activeFilters={filters}
-        onToggleFilter={toggleFilter}
-      />
-      {showAuthNudge && <AuthNudgeCard />}
-      <RoleList
-        jobs={initialJobs}
-        scores={scores}
-        query={query}
-        filters={filters}
-        onSelectRole={handleSelect}
-        onClearFilter={toggleFilter}
-        loading={scoresLoading && initialJobs.length === 0}
-      />
-      {!isAuthed && (
-        <p className="mt-4 mb-8 text-center font-mono text-[10px] text-stone-500 px-4">
-          {LANDING_COPY.footerHint(remaining)}
-        </p>
-      )}
+      <LandingHero state={heroState} loadingMirror={mirrorLoading} />
+      <DailyDigestStrip trustData={trustData} />
+      <div id="roles">
+        <SearchBar
+          query={query}
+          onQueryChange={setQuery}
+          activeFilters={filters}
+          onToggleFilter={toggleFilter}
+        />
+        {showAuthNudge && <AuthNudgeCard />}
+        <div className="max-w-[980px] mx-auto">
+          <RoleList
+            jobs={initialJobs}
+            scores={scores}
+            query={query}
+            filters={filters}
+            onSelectRole={handleSelect}
+            onClearFilter={toggleFilter}
+            loading={scoresLoading && initialJobs.length === 0}
+          />
+          {!isAuthed && (
+            <p className="mt-4 mb-6 text-center font-mono text-[10px] text-fg-subtle px-4">
+              {LANDING_COPY.footerHint(remaining)}
+            </p>
+          )}
+        </div>
+      </div>
+      <TrustBlock trustData={trustData} />
+      <LandingFooter lastSynced={trustData.lastSynced} />
     </div>
   );
 }

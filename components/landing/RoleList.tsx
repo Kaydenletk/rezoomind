@@ -62,22 +62,22 @@ export function RoleList({
   if (loading) {
     return (
       <div className="px-4 sm:px-7" aria-live="polite">
-        <div className="font-mono text-[9px] uppercase tracking-wider text-stone-500 py-2">
+        <div className="font-mono text-[9px] uppercase tracking-wider text-fg-subtle py-2">
           loading…
         </div>
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="grid grid-cols-[32px_1fr_auto] gap-3 items-center px-2 py-3 border-t border-stone-800/60"
+            className="grid grid-cols-[32px_1fr_auto] gap-3 items-center px-2 py-3 border-t border-line-subtle"
           >
             <div className="w-8 flex justify-center">
-              <span className="block w-0.5 h-8 bg-stone-800" />
+              <span className="block w-0.5 h-8 bg-line" />
             </div>
             <div>
-              <div className="h-3 w-48 bg-stone-900 animate-pulse" />
-              <div className="mt-1.5 h-2 w-32 bg-stone-900/70 animate-pulse" />
+              <div className="h-3 w-48 bg-surface-raised animate-pulse" />
+              <div className="mt-1.5 h-2 w-32 bg-surface-raised/70 animate-pulse" />
             </div>
-            <div className="h-6 w-16 bg-stone-900 animate-pulse" />
+            <div className="h-6 w-16 bg-surface-raised animate-pulse" />
           </div>
         ))}
       </div>
@@ -87,23 +87,23 @@ export function RoleList({
   return (
     <div className="px-4 sm:px-7">
       <div className="flex justify-between items-center py-2">
-        <span className="font-mono text-[9px] uppercase tracking-wider text-stone-500">
+        <span className="font-mono text-[9px] uppercase tracking-wider text-fg-subtle">
           {LANDING_COPY.search.meta(filtered.length)}
         </span>
-        <span className="font-mono text-[9px] text-stone-600">
+        <span className="font-mono text-[9px] text-fg-subtle">
           {LANDING_COPY.search.sortLabel}
         </span>
       </div>
 
       {filtered.length === 0 ? (
         <div
-          className="border-t border-stone-800/60 py-8 text-center"
+          className="border-t border-line-subtle py-8 text-center"
           aria-live="polite"
         >
-          <p className="font-mono text-[12px] text-stone-400 mb-3">
+          <p className="font-mono text-[12px] text-fg-muted mb-3">
             {LANDING_COPY.emptyFilters.headline}
           </p>
-          <p className="font-mono text-[10px] text-stone-500 mb-2">
+          <p className="font-mono text-[10px] text-fg-subtle mb-2">
             {LANDING_COPY.emptyFilters.suggestHint}
           </p>
           <div className="inline-flex gap-1.5 flex-wrap justify-center">
@@ -118,7 +118,7 @@ export function RoleList({
               </Chip>
             ))}
             {filters.size === 0 && (
-              <span className="font-mono text-[10px] text-stone-600">
+              <span className="font-mono text-[10px] text-fg-subtle">
                 try a different search
               </span>
             )}
