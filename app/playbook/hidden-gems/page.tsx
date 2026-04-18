@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { PlaybookStubPage } from "@/components/playbook/PlaybookStubPage";
-import { LANDING_COPY } from "@/components/landing/copy";
+import { PlaybookArticle } from "@/components/playbook/PlaybookArticle";
+import { PLAYBOOK_ARTICLES } from "@/content/playbook";
 
-const LABEL = LANDING_COPY.playbook.cards.hiddenGems.label;
+const article = PLAYBOOK_ARTICLES["hidden-gems"];
 
 export const metadata: Metadata = {
-  title: `${LABEL} — The Playbook`,
-  description: LANDING_COPY.playbook.comingSoon.body,
+  title: `${article.title} — The Playbook`,
+  description: article.lede,
 };
 
 export default function Page() {
-  return <PlaybookStubPage label={LABEL} />;
+  return <PlaybookArticle article={article} />;
 }
