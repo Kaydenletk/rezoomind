@@ -1,5 +1,6 @@
 import { getLandingTrustStats } from "@/lib/dashboard";
 import { fetchGitHubJobs } from "@/lib/fetch-github-jobs";
+import { getTipForDate } from "@/lib/insider-tips";
 import { LandingShell } from "@/components/landing/LandingShell";
 import type { LandingRole } from "@/components/landing/RoleRow";
 import type { LandingTrustStats } from "@/lib/dashboard";
@@ -37,12 +38,14 @@ export default async function HomePage() {
   }));
 
   const liveCount = trustData.totalLive || githubData.counts?.total || initialJobs.length;
+  const insiderTip = getTipForDate();
 
   return (
     <LandingShell
       initialJobs={initialJobs}
       liveCount={liveCount}
       trustData={trustData}
+      insiderTip={insiderTip}
     />
   );
 }

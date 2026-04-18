@@ -96,4 +96,41 @@ export const LANDING_COPY = {
     line: (ago: string) =>
       `rezoomind · built by a student · data refreshed ${ago} · privacy · terms`,
   },
+  insider: {
+    eyebrow: "INSIDER",
+    sourceAttribution: "from rezoomind's career-ops research",
+    readMore: "read the full rule →",
+  },
+  playbook: {
+    sectionEyebrow: "THE PLAYBOOK",
+    sectionHeadline: "The rules most students learn too late.",
+    sectionSub:
+      "Condensed from real rejection patterns, recruiter interviews, and 200+ tracked applications. Updated as the market shifts.",
+    cards: {
+      beforeYouApply: {
+        label: "Before you apply",
+        teaser:
+          "ATS keyword thresholds, resume parsing traps, and the cover letter most students skip.",
+        slug: "before-you-apply",
+      },
+      theTimingGame: {
+        label: "The timing game",
+        teaser:
+          "When roles open, when they quietly close, and the follow-up cadence that recovers stalled applications.",
+        slug: "the-timing-game",
+      },
+      hiddenGems: {
+        label: "Hidden gems",
+        teaser:
+          "Under-the-radar companies with high intern-to-FTE conversion, real H1B filings, and warm referral paths.",
+        slug: "hidden-gems",
+      },
+    },
+    readAffordance: "read →",
+    comingSoon: {
+      headline: "Coming soon.",
+      body: "This playbook is being condensed from real rejection patterns and recruiter interviews. Check back in a few days.",
+      backLink: "← back to feed",
+    },
+  },
 } as const;

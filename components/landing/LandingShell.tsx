@@ -5,21 +5,25 @@ import { useSession } from "next-auth/react";
 import { LandingTopbar } from "./LandingTopbar";
 import { LandingHero } from "./LandingHero";
 import { DailyDigestStrip } from "./DailyDigestStrip";
+import { InsiderTipCard } from "./InsiderTipCard";
 import { SearchBar } from "./SearchBar";
 import { AuthNudgeCard } from "./AuthNudgeCard";
 import { RoleList } from "./RoleList";
 import { TrustBlock } from "./TrustBlock";
+import { PlaybookTeaser } from "./PlaybookTeaser";
 import { LandingFooter } from "./LandingFooter";
 import type { LandingRole } from "./RoleRow";
 import { useSearchFilters } from "@/hooks/useSearchFilters";
 import { LANDING_COPY } from "./copy";
 import { formatTimeAgo } from "@/lib/format-time";
 import type { LandingTrustStats } from "@/lib/dashboard";
+import type { InsiderTip } from "@/lib/insider-tips";
 
 interface LandingShellProps {
   initialJobs: LandingRole[];
   liveCount: number;
   trustData: LandingTrustStats;
+  insiderTip: InsiderTip;
 }
 
 interface MirrorBreakdown {
@@ -48,6 +52,7 @@ export function LandingShell({
   initialJobs,
   liveCount,
   trustData,
+  insiderTip,
 }: LandingShellProps) {
   const { data: session, status } = useSession();
   const { query, setQuery, filters, toggleFilter } = useSearchFilters();
@@ -149,6 +154,7 @@ export function LandingShell({
       <LandingTopbar />
       <LandingHero state={heroState} loadingMirror={mirrorLoading} />
       <DailyDigestStrip trustData={trustData} />
+      <InsiderTipCard tip={insiderTip} />
       <div id="roles">
         <SearchBar
           query={query}
@@ -175,6 +181,7 @@ export function LandingShell({
         </div>
       </div>
       <TrustBlock trustData={trustData} />
+      <PlaybookTeaser />
       <LandingFooter lastSynced={trustData.lastSynced} />
     </div>
   );
