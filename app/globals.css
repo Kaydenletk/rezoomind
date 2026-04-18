@@ -5,15 +5,17 @@
 :root {
   color-scheme: light dark;
 
-  /* Light mode defaults */
-  --bg-primary: 255 255 255;
-  --bg-secondary: 248 250 252;
-  --bg-tertiary: 241 245 249;
-  --text-primary: 15 23 42;
-  --text-secondary: 71 85 105;
-  --text-muted: 148 163 184;
-  --border-color: 226 232 240;
-  --border-subtle: 241 245 249;
+  /* Light mode defaults — warm off-white (stone family) for comfortable
+     long-reading contrast. Pure #fff + slate-900 is eye-fatiguing;
+     these values match the Stripe/Linear "warm-premium" palette. */
+  --bg-primary: 250 250 248;     /* stone-50 slightly warmer */
+  --bg-secondary: 245 245 242;   /* stone-100 */
+  --bg-tertiary: 231 229 226;    /* stone-200 */
+  --text-primary: 28 25 23;      /* stone-900 — warm dark, not slate */
+  --text-secondary: 87 83 78;    /* stone-600 */
+  --text-muted: 120 113 108;     /* stone-500 */
+  --border-color: 214 211 209;   /* stone-300 */
+  --border-subtle: 231 229 226;  /* stone-200 */
 
   /* Brand colors - Orange accent */
   --brand-rgb: 234 88 12;
@@ -75,16 +77,17 @@
   --motion-slow: 400ms;
 }
 
-/* Dark mode */
+/* Dark mode — matched to the warm stone family so orange brand reads
+   naturally against it (cool slate clashes with warm accent). */
 .dark, [data-theme="dark"] {
-  --bg-primary: 15 23 42;
-  --bg-secondary: 30 41 59;
-  --bg-tertiary: 51 65 85;
-  --text-primary: 248 250 252;
-  --text-secondary: 203 213 225;
-  --text-muted: 148 163 184;
-  --border-color: 51 65 85;
-  --border-subtle: 30 41 59;
+  --bg-primary: 12 10 9;         /* stone-950 */
+  --bg-secondary: 28 25 23;      /* stone-900 */
+  --bg-tertiary: 41 37 36;       /* stone-800 */
+  --text-primary: 245 245 244;   /* stone-100 */
+  --text-secondary: 168 162 158; /* stone-400 */
+  --text-muted: 120 113 108;     /* stone-500 */
+  --border-color: 68 64 60;      /* stone-700 */
+  --border-subtle: 41 37 36;     /* stone-800 */
 
   /* Enhanced neon for dark mode */
   --brand-tint: rgba(234, 88, 12, 0.15);
