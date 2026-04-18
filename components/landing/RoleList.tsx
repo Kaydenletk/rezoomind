@@ -4,35 +4,12 @@ import { useMemo } from "react";
 import { LANDING_COPY } from "./copy";
 import { RoleRow, type LandingRole } from "./RoleRow";
 import { Chip } from "@/components/ui/Chip";
+import { matchesFilters } from "@/lib/role-filters";
 
 function matchesQuery(role: LandingRole, q: string): boolean {
   if (!q.trim()) return true;
   const haystack = `${role.role} ${role.company} ${role.tags.join(" ")}`.toLowerCase();
   return haystack.includes(q.trim().toLowerCase());
-}
-
-function matchesFilters(role: LandingRole, filters: Set<string>): boolean {
-  if (filters.size === 0) return true;
-  const tagsLc = role.tags.map((t) => t.toLowerCase());
-  const titleLc = role.role.toLowerCase();
-  const locationLc = (role.location ?? "").toLowerCase();
-
-  for (const f of filters) {
-    switch (f) {
-      case "internship":
-        if (!(tagsLc.includes("internship") || titleLc.includes("intern"))) return false;
-        break;
-      case "newGrad":
-        if (!(tagsLc.includes("new-grad") || titleLc.includes("new grad"))) return false;
-        break;
-      case "remote":
-        if (!(tagsLc.includes("remote") || locationLc.includes("remote"))) return false;
-        break;
-      default:
-        return false;
-    }
-  }
-  return true;
 }
 
 interface RoleListProps {

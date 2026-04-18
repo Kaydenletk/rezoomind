@@ -2,8 +2,23 @@ import { getLandingTrustStats } from "@/lib/dashboard";
 import { fetchGitHubJobs } from "@/lib/fetch-github-jobs";
 import { getTipForDate } from "@/lib/insider-tips";
 import { LandingShell } from "@/components/landing/LandingShell";
-import type { LandingRole } from "@/components/landing/RoleRow";
+import type { LandingRole, RoleCategory } from "@/components/landing/RoleRow";
 import type { LandingTrustStats } from "@/lib/dashboard";
+
+const VALID_CATEGORIES: ReadonlySet<RoleCategory> = new Set([
+  "swe",
+  "pm",
+  "dsml",
+  "quant",
+  "hardware",
+  "other",
+]);
+
+function normalizeCategory(raw: string | undefined): RoleCategory {
+  if (!raw) return "other";
+  const lc = raw.toLowerCase();
+  return VALID_CATEGORIES.has(lc as RoleCategory) ? (lc as RoleCategory) : "other";
+}
 
 export const revalidate = 3600;
 
@@ -35,6 +50,7 @@ export default async function HomePage() {
     url: j.url,
     datePosted: j.datePosted ?? null,
     tags: [],
+    category: normalizeCategory(j.category),
   }));
 
   const liveCount = trustData.totalLive || githubData.counts?.total || initialJobs.length;
