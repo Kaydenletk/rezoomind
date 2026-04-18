@@ -1,13 +1,23 @@
-import { getDashboardStats } from "@/lib/dashboard";
+import { getLandingTrustStats } from "@/lib/dashboard";
 import { fetchGitHubJobs } from "@/lib/fetch-github-jobs";
 import { LandingShell } from "@/components/landing/LandingShell";
 import type { LandingRole } from "@/components/landing/RoleRow";
+import type { LandingTrustStats } from "@/lib/dashboard";
 
 export const revalidate = 3600;
 
+const TRUST_FALLBACK: LandingTrustStats = {
+  totalLive: 0,
+  lastSynced: new Date().toISOString(),
+  topHiring: [],
+  remoteCount: 0,
+  h1bCount: 0,
+  velocity7d: { newThisWeek: 0, deltaVsLastWeek: 0, daily: [] },
+};
+
 export default async function HomePage() {
-  const [dbStats, githubData] = await Promise.all([
-    getDashboardStats().catch(() => null),
+  const [trustData, githubData] = await Promise.all([
+    getLandingTrustStats().catch(() => TRUST_FALLBACK),
     fetchGitHubJobs().catch(() => ({
       jobs: [],
       counts: { swe: 0, pm: 0, dsml: 0, quant: 0, hardware: 0, total: 0 },
@@ -26,10 +36,13 @@ export default async function HomePage() {
     tags: [],
   }));
 
-  const liveCount =
-    (dbStats && "totalLive" in dbStats && typeof dbStats.totalLive === "number"
-      ? dbStats.totalLive
-      : githubData.counts?.total) ?? initialJobs.length;
+  const liveCount = trustData.totalLive || githubData.counts?.total || initialJobs.length;
 
-  return <LandingShell initialJobs={initialJobs} liveCount={liveCount} />;
+  return (
+    <LandingShell
+      initialJobs={initialJobs}
+      liveCount={liveCount}
+      trustData={trustData}
+    />
+  );
 }

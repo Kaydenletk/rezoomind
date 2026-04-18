@@ -50,15 +50,15 @@ const primaryTint =
 
 export const buttonVariants: Record<ButtonVariant, string> = {
   "primary-solid":
-    "border border-brand-primary bg-brand-primary text-stone-950 hover:bg-orange-500",
+    "border border-brand-primary bg-brand-primary text-white hover:bg-orange-500",
   "primary-tint": primaryTint,
   primary: primaryTint,
-  ai: "border border-violet-500/50 bg-brand-ai-tint text-violet-300 hover:bg-violet-500/20",
+  ai: "border border-violet-500/50 bg-brand-ai-tint text-violet-700 dark:text-violet-300 hover:bg-violet-500/20",
   secondary:
-    "border border-stone-700 bg-transparent text-stone-400 hover:border-orange-600/50 hover:text-orange-500",
-  ghost: "text-stone-500 hover:text-orange-500",
+    "border border-line bg-transparent text-fg-muted hover:border-orange-600/50 hover:text-orange-600 dark:hover:text-orange-500",
+  ghost: "text-fg-muted hover:text-orange-600 dark:hover:text-orange-500",
   danger:
-    "border border-red-500/30 bg-transparent text-red-400 hover:bg-red-500/10",
+    "border border-red-500/30 bg-transparent text-red-600 dark:text-red-400 hover:bg-red-500/10",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

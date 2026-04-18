@@ -97,6 +97,19 @@
 @theme inline {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-plus-jakarta);
+  --font-numeric: var(--font-dm-mono);
+
+  /* Semantic surface tokens — auto-swap light/dark via :root and .dark blocks.
+     Produces `bg-surface`, `text-fg`, `border-line`, etc. */
+  --color-surface: rgb(var(--bg-primary));
+  --color-surface-raised: rgb(var(--bg-secondary));
+  --color-surface-sunken: rgb(var(--bg-tertiary));
+  --color-fg: rgb(var(--text-primary));
+  --color-fg-muted: rgb(var(--text-secondary));
+  --color-fg-subtle: rgb(var(--text-muted));
+  --color-line: rgb(var(--border-color));
+  --color-line-subtle: rgb(var(--border-subtle));
 
   /* Brand hues */
   --color-brand-primary: rgb(var(--brand-primary));

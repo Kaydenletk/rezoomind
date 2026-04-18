@@ -173,3 +173,76 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     lastSynced,
   };
 }
+
+export interface LandingTrustStats {
+  totalLive: number;
+  lastSynced: string;
+  topHiring: Array<{ company: string; count: number }>;
+  remoteCount: number;
+  h1bCount: number;
+  velocity7d: {
+    newThisWeek: number;
+    deltaVsLastWeek: number;
+    daily: Array<{ date: string; count: number }>;
+  };
+}
+
+export function computeVelocity(
+  marketTrend: DashboardStats["marketTrend"],
+): LandingTrustStats["velocity7d"] {
+  const totals = marketTrend.map((snap) => ({
+    date: snap.date,
+    total:
+      snap.usaInternships +
+      snap.usaNewGrad +
+      snap.intlInternships +
+      snap.intlNewGrad,
+  }));
+
+  const daily = totals.map((row, i) => {
+    if (i === 0) return { date: row.date, count: 0 };
+    const delta = row.total - totals[i - 1].total;
+    return { date: row.date, count: Math.max(0, delta) };
+  });
+
+  const last7 = daily.slice(-7);
+  const prev7 = daily.slice(-14, -7);
+  const newThisWeek = last7.reduce((sum, d) => sum + d.count, 0);
+  const newLastWeek = prev7.reduce((sum, d) => sum + d.count, 0);
+
+  return {
+    newThisWeek,
+    deltaVsLastWeek: newThisWeek - newLastWeek,
+    daily: last7,
+  };
+}
+
+export async function getLandingTrustStats(): Promise<LandingTrustStats> {
+  const [base, remoteCount, h1bCount] = await Promise.all([
+    getDashboardStats().catch(() => null),
+    prisma.job_postings
+      .count({ where: { tags: { has: "remote" } } })
+      .catch(() => 0),
+    prisma.companyData.count({ where: { h1bSponsorship: true } }).catch(() => 0),
+  ]);
+
+  if (!base) {
+    return {
+      totalLive: 0,
+      lastSynced: new Date().toISOString(),
+      topHiring: [],
+      remoteCount,
+      h1bCount,
+      velocity7d: { newThisWeek: 0, deltaVsLastWeek: 0, daily: [] },
+    };
+  }
+
+  return {
+    totalLive: base.totalJobs,
+    lastSynced: base.lastSynced,
+    topHiring: base.topHiring,
+    remoteCount,
+    h1bCount,
+    velocity7d: computeVelocity(base.marketTrend),
+  };
+}

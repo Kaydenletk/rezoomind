@@ -9,7 +9,7 @@ import { execSync } from "node:child_process";
 
 const BASELINES: Record<string, number> = {
   "text-\\[9px\\]": 28,
-  "text-\\[11px\\]": 98,
+  "text-\\[11px\\]": 93,
   "rounded-\\[10px\\]": 38,
   "rounded-\\[14px\\]": 2,
   "rounded-md": 18,

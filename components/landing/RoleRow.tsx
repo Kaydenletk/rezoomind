@@ -29,12 +29,19 @@ function ringStyle(tier: Tier, score: number): React.CSSProperties {
     apply: "rgb(var(--brand-primary))",
     explore: "rgb(var(--brand-info))",
     tailor: "rgb(var(--brand-ai))",
-    skip: "#44403c",
+    skip: "rgb(var(--text-muted))",
   };
   return {
-    background: `conic-gradient(${colorMap[tier]} 0 ${score}%, rgba(41,37,36,0.3) ${score}%)`,
+    background: `conic-gradient(${colorMap[tier]} 0 ${score}%, rgb(var(--border-color) / 0.35) ${score}%)`,
   };
 }
+
+const tierTextClass: Record<Tier, string> = {
+  apply: "text-orange-700 dark:text-orange-400",
+  explore: "text-cyan-700 dark:text-cyan-300",
+  tailor: "text-violet-700 dark:text-violet-300",
+  skip: "text-fg-subtle",
+};
 
 function formatAge(datePosted: string | null): string {
   if (!datePosted) return "";
@@ -73,10 +80,10 @@ export function RoleRow({ role, score, onSelect }: RoleRowProps) {
       : LANDING_COPY.ctas.explore;
   const ctaVariant =
     tier === "apply"
-      ? "border-orange-600 text-orange-400 bg-brand-primary-tint"
+      ? "border-orange-600/60 text-orange-700 dark:text-orange-400 bg-brand-primary-tint"
       : tier === "tailor"
-      ? "border-violet-500/50 text-violet-300 bg-brand-ai-tint"
-      : "border-cyan-500/50 text-cyan-300 bg-brand-info-tint";
+      ? "border-violet-500/50 text-violet-700 dark:text-violet-300 bg-brand-ai-tint"
+      : "border-cyan-500/50 text-cyan-700 dark:text-cyan-300 bg-brand-info-tint";
 
   return (
     <div
@@ -85,7 +92,7 @@ export function RoleRow({ role, score, onSelect }: RoleRowProps) {
       onClick={handleRowClick}
       onKeyDown={handleKey}
       aria-label={`${role.role} at ${role.company}${role.location ? `, ${role.location}` : ""}${score !== null ? `, match score ${score} of 100` : ""}`}
-      className="grid grid-cols-[32px_1fr_auto] sm:grid-cols-[32px_1fr_auto_auto] gap-2 sm:gap-3 items-center px-2 py-3 border-t border-stone-800/60 hover:bg-stone-900 transition-colors cursor-pointer"
+      className="grid grid-cols-[32px_1fr_auto] sm:grid-cols-[32px_1fr_auto_auto] gap-2 sm:gap-3 items-center px-2 py-3 border-t border-line-subtle hover:bg-surface-raised transition-colors cursor-pointer"
     >
       {tier ? (
         <div
@@ -93,39 +100,27 @@ export function RoleRow({ role, score, onSelect }: RoleRowProps) {
           className="w-8 h-8 rounded-full p-[2.5px] flex items-center justify-center"
           style={ringStyle(tier, score!)}
         >
-          <div className="w-[27px] h-[27px] rounded-full bg-stone-950 flex items-center justify-center">
-            <span
-              className="font-mono text-[10px] font-bold"
-              style={{
-                color:
-                  tier === "apply"
-                    ? "#fb923c"
-                    : tier === "explore"
-                    ? "#22d3ee"
-                    : tier === "tailor"
-                    ? "#c4b5fd"
-                    : "#78716c",
-              }}
-            >
+          <div className="w-[27px] h-[27px] rounded-full bg-surface flex items-center justify-center">
+            <span className={`font-mono text-[10px] font-bold ${tierTextClass[tier]}`}>
               {score}
             </span>
           </div>
         </div>
       ) : (
         <div aria-hidden className="w-8 flex justify-center">
-          <span className="block w-0.5 h-8 bg-stone-800" />
+          <span className="block w-0.5 h-8 bg-line" />
         </div>
       )}
 
       <div className="min-w-0">
-        <div className="font-mono text-[12px] sm:text-[13px] text-stone-50 truncate">
+        <div className="font-mono text-[12px] sm:text-[13px] text-fg truncate">
           {role.role}
         </div>
-        <div className="font-mono text-[9px] sm:text-[10px] text-stone-500 truncate">
+        <div className="font-mono text-[9px] sm:text-[10px] text-fg-subtle truncate">
           {role.company}
-          {role.location && <span className="text-stone-700 mx-1">·</span>}
+          {role.location && <span className="text-fg-subtle/60 mx-1">·</span>}
           {role.location}
-          {role.datePosted && <span className="text-stone-700 mx-1">·</span>}
+          {role.datePosted && <span className="text-fg-subtle/60 mx-1">·</span>}
           {role.datePosted && formatAge(role.datePosted)}
         </div>
       </div>

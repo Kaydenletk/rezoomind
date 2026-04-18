@@ -8,13 +8,13 @@ const baseStyles =
 
 export const chipVariants: Record<ChipVariant, string> = {
   neutral:
-    "font-mono border border-stone-700 bg-transparent text-stone-400 hover:border-stone-600",
+    "font-mono border border-line bg-transparent text-fg-muted hover:border-fg-subtle",
   info:
-    "font-mono border border-cyan-500/40 bg-brand-info-tint text-cyan-300 hover:border-cyan-500/70",
+    "font-mono border border-cyan-500/40 bg-brand-info-tint text-cyan-700 dark:text-cyan-300 hover:border-cyan-500/70",
   ai:
-    "font-mono border border-violet-500/40 bg-brand-ai-tint text-violet-300 hover:border-violet-500/70",
+    "font-mono border border-violet-500/40 bg-brand-ai-tint text-violet-700 dark:text-violet-300 hover:border-violet-500/70",
   active:
-    "font-mono border border-orange-600/40 bg-brand-primary-tint text-orange-400 hover:border-orange-600/70",
+    "font-mono border border-orange-600/40 bg-brand-primary-tint text-orange-700 dark:text-orange-400 hover:border-orange-600/70",
 };
 
 interface ChipBaseProps {

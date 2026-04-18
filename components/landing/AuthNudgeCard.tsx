@@ -21,10 +21,10 @@ export function AuthNudgeCard() {
   };
 
   return (
-    <div className="mx-4 sm:mx-7 my-2 px-4 py-3 border border-orange-600/50 bg-brand-primary-tint flex items-center justify-between gap-3">
+    <div className="mx-4 sm:mx-7 my-2 px-4 py-3 border border-orange-600/40 bg-brand-primary-tint flex items-center justify-between gap-3">
       <Link
         href="/resume"
-        className="font-mono text-[11px] text-orange-400 flex items-center gap-2 flex-1"
+        className="font-mono text-label text-orange-700 dark:text-orange-400 flex items-center gap-2 flex-1"
       >
         {LANDING_COPY.authNudge.text}
         <span aria-hidden>{LANDING_COPY.authNudge.cta}</span>
@@ -32,7 +32,7 @@ export function AuthNudgeCard() {
       <button
         onClick={dismiss}
         aria-label={LANDING_COPY.authNudge.dismissLabel}
-        className="font-mono text-stone-500 hover:text-stone-300 text-[11px] px-2"
+        className="font-mono text-fg-subtle hover:text-fg text-label px-2"
       >
         ×
       </button>

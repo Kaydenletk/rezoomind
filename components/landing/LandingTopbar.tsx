@@ -9,16 +9,16 @@ export function LandingTopbar() {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-7 h-12 sm:h-14 bg-stone-950/80 backdrop-blur border-b border-stone-800">
+    <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-7 h-12 sm:h-14 bg-surface/85 backdrop-blur border-b border-line-subtle">
       <div className="flex items-center gap-3">
         <span aria-hidden className="inline-flex gap-1">
           <span className="w-2 h-2 rounded-full bg-brand-primary" />
-          <span className="w-2 h-2 rounded-full border border-orange-800" />
-          <span className="w-2 h-2 rounded-full border border-stone-800" />
+          <span className="w-2 h-2 rounded-full border border-orange-600/40" />
+          <span className="w-2 h-2 rounded-full border border-line" />
         </span>
         <Link
           href="/"
-          className="font-mono text-sm font-bold tracking-[0.08em] text-brand-primary"
+          className="font-mono text-sm font-bold tracking-[0.08em] text-orange-700 dark:text-orange-400"
         >
           rezoomind
         </Link>
@@ -27,7 +27,7 @@ export function LandingTopbar() {
       <div className="flex items-center gap-2">
         {session?.user ? (
           <>
-            <span className="hidden sm:inline font-mono text-[11px] text-stone-400">
+            <span className="hidden sm:inline font-mono text-label text-fg-muted">
               {session.user.name || session.user.email?.split("@")[0]}
             </span>
             <Button
