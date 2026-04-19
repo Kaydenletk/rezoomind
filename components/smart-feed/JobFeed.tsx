@@ -9,6 +9,7 @@ interface JobFeedProps {
   matches?: Record<string, JobMatch>;
   selectedJobId: string | null;
   savedJobIds: Set<string>;
+  appliedJobIds?: Set<string>;
   isAuthenticated: boolean;
   onSelectJob: (id: string) => void;
   onToggleSave: (job: SmartFeedJob) => void;
@@ -20,6 +21,7 @@ export function JobFeed({
   matches,
   selectedJobId,
   savedJobIds,
+  appliedJobIds,
   isAuthenticated,
   onSelectJob,
   onToggleSave,
@@ -50,7 +52,7 @@ export function JobFeed({
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="animate-pulse bg-stone-200 dark:bg-stone-800 h-20 border-b border-stone-200 dark:border-stone-800"
+            className="animate-pulse bg-surface-sunken h-20 border-b border-line"
           />
         ))}
       </div>
@@ -61,7 +63,7 @@ export function JobFeed({
     return (
       <div className="overflow-y-auto max-h-[calc(100vh-200px)] flex flex-col items-center justify-center py-20 gap-3">
         <svg
-          className="text-stone-300 dark:text-stone-700 w-8 h-8"
+          className="text-fg-subtle w-8 h-8"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -75,7 +77,7 @@ export function JobFeed({
             d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
           />
         </svg>
-        <span className="text-stone-400 font-mono text-sm">
+        <span className="text-fg-muted font-mono text-sm">
           No jobs match your filters
         </span>
       </div>
@@ -96,6 +98,7 @@ export function JobFeed({
             match={matches?.[job.id] ?? null}
             isSelected={job.id === selectedJobId}
             isSaved={savedJobIds.has(job.id)}
+            isApplied={appliedJobIds?.has(job.id) ?? false}
             onSelect={onSelectJob}
             onToggleSave={onToggleSave}
             isAuthenticated={isAuthenticated}
