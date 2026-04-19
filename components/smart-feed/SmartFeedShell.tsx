@@ -8,7 +8,7 @@ import { FilterBar, type Filters, DEFAULT_FILTERS } from "./FilterBar";
 import { TabBar, type TabId } from "./TabBar";
 import { JobFeed } from "./JobFeed";
 import { DetailPanel } from "./DetailPanel";
-import { OnboardingBanner } from "./OnboardingBanner";
+import { OnboardingStrip } from "./OnboardingStrip";
 import { TrustStrip } from "./TrustStrip";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
@@ -61,6 +61,8 @@ export function SmartFeedShell({
   const [matches, setMatches] = useState<Record<string, JobMatch>>({});
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const [hasResume, setHasResume] = useState<boolean | null>(null);
+  const [hasInterest, setHasInterest] = useState<boolean | null>(null);
+  const [appliedToday, setAppliedToday] = useState(0);
 
   // Task 14: QuickTailor
   const [tailorJob, setTailorJob] = useState<SmartFeedJob | null>(null);
@@ -77,61 +79,77 @@ export function SmartFeedShell({
     let cancelled = false;
     setIsLoadingMatches(true);
 
-    Promise.all([
+    Promise.allSettled([
       fetch("/api/dashboard/data").then((r) => r.json()),
       fetch("/api/resume/data").then((r) => r.json()),
+      fetch("/api/interest").then((r) => r.json()),
+      fetch("/api/feed/aggregate").then((r) => r.json()),
     ])
-      .then(([matchData, resumeData]) => {
+      .then((results) => {
         if (cancelled) return;
 
-        if (matchData.ok && Array.isArray(matchData.matchRows)) {
-          setHasResume(matchData.hasResume ?? false);
+        const [matchRes, resumeRes, interestRes, aggregateRes] = results;
 
-          const jobs: SmartFeedJob[] = [];
-          const matchMap: Record<string, JobMatch> = {};
+        if (matchRes.status === "fulfilled") {
+          const matchData = matchRes.value;
+          if (matchData.ok && Array.isArray(matchData.matchRows)) {
+            setHasResume(matchData.hasResume ?? false);
 
-          for (const row of matchData.matchRows) {
-            const jp = row.job_postings;
-            if (!jp) continue;
+            const jobs: SmartFeedJob[] = [];
+            const matchMap: Record<string, JobMatch> = {};
 
-            jobs.push({
-              id: jp.id,
-              company: jp.company,
-              role: jp.role,
-              location: jp.location,
-              url: jp.url,
-              datePosted: jp.date_posted,
-              salary: formatSalary(jp.salary_min, jp.salary_max, jp.salary_interval),
-              tags: jp.tags ?? null,
-              description: jp.description,
-            });
+            for (const row of matchData.matchRows) {
+              const jp = row.job_postings;
+              if (!jp) continue;
 
-            matchMap[jp.id] = {
-              matchScore: row.match_score,
-              skillsMatch: row.skills_match,
-              experienceMatch: row.experience_match,
-              matchReasons: row.match_reasons,
-              missingSkills: row.missing_skills,
-            };
+              jobs.push({
+                id: jp.id,
+                company: jp.company,
+                role: jp.role,
+                location: jp.location,
+                url: jp.url,
+                datePosted: jp.date_posted,
+                salary: formatSalary(jp.salary_min, jp.salary_max, jp.salary_interval),
+                tags: jp.tags ?? null,
+                description: jp.description,
+              });
+
+              matchMap[jp.id] = {
+                matchScore: row.match_score,
+                skillsMatch: row.skills_match,
+                experienceMatch: row.experience_match,
+                matchReasons: row.match_reasons,
+                missingSkills: row.missing_skills,
+              };
+            }
+
+            jobs.sort(
+              (a, b) =>
+                (matchMap[b.id]?.matchScore ?? -1) -
+                (matchMap[a.id]?.matchScore ?? -1)
+            );
+
+            setAuthJobs(jobs);
+            setMatches(matchMap);
           }
-
-          // Sort by match score descending for "For You"
-          jobs.sort(
-            (a, b) =>
-              (matchMap[b.id]?.matchScore ?? -1) -
-              (matchMap[a.id]?.matchScore ?? -1)
-          );
-
-          setAuthJobs(jobs);
-          setMatches(matchMap);
         }
 
-        if (resumeData.ok && resumeData.resume?.resume_text) {
-          setSavedResumeText(resumeData.resume.resume_text);
+        if (resumeRes.status === "fulfilled") {
+          const resumeData = resumeRes.value;
+          if (resumeData?.ok && resumeData?.resume?.resume_text) {
+            setSavedResumeText(resumeData.resume.resume_text);
+          }
         }
-      })
-      .catch(() => {
-        // Silent fail — public feed still works
+
+        if (interestRes.status === "fulfilled") {
+          const interestData = interestRes.value;
+          setHasInterest(!!interestData?.interest?.roles?.length);
+        }
+
+        if (aggregateRes.status === "fulfilled") {
+          const agg = aggregateRes.value;
+          if (typeof agg?.appliedToday === "number") setAppliedToday(agg.appliedToday);
+        }
       })
       .finally(() => {
         if (!cancelled) setIsLoadingMatches(false);
@@ -283,7 +301,7 @@ export function SmartFeedShell({
       <TrustStrip
         freshToday={freshToday}
         refreshedAt={refreshedAt ? new Date(refreshedAt) : null}
-        appliedToday={0}
+        appliedToday={appliedToday}
       />
 
       {isAuth && (
@@ -300,9 +318,20 @@ export function SmartFeedShell({
 
       <FilterBar filters={filters} onChange={setFilters} />
 
-      {/* No-resume onboarding banner */}
-      {isAuth && hasResume === false && activeTab === "for-you" && (
-        <OnboardingBanner />
+      {isAuth && (
+        <OnboardingStrip
+          hasResume={!!hasResume}
+          hasInterest={!!hasInterest}
+          hasFirstAction={savedJobIds.size > 0}
+          onStepClick={(step) => {
+            if (step === 2) {
+              window.location.href = "/preferences";
+            }
+            if (step === 3) {
+              setActiveTab("for-you");
+            }
+          }}
+        />
       )}
 
       <div className="flex-1 flex">
