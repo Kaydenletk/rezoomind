@@ -30,6 +30,23 @@ After 2026-04-17 redesign (feed-is-the-hero). Spec: `docs/superpowers/specs/2026
 
 **Retired from `/` (kept for `(app)` layout):** `HomeClientShell.tsx`, `SummaryStrip.tsx`, `MainInsightCard.tsx`, `MarketBanner.tsx`, `InsightCards.tsx`, `JobsTable.tsx`.
 
+### Protected Smart-Feed Files (Phase 3 — 2026-04-19)
+
+Spec: `docs/superpowers/specs/2026-04-19-phase3-feed-redesign-design.md`.
+Plan: `docs/superpowers/plans/2026-04-19-phase3-feed-redesign.md`.
+
+| File | Rule |
+|------|------|
+| `components/smart-feed/JobCard.tsx` | Compact layout is load-bearing. Do not expand padding or add a 4th row without approval. |
+| `components/smart-feed/DetailPanel.tsx` | No tab bar. Cover letter is a single inline expand-button. |
+| `components/smart-feed/FilterBar.tsx` | Single-row layout. Only H1B lives behind `more…`; new filters must be added to the popover, not the main row. |
+| `components/smart-feed/TrustStrip.tsx` | Items are data-driven. Never show placeholders or zero-values. |
+| `components/smart-feed/OnboardingStrip.tsx` | Three steps locked: resume → preferences → first_apply. |
+| `components/smart-feed/StatusPill.tsx` | NEW/SAVED/APPLIED only. APPLIED stays dormant until Phase 5 wires real data. |
+| `components/smart-feed/copy.ts` | Source of truth for feed copy. All display strings live here. |
+| `hooks/useFeedKeyboard.ts` | Keyboard map is load-bearing. New shortcuts must not shadow `j/k/s/t/a///?/esc`. |
+| `lib/feed-derivations.ts` | Pure. No side effects. Tests live next to it at `lib/feed-derivations.test.ts`. |
+
 ### Smart Feed Components (Separate from Production)
 
 The `components/smart-feed/` directory contains components for the upcoming unified dashboard rebuild. These are NOT used by the production homepage. They live alongside production code and must NOT replace or interfere with the files listed above until explicitly approved.
@@ -73,21 +90,22 @@ This is the **core identity** of the app. Every new page, component, or feature 
 
 | Element | Rule |
 |---------|------|
-| **Background** | `bg-stone-950` (dark) or `bg-stone-50 dark:bg-stone-950` (with toggle) |
-| **Brand color** | Orange — `text-orange-600`, `border-orange-600`, `bg-orange-600/10` |
+| **Palette core** | **Warm stone + orange.** No pure black anywhere. Primary = warm stone-50 (light) / stone-900 (dark). Pure `bg-black`, `bg-stone-950`, `bg-[#0c0c0c]`, `bg-[#000]` are banned — use semantic tokens. |
+| **Background** | `bg-surface` (primary), `bg-surface-raised` (cards), `bg-surface-sunken` (wells/chrome). These auto-swap light/dark and are the warm-stone palette, not black. |
+| **Brand color** | Orange — `text-orange-600`, `border-orange-600`, `bg-orange-600/10`. For body text legibility use `text-orange-700 dark:text-orange-400`. |
 | **Font** | Monospace (`font-mono` / Geist Mono) for headings, nav, labels, data. Inter for body text where readability matters. |
-| **Brand text** | `rezoomind` — always lowercase, `tracking-wider`, `text-orange-600`, `font-bold` |
-| **Terminal dots** | Three dots in the nav: `●` orange-600 filled → `○` orange-700 outline → `○` stone-700 outline |
-| **Nav links** | `~/jobs`, `~/insights`, `~/home` — mono, lowercase, `text-stone-500`, hover `text-orange-500` |
-| **Borders** | `border-stone-800` (dark mode), sharp 1px, NO rounded corners on cards |
-| **Cards** | `bg-[#0c0c0c]` or `bg-stone-900`, `border border-stone-800`, flat — NO shadows, NO rounded-xl |
-| **Buttons** | `border border-orange-600/50 bg-orange-600/10 text-orange-500` for primary. `border-stone-800 bg-stone-900/30 text-stone-500` for secondary. |
-| **Labels** | `text-[10px] uppercase tracking-[0.2em] text-stone-500` |
-| **Input fields** | Transparent bg, `border-b border-stone-800 focus:border-orange-600`, mono, preceded by `>` cursor |
-| **Status messages** | `▸` success (green-500), `✗` error (red-400), `⋯` loading (stone-400) |
-| **Grid overlay** | Subtle 40px background grid at `opacity-[0.04]` for terminal feel |
-| **Window chrome** | Faux title bar with 3 dots + `.exe` label (e.g., `auth.exe`, `register.exe`) |
-| **Theme default** | Light (`bg-stone-50`). Dark toggle available. Use `dark:` variants for all color tokens. |
+| **Brand text** | `rezoomind` — always lowercase, `tracking-wider`, `text-orange-700 dark:text-orange-400`, `font-bold`. |
+| **Terminal dots** | Three dots in the nav: `●` `bg-brand-primary` → `○` `border-orange-600/40` → `○` `border-line`. |
+| **Nav links** | `~/jobs`, `~/insights`, `~/home` — mono, lowercase, `text-fg-subtle`, hover `text-orange-600 dark:text-orange-400`. |
+| **Borders** | `border-line` (primary) / `border-line-subtle` (secondary). Sharp 1px, NO rounded corners on cards. |
+| **Cards** | `bg-surface-raised border border-line`, flat — NO shadows, NO rounded-xl. |
+| **Buttons** | Primary: `border border-orange-600/60 bg-orange-600/10 text-orange-700 dark:text-orange-400`. Secondary: `border border-line bg-surface-sunken/60 text-fg-muted`. |
+| **Labels** | `text-[10px] uppercase tracking-[0.2em] text-fg-muted`. |
+| **Input fields** | Transparent bg, `border-b border-line focus:border-orange-600`, mono, preceded by `>` cursor. |
+| **Status messages** | `▸` success (`text-status-success`), `✗` error (`text-status-error`), `⋯` loading (`text-fg-muted`). |
+| **Grid overlay** | Subtle 40px background grid using `currentColor` at `opacity-[0.035]` light / `opacity-[0.05]` dark. |
+| **Window chrome** | Faux title bar with 3 dots + `.exe` label (e.g., `auth.exe`, `register.exe`). Use `bg-surface-sunken` for the bar, `bg-fg-subtle/40` for the dots. |
+| **Theme default** | Light (warm stone-50). Dark toggle available. Use semantic tokens; avoid hand-coded `dark:` classes where a semantic token already swaps. |
 
 ### What to AVOID
 
@@ -162,17 +180,22 @@ The `(app)` layout still uses the old white `<Header />` + `<Footer />`. New pag
 
 ## Environment Variables
 
-Required in `.env.local`:
+`.env.local` is populated via `vercel env pull .env.local` (Vercel CLI). Key vars:
 ```
-DATABASE_URL=            # Neon PostgreSQL (pooled)
-DATABASE_URL_UNPOOLED=   # Neon PostgreSQL (direct, for migrations)
+DATABASE_URL=            # Neon PostgreSQL (pooled) — from Vercel
+DATABASE_URL_UNPOOLED=   # Neon PostgreSQL (direct) — from Vercel
 OPENAI_API_KEY=          # For AI features
 GEMINI_API_KEY=          # For Quick Tailor + resume analysis
-NEXTAUTH_SECRET=         # JWT signing (generate with `openssl rand -base64 32`)
+NEXTAUTH_SECRET=         # JWT signing — generate: openssl rand -base64 32
 NEXTAUTH_URL=            # http://localhost:3000 (dev) or https://rezoomind.vercel.app (prod)
+GOOGLE_CLIENT_ID=        # Google OAuth — from console.cloud.google.com
+GOOGLE_CLIENT_SECRET=    # Google OAuth — starts with GOCSPX-
 RESEND_API_KEY=          # Email sending
 CRON_SECRET=             # Secures cron job endpoints
 ```
+Google OAuth redirect URIs (must be set in Google Cloud Console OAuth client):
+- `http://localhost:3000/api/auth/callback/google`
+- `https://rezoomind.vercel.app/api/auth/callback/google`
 
 ---
 
@@ -233,10 +256,8 @@ npx prisma db push       # Push schema changes without migration
 |-------|----------|-------|
 | Match scores are fake | `app/(app)/dashboard/page.tsx:174` | Uses `Math.random()` — Phase 1 replaces this |
 | Skills checklist hardcoded | `app/(app)/dashboard/page.tsx:706` | `["Python", "Django", ...]` — should come from resume analysis |
-| `NEXTAUTH_SECRET` missing | `.env.local` | Auth will fail without it — generate and add |
-| `GEMINI_API_KEY` missing | `.env.local` | Quick Tailor falls back to mock data without it |
+| `GEMINI_API_KEY` missing | `.env.local` | Quick Tailor falls back to mock data — add to Vercel env dashboard if missing |
 | Old white UI on `/resume` | `app/(app)/resume/page.tsx` | Needs migration to terminal aesthetic |
-| Old white UI on `/dashboard` | `app/(app)/dashboard/page.tsx` | Uses slate-900 dark but wrapped in white Header |
 | `setState` in `useEffect` | `components/dashboard/JobsTable.tsx` | Lint warning — potential cascade renders |
 | Duplicate signup route | `api/auth/signup/` + `api/auth/sign-up/` | Consolidate to one |
 
