@@ -5,16 +5,22 @@ import { motion } from "framer-motion";
 interface MatchScoreRingProps {
   score: number | null;
   size?: number;
+  muted?: boolean;
 }
 
-export function MatchScoreRing({ score, size = 52 }: MatchScoreRingProps) {
+export function MatchScoreRing({ score, size = 52, muted = false }: MatchScoreRingProps) {
   const strokeWidth = 3.5;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
+  const wrapperClass = [
+    "relative shrink-0",
+    muted ? "opacity-60" : "",
+  ].filter(Boolean).join(" ");
+
   if (score === null) {
     return (
-      <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <div className={wrapperClass} style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
           <circle
             cx={size / 2}
@@ -39,7 +45,7 @@ export function MatchScoreRing({ score, size = 52 }: MatchScoreRingProps) {
   const color = score >= 80 ? "#ea580c" : score >= 60 ? "#f59e0b" : "#78716c";
 
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className={wrapperClass} style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}

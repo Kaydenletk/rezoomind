@@ -238,6 +238,9 @@ export function SmartFeedShell({
   }, []);
 
   // ── Render ───────────────────────────────────────────────────────────────
+  // Phase 3 placeholder — Phase 5 wires real appliedJobIds from useAppliedJobs.
+  const appliedJobIds = new Set<string>();
+
   return (
     <div className="min-h-screen bg-surface flex flex-col transition-colors">
       <SmartFeedHeader user={user} />
@@ -280,6 +283,7 @@ export function SmartFeedShell({
             matches={matches}
             selectedJobId={selectedJobId}
             savedJobIds={savedJobIds}
+            appliedJobIds={appliedJobIds}
             isAuthenticated={isAuth}
             onSelectJob={setSelectedJobId}
             onToggleSave={handleToggleSave}
