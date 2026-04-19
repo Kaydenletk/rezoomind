@@ -5,6 +5,7 @@ import { computeMarketInsights } from "@/lib/insights";
 import { parseDatePostedToAge } from "@/lib/job-priority";
 import { SmartFeedShell } from "@/components/smart-feed/SmartFeedShell";
 import type { SmartFeedJob } from "@/components/smart-feed/types";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Smart Job Feed | Rezoomind",
@@ -20,16 +21,21 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function FeedPage() {
-  const [dbStats, githubData] = await Promise.all([
+  const [dbStats, githubData, latestPosting] = await Promise.all([
     getDashboardStats().catch(() => null),
     fetchGitHubJobs().catch(() => ({
       jobs: [],
       counts: { swe: 0, pm: 0, dsml: 0, quant: 0, hardware: 0, total: 0 },
     })),
+    prisma.job_postings
+      .findFirst({ orderBy: { created_at: "desc" }, select: { created_at: true } })
+      .catch(() => null),
   ]);
 
   const trend = dbStats?.marketTrend ?? [];
   const insights = computeMarketInsights(trend);
+
+  const refreshedAt = latestPosting?.created_at ? latestPosting.created_at.toISOString() : null;
 
   const freshToday = githubData.jobs.filter((j) => {
     const age = parseDatePostedToAge(j.datePosted);
@@ -55,6 +61,7 @@ export default async function FeedPage() {
       marketHeat={insights.marketHeat}
       freshToday={freshToday}
       competitionLevel={insights.competitionLevel}
+      refreshedAt={refreshedAt}
     />
   );
 }

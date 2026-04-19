@@ -9,6 +9,7 @@ import { TabBar, type TabId } from "./TabBar";
 import { JobFeed } from "./JobFeed";
 import { DetailPanel } from "./DetailPanel";
 import { OnboardingBanner } from "./OnboardingBanner";
+import { TrustStrip } from "./TrustStrip";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 import type { SmartFeedJob, JobMatch, DetailPanelMode } from "./types";
@@ -19,6 +20,7 @@ interface SmartFeedShellProps {
   marketHeat: MarketInsights["marketHeat"];
   freshToday: number;
   competitionLevel: MarketInsights["competitionLevel"];
+  refreshedAt: string | null;
 }
 
 function formatSalary(
@@ -40,6 +42,7 @@ export function SmartFeedShell({
   marketHeat,
   freshToday,
   competitionLevel,
+  refreshedAt,
 }: SmartFeedShellProps) {
   const { data: session, status: authStatus } = useSession();
   const isAuth = authStatus === "authenticated";
@@ -236,13 +239,19 @@ export function SmartFeedShell({
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col transition-colors">
+    <div className="min-h-screen bg-surface flex flex-col transition-colors">
       <SmartFeedHeader user={user} />
 
       <SummaryStrip
         marketHeat={marketHeat}
         freshToday={freshToday}
         competitionLevel={competitionLevel}
+      />
+
+      <TrustStrip
+        freshToday={freshToday}
+        refreshedAt={refreshedAt ? new Date(refreshedAt) : null}
+        appliedToday={0}
       />
 
       {isAuth && (
@@ -265,7 +274,7 @@ export function SmartFeedShell({
       )}
 
       <div className="flex-1 flex">
-        <div className="w-full lg:w-[55%] xl:w-[60%] border-r border-stone-200 dark:border-stone-800">
+        <div className="w-full lg:w-[55%] xl:w-[60%] border-r border-line">
           <JobFeed
             jobs={filteredJobs}
             matches={matches}
