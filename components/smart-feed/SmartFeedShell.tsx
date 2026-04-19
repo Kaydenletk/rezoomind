@@ -12,6 +12,9 @@ import { OnboardingBanner } from "./OnboardingBanner";
 import { TrustStrip } from "./TrustStrip";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
+import { useFeedKeyboard } from "@/hooks/useFeedKeyboard";
+import { KeyboardHelpOverlay } from "./KeyboardHelpOverlay";
+import { FEED_COPY } from "./copy";
 import type { SmartFeedJob, JobMatch } from "./types";
 import type { MarketInsights } from "@/lib/insights";
 
@@ -51,6 +54,7 @@ export function SmartFeedShell({
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [activeTab, setActiveTab] = useState<TabId>("all-jobs");
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Task 12: Auth-aware match data
   const [authJobs, setAuthJobs] = useState<SmartFeedJob[]>([]);
@@ -206,6 +210,8 @@ export function SmartFeedShell({
     [filteredJobs, selectedJobId]
   );
 
+  const selectedIndex = filteredJobs.findIndex((j) => j.id === selectedJobId);
+
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleToggleSave = useCallback(
     (job: SmartFeedJob) => {
@@ -224,7 +230,46 @@ export function SmartFeedShell({
     setTailorJob(job);
   }, []);
 
+  // ── Keyboard navigation ──────────────────────────────────────────────────
+  useFeedKeyboard(
+    {
+      onNext: () => {
+        if (filteredJobs.length === 0) return;
+        const next = selectedIndex < 0 ? 0 : Math.min(selectedIndex + 1, filteredJobs.length - 1);
+        setSelectedJobId(filteredJobs[next].id);
+      },
+      onPrev: () => {
+        if (filteredJobs.length === 0) return;
+        const prev = selectedIndex <= 0 ? 0 : selectedIndex - 1;
+        setSelectedJobId(filteredJobs[prev].id);
+      },
+      onToggleSave: () => {
+        if (selectedJob) handleToggleSave(selectedJob);
+      },
+      onTailor: () => {
+        if (selectedJob && isAuth) setTailorJob(selectedJob);
+      },
+      onApply: () => {
+        if (selectedJob?.url) window.open(selectedJob.url, "_blank");
+      },
+      onFocusSearch: () => {
+        const input = document.getElementById("feed-search-input") as HTMLInputElement | null;
+        input?.focus();
+      },
+      onToggleHelp: () => setHelpOpen((p) => !p),
+      onEscape: () => {
+        if (helpOpen) setHelpOpen(false);
+        else if (tailorJob) setTailorJob(null);
+        else setSelectedJobId(null);
+      },
+    },
+    true
+  );
+
   // ── Render ───────────────────────────────────────────────────────────────
+  // Phase 3 placeholder — Phase 5 wires real appliedJobIds from useAppliedJobs.
+  const appliedJobIds = new Set<string>();
+
   return (
     <div className="min-h-screen bg-surface flex flex-col transition-colors">
       <SmartFeedHeader user={user} />
@@ -267,11 +312,15 @@ export function SmartFeedShell({
             matches={matches}
             selectedJobId={selectedJobId}
             savedJobIds={savedJobIds}
+            appliedJobIds={appliedJobIds}
             isAuthenticated={isAuth}
             onSelectJob={setSelectedJobId}
             onToggleSave={handleToggleSave}
             isLoading={isLoadingMatches}
           />
+          <div className="hidden lg:block sticky bottom-0 px-5 py-2 border-t border-line-subtle bg-surface-sunken/80 backdrop-blur-sm text-[10px] tracking-[0.2em] text-fg-subtle font-mono">
+            {FEED_COPY.keyboard.footer}
+          </div>
         </div>
         <div className="hidden lg:block lg:w-[45%] xl:w-[40%]">
           <DetailPanel
@@ -302,6 +351,8 @@ export function SmartFeedShell({
         }
         savedResumeText={savedResumeText}
       />
+
+      <KeyboardHelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }
