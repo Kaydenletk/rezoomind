@@ -12,7 +12,7 @@ import { OnboardingBanner } from "./OnboardingBanner";
 import { TrustStrip } from "./TrustStrip";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
-import type { SmartFeedJob, JobMatch, DetailPanelMode } from "./types";
+import type { SmartFeedJob, JobMatch } from "./types";
 import type { MarketInsights } from "@/lib/insights";
 
 interface SmartFeedShellProps {
@@ -61,14 +61,6 @@ export function SmartFeedShell({
   // Task 14: QuickTailor
   const [tailorJob, setTailorJob] = useState<SmartFeedJob | null>(null);
   const [savedResumeText, setSavedResumeText] = useState<string | null>(null);
-
-  // DetailPanel tab mode
-  const [panelMode, setPanelMode] = useState<DetailPanelMode>("overview");
-
-  // Reset panel to overview whenever user selects a different job
-  useEffect(() => {
-    setPanelMode("overview");
-  }, [selectedJobId]);
 
   // Task 13: useSavedJobs hook
   const { savedJobIds: savedJobIdsList, toggleSavedJob } = useSavedJobs();
@@ -232,15 +224,7 @@ export function SmartFeedShell({
     setTailorJob(job);
   }, []);
 
-  const handleAskAI = useCallback((job: SmartFeedJob) => {
-    setSelectedJobId(job.id);
-    setPanelMode("explain");
-  }, []);
-
   // ── Render ───────────────────────────────────────────────────────────────
-  // Phase 3 placeholder — Phase 5 wires real appliedJobIds from useAppliedJobs.
-  const appliedJobIds = new Set<string>();
-
   return (
     <div className="min-h-screen bg-surface flex flex-col transition-colors">
       <SmartFeedHeader user={user} />
@@ -283,7 +267,6 @@ export function SmartFeedShell({
             matches={matches}
             selectedJobId={selectedJobId}
             savedJobIds={savedJobIds}
-            appliedJobIds={appliedJobIds}
             isAuthenticated={isAuth}
             onSelectJob={setSelectedJobId}
             onToggleSave={handleToggleSave}
@@ -298,10 +281,7 @@ export function SmartFeedShell({
             isAuthenticated={isAuth}
             onToggleSave={handleToggleSave}
             onTailorClick={handleTailorClick}
-            onAskAI={handleAskAI}
             jobDescription={selectedJob?.description}
-            panelMode={panelMode}
-            onPanelModeChange={setPanelMode}
             savedResumeText={savedResumeText}
           />
         </div>

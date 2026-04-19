@@ -18,5 +18,3 @@ export interface JobMatch {
   matchReasons?: string[] | null;
   missingSkills?: string[] | null;
 }
-
-export type DetailPanelMode = "overview" | "explain" | "cover-letter";
