@@ -48,3 +48,7 @@ scripts/.last_commit_hash
 
 .superpowers/
 .worktrees/
+
+# Internal-only — keep out of GitHub
+CLAUDE.md
+docs/superpowers/
