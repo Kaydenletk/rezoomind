@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { MatchScoreRing } from "@/components/dashboard/MatchScoreRing";
 import { MatchExplanationStream } from "./MatchExplanationStream";
 import { CoverLetterStream } from "./CoverLetterStream";
+import { StatusSelector } from "./StatusSelector";
 import { FEED_COPY } from "./copy";
+import type { PipelineStatus } from "@/hooks/useJobPipeline";
 import type { SmartFeedJob, JobMatch } from "./types";
 
 interface DetailPanelProps {
@@ -14,6 +16,10 @@ interface DetailPanelProps {
   isAuthenticated: boolean;
   onToggleSave: (job: SmartFeedJob) => void;
   onTailorClick: (job: SmartFeedJob) => void;
+  onApplyTrack?: (job: SmartFeedJob) => void;
+  onStatusChange?: (job: SmartFeedJob, status: PipelineStatus) => void;
+  onRemoveFromPipeline?: (job: SmartFeedJob) => void;
+  pipelineStatus?: PipelineStatus | null;
   jobDescription?: string | null;
   savedResumeText: string | null;
 }
@@ -39,6 +45,10 @@ export function DetailPanel({
   isAuthenticated,
   onToggleSave,
   onTailorClick,
+  onApplyTrack,
+  onStatusChange,
+  onRemoveFromPipeline,
+  pipelineStatus,
   jobDescription,
   savedResumeText,
 }: DetailPanelProps) {
@@ -118,7 +128,11 @@ export function DetailPanel({
       <div className="flex items-stretch gap-2 mb-4">
         <button
           type="button"
-          onClick={() => job.url && window.open(job.url, "_blank")}
+          onClick={() => {
+            if (!job.url) return;
+            if (isAuthenticated && onApplyTrack) onApplyTrack(job);
+            window.open(job.url, "_blank");
+          }}
           disabled={!job.url}
           className="flex-1 bg-brand-primary hover:bg-orange-700 disabled:bg-surface-sunken disabled:cursor-not-allowed text-white font-mono text-sm px-4 py-2 transition-colors text-center inline-flex items-center justify-center gap-1.5 group"
         >
@@ -143,6 +157,19 @@ export function DetailPanel({
           </a>
         )}
       </div>
+
+      {isAuthenticated && pipelineStatus && onStatusChange && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-fg-subtle font-mono">
+            pipeline
+          </span>
+          <StatusSelector
+            status={pipelineStatus}
+            onChange={(s) => onStatusChange(job, s)}
+            onRemove={onRemoveFromPipeline ? () => onRemoveFromPipeline(job) : undefined}
+          />
+        </div>
+      )}
 
       {job.url && (
         <a

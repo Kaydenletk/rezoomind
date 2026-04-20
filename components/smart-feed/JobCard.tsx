@@ -1,7 +1,7 @@
 "use client";
 
 import { MatchScoreRing } from "@/components/dashboard/MatchScoreRing";
-import { StatusPill } from "./StatusPill";
+import { StatusPill, type PillStatus } from "./StatusPill";
 import { FEED_COPY } from "./copy";
 import { deriveAIReason, deriveStatus } from "@/lib/feed-derivations";
 import type { SmartFeedJob, JobMatch } from "./types";
@@ -12,6 +12,7 @@ interface JobCardProps {
   isSelected: boolean;
   isSaved: boolean;
   isApplied: boolean;
+  pipelineStatus?: PillStatus | null;
   onSelect: (id: string) => void;
   onToggleSave: (job: SmartFeedJob) => void;
   isAuthenticated: boolean;
@@ -37,6 +38,7 @@ export function JobCard({
   isSelected,
   isSaved,
   isApplied,
+  pipelineStatus,
   onSelect,
   onToggleSave,
   isAuthenticated,
@@ -46,7 +48,8 @@ export function JobCard({
 
   const savedSet = new Set(isSaved ? [job.id] : []);
   const appliedSet = new Set(isApplied ? [job.id] : []);
-  const status = deriveStatus(job, savedSet, appliedSet);
+  const derivedStatus = deriveStatus(job, savedSet, appliedSet);
+  const status: PillStatus | null = pipelineStatus ?? derivedStatus;
 
   const aiReason = isAuthenticated ? deriveAIReason(match ?? null) : null;
 
