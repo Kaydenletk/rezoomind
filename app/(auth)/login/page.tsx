@@ -1,15 +1,30 @@
 import { Suspense } from "react";
+import { AuthCardShell } from "@/components/auth/AuthCardShell";
 import LoginClient from "./LoginClient";
 
 export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="w-full max-w-lg">
-          <div className="border border-stone-800 bg-[#0f0f0f] p-8">
-            <p className="text-xs text-stone-500 animate-pulse">loading auth module...</p>
+        <AuthCardShell>
+          <div className="space-y-5 animate-pulse">
+            <div className="space-y-2">
+              <div className="h-4 w-24 rounded bg-stone-200 dark:bg-stone-800" />
+              <div className="h-3 w-48 rounded bg-stone-200 dark:bg-stone-800" />
+            </div>
+
+            <div className="space-y-3">
+              <div className="h-10 rounded border border-stone-200 bg-stone-100/80 dark:border-stone-800 dark:bg-stone-900/60" />
+              <div className="h-10 rounded border border-stone-200 bg-stone-100/80 dark:border-stone-800 dark:bg-stone-900/60" />
+              <div className="h-10 rounded border border-orange-600/20 bg-orange-600/5 dark:border-orange-500/20 dark:bg-orange-500/10" />
+            </div>
+
+            <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
+              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-orange-500/80" />
+              loading sign in...
+            </div>
           </div>
-        </div>
+        </AuthCardShell>
       }
     >
       <LoginClient />

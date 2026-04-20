@@ -6,6 +6,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { ArrowRight } from "lucide-react";
+import {
+  AuthCardShell,
+  authCardSubtitleClassName,
+  authCardTitleClassName,
+  authFieldLabelClassName,
+  authFooterClassName,
+  authInlineLinkClassName,
+  authInputClassName,
+  authPrimaryButtonClassName,
+  authSecondaryButtonClassName,
+  authStatusClassName,
+  authStatusToneClassNames,
+} from "@/components/auth/AuthCardShell";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -64,126 +77,94 @@ export default function LoginClient() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full max-w-md"
-    >
-      {/* Form card */}
-      <div className="border border-stone-800 bg-[#0c0c0c] relative">
-        {/* Faux window bar */}
-        <div className="h-7 border-b border-stone-800 bg-[#111] flex items-center px-3 gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <div className="w-2 h-2 rounded-full bg-stone-700" />
-          <span className="text-[10px] text-stone-600 ml-2 tracking-wider">auth.exe</span>
+    <AuthCardShell>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        <div>
+          <h1 className={authCardTitleClassName}>Welcome back</h1>
+          <p className={authCardSubtitleClassName}>
+            Sign in to manage your internship alerts.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-7 space-y-6">
-          {/* Title */}
-          <div>
-            <h1 className="text-sm font-bold text-stone-200 tracking-wider">sign_in</h1>
-            <p className="text-[11px] text-stone-500 mt-1">
-              &gt;_ access your dashboard and alerts
-            </p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className={authFieldLabelClassName}>Email</label>
+            <input
+              type="email"
+              spellCheck={false}
+              value={form.email}
+              onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+              className={authInputClassName}
+              placeholder="name@school.edu"
+            />
           </div>
 
-          {/* Email */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
-              email
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-stone-600 text-xs">&gt;</span>
-              <input
-                type="email"
-                spellCheck={false}
-                value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                className="w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm transition-colors"
-                placeholder="user@domain.com"
-              />
-            </div>
+          <div className="space-y-2">
+            <label className={authFieldLabelClassName}>Password</label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+              className={authInputClassName}
+              placeholder="Enter your password"
+            />
           </div>
 
-          {/* Password */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase tracking-[0.2em] text-stone-500 block">
-              password
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-stone-600 text-xs">&gt;</span>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                className="w-full bg-transparent border-b border-stone-800 focus:border-orange-600 outline-none text-stone-200 py-1.5 font-mono text-sm tracking-[0.15em] transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-
-          {/* Status */}
-          <div className="h-5">
+          <div className="min-h-11">
             {note && (
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`text-[11px] font-mono ${
+                className={`${authStatusClassName} ${
                   status === "success"
-                    ? "text-green-500"
+                    ? authStatusToneClassNames.success
                     : status === "error"
-                    ? "text-red-400"
-                    : "text-stone-400"
+                    ? authStatusToneClassNames.error
+                    : authStatusToneClassNames.neutral
                 }`}
               >
-                {status === "success" && "▸ "}
-                {status === "error" && "✗ "}
-                {status === "loading" && "⋯ "}
                 {note}
               </motion.p>
             )}
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full py-2.5 border border-orange-600/50 bg-orange-600/10 hover:bg-orange-600/20 text-orange-500 text-xs font-bold tracking-[0.15em] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+            className={authPrimaryButtonClassName}
           >
             {status === "loading" ? (
-              <span className="animate-pulse">processing...</span>
+              <span className="animate-pulse">Signing in...</span>
             ) : (
               <>
-                sign_in
-                <ArrowRight className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                Sign in
+                <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
               </>
             )}
           </button>
 
-          {/* Google */}
           <button
             type="button"
-            className="w-full py-2.5 border border-stone-800 bg-stone-900/30 hover:bg-stone-800/50 text-stone-500 text-xs tracking-[0.15em] transition-all"
+            className={authSecondaryButtonClassName}
           >
-            continue_with_google
+            Continue with Google
           </button>
 
-          {/* Link */}
-          <div className="pt-4 border-t border-stone-800/50 text-center">
-            <p className="text-[11px] text-stone-500">
-              no account?{" "}
-              <Link
-                href="/signup"
-                className="text-orange-500 hover:text-orange-400 underline decoration-orange-500/20 underline-offset-4 transition-colors"
-              >
-                create_account
+          <div className={authFooterClassName}>
+            <p>
+              New here?{" "}
+              <Link href="/signup" className={authInlineLinkClassName}>
+                Create an account
               </Link>
             </p>
           </div>
         </form>
-      </div>
-    </motion.div>
+      </motion.div>
+    </AuthCardShell>
   );
 }
