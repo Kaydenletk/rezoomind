@@ -1,10 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, type FormEvent } from "react";
-
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
+import { useState, useEffect, type FormEvent } from "react";
 import { useSession } from "next-auth/react";
 
 type ResumeRecord = {
@@ -13,15 +9,20 @@ type ResumeRecord = {
   created_at: string;
 };
 
+type SaveStatus = "idle" | "loading" | "success" | "error";
+
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+
 export default function ResumePage() {
   const { data: session } = useSession();
   const user = session?.user;
-  const loading = session === undefined;
+  const sessionLoading = session === undefined;
 
   const [resumeText, setResumeText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [existing, setExisting] = useState<ResumeRecord | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<SaveStatus>("idle");
   const [note, setNote] = useState("");
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function ResumePage() {
     };
   }, [user]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!user) {
@@ -88,70 +89,138 @@ export default function ResumePage() {
       setStatus("error");
       setNote("Network error. Try again.");
     }
-  };
+  }
+
+  const isSaving = status === "loading";
+  const noteTone =
+    status === "success"
+      ? "text-status-success"
+      : status === "error"
+      ? "text-status-error"
+      : "text-fg-muted";
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8 px-6 py-20">
-      <div>
-        <h1 className="text-3xl font-semibold text-stone-100 font-mono sm:text-4xl">Resume</h1>
-        <p className="mt-2 text-sm text-stone-400">
-          Upload a PDF/DOCX or paste your resume text for smarter matching.
-        </p>
-      </div>
+    <div className="min-h-[calc(100vh-4rem)] bg-surface text-fg font-mono">
+      {/* subtle terminal grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 opacity-[0.035] dark:opacity-[0.05] text-fg"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-              Resume File
-            </label>
-            <Input
-              type="file"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              className="mt-3"
-              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-              disabled={loading}
-            />
-            {existing?.file_url ? (
-              <p className="mt-2 text-xs text-stone-500">
-                Stored file: {existing.file_url}
+      <div className="relative mx-auto flex max-w-3xl flex-col gap-8 px-6 py-16 sm:py-20">
+        <header>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-fg-subtle">
+            ~/resume
+          </p>
+          <h1 className="mt-2 font-mono text-3xl font-bold tracking-tight sm:text-4xl">
+            resume.dat
+          </h1>
+          <p className="mt-3 max-w-prose text-sm text-fg-muted">
+            Upload a PDF/DOCX or paste your resume text. We extract skills and keywords
+            to power match scoring.
+          </p>
+        </header>
+
+        {/* Window chrome card */}
+        <section
+          aria-labelledby="resume-form-heading"
+          className="border border-line bg-surface-raised"
+        >
+          <div className="flex items-center gap-2 border-b border-line bg-surface-sunken px-4 py-2">
+            <div className="flex items-center gap-1.5" aria-hidden="true">
+              <div className="w-2 h-2 rounded-full bg-fg-subtle/40" />
+              <div className="w-2 h-2 rounded-full bg-fg-subtle/40" />
+              <div className="w-2 h-2 rounded-full bg-fg-subtle/40" />
+            </div>
+            <span
+              id="resume-form-heading"
+              className="ml-2 text-[10px] uppercase tracking-[0.2em] text-fg-muted"
+            >
+              resume.exe
+            </span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-8 p-6 sm:p-8">
+            <div>
+              <label
+                htmlFor="resume-file"
+                className="text-[10px] font-semibold uppercase tracking-[0.24em] text-fg-muted"
+              >
+                resume_file
+              </label>
+              <input
+                id="resume-file"
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                disabled={sessionLoading || isSaving}
+                className={`mt-3 block w-full border border-line bg-surface px-3 py-2 text-sm text-fg file:mr-3 file:rounded-none file:border file:border-line file:bg-surface-sunken file:px-3 file:py-1 file:text-xs file:font-mono file:text-fg-muted hover:file:border-orange-600/60 disabled:opacity-50 ${focusRing}`}
+              />
+              {existing?.file_url ? (
+                <p className="mt-2 text-xs text-fg-subtle">
+                  <span className="text-status-success" aria-hidden="true">▸ </span>
+                  stored: <span className="text-fg-muted">{existing.file_url}</span>
+                </p>
+              ) : null}
+            </div>
+
+            <div>
+              <label
+                htmlFor="resume-text"
+                className="text-[10px] font-semibold uppercase tracking-[0.24em] text-fg-muted"
+              >
+                resume_text
+              </label>
+              <div className="mt-3 flex border-b border-line focus-within:border-orange-600">
+                <span
+                  aria-hidden="true"
+                  className="pt-2 pr-2 text-sm text-orange-600"
+                >
+                  {">"}
+                </span>
+                <textarea
+                  id="resume-text"
+                  value={resumeText}
+                  onChange={(event) => setResumeText(event.target.value)}
+                  rows={10}
+                  placeholder="paste your resume here..."
+                  disabled={sessionLoading || isSaving}
+                  className="w-full resize-none bg-transparent py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none disabled:opacity-50"
+                />
+              </div>
+              <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-fg-subtle">
+                extracted keywords drive match scoring
+              </p>
+            </div>
+
+            {note ? (
+              <p
+                role={status === "error" ? "alert" : undefined}
+                aria-live="polite"
+                className={`flex items-center gap-2 text-sm ${noteTone}`}
+              >
+                <span aria-hidden="true">
+                  {status === "success" ? "▸" : status === "error" ? "✗" : "⋯"}
+                </span>
+                <span>{note}</span>
               </p>
             ) : null}
-          </div>
 
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-              Resume Text
-            </label>
-            <textarea
-              value={resumeText}
-              onChange={(event) => setResumeText(event.target.value)}
-              rows={8}
-              className="mt-3 w-full bg-transparent border-0 border-b border-stone-800 rounded-none px-0 py-2 text-sm text-stone-200 placeholder:text-stone-600 focus:border-orange-600 focus:outline-none focus:ring-0 font-mono resize-none"
-              placeholder="Paste your resume text here..."
-              disabled={loading}
-            />
-          </div>
-
-          {note ? (
-            <p
-              className={`text-sm ${status === "success" ? "text-green-500" : "text-red-400"
-                }`}
+            <button
+              type="submit"
+              disabled={isSaving || sessionLoading}
+              className={`w-full border border-orange-600/60 bg-orange-600/10 px-6 py-3 font-mono text-sm font-semibold tracking-wide text-orange-700 dark:text-orange-400 transition-colors hover:bg-orange-600/20 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`}
             >
-              {note}
-            </p>
-          ) : null}
-
-          <Button
-            type="submit"
-            variant="primary"
-            className="w-full"
-            disabled={status === "loading" || loading}
-          >
-            {status === "loading" ? "Saving..." : "Save Resume"}
-          </Button>
-        </form>
-      </Card>
+              {isSaving ? "saving..." : "save_resume →"}
+            </button>
+          </form>
+        </section>
+      </div>
     </div>
   );
 }
