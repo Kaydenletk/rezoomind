@@ -1,0 +1,16 @@
+# Default owner for every path.
+* @kaydenletk
+
+# Critical infra — owner must review.
+/.github/                     @kaydenletk
+/.claude/                     @kaydenletk
+/prisma/                      @kaydenletk
+/vercel.ts                    @kaydenletk
+/app/api/                     @kaydenletk
+
+# Protected surfaces (see CLAUDE.md "Protected Landing Page Files").
+/app/page.tsx                         @kaydenletk
+/components/landing/                  @kaydenletk
+/components/smart-feed/               @kaydenletk
+/hooks/useFeedKeyboard.ts             @kaydenletk
+/lib/feed-derivations.ts              @kaydenletk
