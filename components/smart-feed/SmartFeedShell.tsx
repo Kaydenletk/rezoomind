@@ -424,6 +424,7 @@ export function SmartFeedShell({
             match={selectedJob ? matches[selectedJob.id] : null}
             isSaved={selectedJob ? savedJobIds.has(selectedJob.id) : false}
             isAuthenticated={isAuth}
+            hasResume={!!hasResume}
             onToggleSave={handleToggleSave}
             onTailorClick={handleTailorClick}
             onApplyTrack={handleApplyTrack}
