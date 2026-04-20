@@ -2,16 +2,30 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { generateGeminiJson, hasGeminiKey } from "@/lib/ai/client";
+import { batchMatchJobs } from "@/lib/matching/batch-match";
+import { generateEmbedding } from "@/lib/ai/embeddings";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-interface JobInput {
-  company: string;
-  role: string;
-  location: string;
-  category: string;
+const MAX_BATCH = 80;
+
+interface BatchScoreDetails {
+  skillMatch: number;
+  experienceMatch: number;
+  reasons: string[];
+  missingSkills: string[];
+}
+
+function emptyResponse() {
+  return NextResponse.json({ ok: true, scores: {}, details: {} });
+}
+
+function clampScore(n: number): number {
+  const rounded = Math.round(n);
+  if (rounded < 0) return 0;
+  if (rounded > 100) return 100;
+  return rounded;
 }
 
 export async function POST(request: Request) {
@@ -24,76 +38,76 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json().catch(() => null);
-    if (!body?.jobs || !Array.isArray(body.jobs) || body.jobs.length === 0) {
-      return NextResponse.json({ ok: true, scores: {} });
-    }
+    const rawIds = Array.isArray(body?.jobIds) ? body.jobIds : null;
+    if (!rawIds || rawIds.length === 0) return emptyResponse();
 
-    const jobs: JobInput[] = body.jobs.slice(0, 80);
+    const jobIds: string[] = rawIds
+      .filter((id: unknown): id is string => typeof id === "string" && id.length > 0)
+      .slice(0, MAX_BATCH);
+    if (jobIds.length === 0) return emptyResponse();
 
-    // Fetch resume
     const resume = await prisma.resume.findUnique({
       where: { userId },
-      select: { resume_text: true },
+      select: { resume_text: true, embedding: true },
     });
+    if (!resume?.resume_text) return emptyResponse();
 
-    if (!resume?.resume_text) {
-      return NextResponse.json({ ok: true, scores: {} });
+    const jobs = await prisma.job_postings.findMany({
+      where: { id: { in: jobIds }, description: { not: null } },
+      select: {
+        id: true,
+        source_id: true,
+        company: true,
+        role: true,
+        location: true,
+        description: true,
+        tags: true,
+        embedding: true,
+      },
+    });
+    if (jobs.length === 0) return emptyResponse();
+
+    let embedding = resume.embedding;
+    if (!embedding || embedding.length === 0) {
+      embedding = await generateEmbedding(resume.resume_text);
+      await prisma.resume.update({ where: { userId }, data: { embedding } });
     }
 
-    if (!hasGeminiKey()) {
-      return NextResponse.json({ ok: true, scores: {} });
+    const { results, generatedEmbeddings } = await batchMatchJobs(
+      { text: resume.resume_text, embedding },
+      jobs.map((j) => ({
+        ...j,
+        tags: j.tags ?? [],
+        embedding: j.embedding ?? [],
+      })),
+    );
+
+    if (generatedEmbeddings.length > 0) {
+      Promise.allSettled(
+        generatedEmbeddings.map((ge) =>
+          prisma.job_postings.update({
+            where: { id: ge.jobId },
+            data: { embedding: ge.embedding },
+          }),
+        ),
+      ).catch(() => {});
     }
 
-    // Build job list for prompt
-    const jobLines = jobs
-      .map((j, i) => `${i + 1} | ${j.company} | ${j.role} | ${j.location} | ${j.category}`)
-      .join("\n");
-
-    const resumeText = resume.resume_text.slice(0, 4000);
-
-    const prompt = `Given this candidate's resume and a list of internship/new-grad openings, score each job 0-100 for how well the resume matches.
-
-Scoring criteria:
-- Technical skill alignment (frameworks, languages, tools mentioned or implied by the role)
-- Role type fit (backend/frontend/fullstack/ML/data vs candidate experience)
-- Industry relevance
-- Experience level appropriateness
-
-Be realistic: most relevant jobs score 50-80. Only perfect matches score 85+. Completely unrelated roles score below 30.
-
-Resume:
----
-${resumeText}
----
-
-Jobs (format: number | company | role | location | category):
-${jobLines}
-
-Return a JSON array: [{"i":1,"s":72},{"i":2,"s":65},...]
-Where "i" is the job number and "s" is the score 0-100.`;
-
-    const results = await generateGeminiJson<Array<{ i: number; s: number }>>({
-      prompt,
-      systemPrompt:
-        "You are an expert ATS recruiter. Score job-resume matches accurately. Return only the JSON array requested.",
-      temperature: 0,
-      maxOutputTokens: 2048,
-    });
-
-    // Map results to composite keys
     const scores: Record<string, number> = {};
-    if (Array.isArray(results)) {
-      for (const { i, s } of results) {
-        const job = jobs[i - 1]; // 1-indexed
-        if (!job) continue;
-        const key = `${job.company.toLowerCase().trim()}|${job.role.toLowerCase().trim()}`;
-        scores[key] = Math.max(0, Math.min(100, Math.round(s)));
-      }
+    const details: Record<string, BatchScoreDetails> = {};
+    for (const r of results) {
+      scores[r.jobId] = clampScore(r.overallScore);
+      details[r.jobId] = {
+        skillMatch: clampScore(r.skillMatch),
+        experienceMatch: clampScore(r.experienceMatch),
+        reasons: r.reasons ?? [],
+        missingSkills: r.missingSkills ?? [],
+      };
     }
 
-    return NextResponse.json({ ok: true, scores });
-  } catch (error: any) {
+    return NextResponse.json({ ok: true, scores, details });
+  } catch (error) {
     console.error("[batch-score] error:", error);
-    return NextResponse.json({ ok: true, scores: {} });
+    return emptyResponse();
   }
 }
