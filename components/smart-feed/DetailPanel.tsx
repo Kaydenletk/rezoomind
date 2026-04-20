@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { MatchScoreRing } from "@/components/dashboard/MatchScoreRing";
 import { MatchExplanationStream } from "./MatchExplanationStream";
 import { CoverLetterStream } from "./CoverLetterStream";
@@ -155,22 +156,22 @@ export function DetailPanel({
               ✦ Tailor
             </button>
           ) : (
-            <a
+            <Link
               href="/resume"
               title="Upload resume to unlock tailoring"
               className="border border-line bg-surface-sunken font-mono text-xs px-3 py-2 text-fg-muted flex items-center gap-1 whitespace-nowrap hover:border-orange-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
               <span aria-hidden="true">🔒</span>
               <span>Upload resume →</span>
-            </a>
+            </Link>
           )
         ) : (
-          <a
+          <Link
             href="/signup"
             className="border border-line font-mono text-xs px-3 py-2 text-fg-subtle flex items-center whitespace-nowrap hover:border-orange-400 hover:text-orange-500 transition-colors"
           >
             Sign up for AI →
-          </a>
+          </Link>
         )}
       </div>
 
@@ -305,12 +306,12 @@ export function DetailPanel({
               <p className="font-mono text-xs text-fg-subtle">
                 Upload your resume to generate a tailored cover letter
               </p>
-              <a
+              <Link
                 href="/resume"
                 className="inline-block border border-orange-600/50 bg-orange-600/10 text-orange-600 dark:text-orange-400 font-mono text-xs px-4 py-2 hover:bg-orange-600/20 transition-colors"
               >
                 ~/resume →
-              </a>
+              </Link>
             </div>
           )}
         </div>

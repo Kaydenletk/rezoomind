@@ -72,7 +72,7 @@ export function SeoLandingPage({
   fitBadges,
   freshToday,
   remoteCount,
-  newGradCount,
+  newGradCount: _newGradCount,
 }: SeoLandingPageProps) {
   const faqSchema = generateFaqSchema(config.faq);
   const jobListingSchema = generateJobListingSchema(jobs, config);

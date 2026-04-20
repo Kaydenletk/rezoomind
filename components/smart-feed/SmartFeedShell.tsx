@@ -218,6 +218,7 @@ export function SmartFeedShell({
     }
 
     if (filters.recency) {
+      // eslint-disable-next-line react-hooks/purity -- recency cutoff is time-relative by design
       const now = Date.now();
       const cutoff = { day: 1, week: 7, month: 30 }[filters.recency] ?? 30;
       result = result.filter((j) => {

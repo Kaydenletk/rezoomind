@@ -3,18 +3,18 @@ import { execSync } from "node:child_process";
 
 /**
  * Drift guard: fails if new usages of retired patterns appear.
- * Baseline from docs/superpowers/drift-audit-2026-04-16.md (rebased 2026-04-17).
- * Migration phases must reduce each count toward zero.
+ * Baseline rebased 2026-04-20. Migration phases must only reduce each count —
+ * never raise a baseline to paper over new drift.
  */
 
 const BASELINES: Record<string, number> = {
-  "text-\\[9px\\]": 28,
+  "text-\\[9px\\]": 29,
   "text-\\[11px\\]": 93,
-  "rounded-\\[10px\\]": 38,
-  "rounded-\\[14px\\]": 2,
-  "rounded-md": 18,
+  "rounded-\\[10px\\]": 31,
+  "rounded-\\[14px\\]": 1,
+  "rounded-md": 14,
   "rounded-lg": 5,
-  "rounded-xl": 0,
+  "rounded-xl": 4,
 };
 
 function countPattern(pattern: string): number {

@@ -22,14 +22,14 @@ const log = (message: string, meta?: Record<string, unknown>) => {
   }
 };
 
-const knownExistingUserMessages = [
+const _knownExistingUserMessages = [
   "user already registered",
   "already registered",
   "already exists",
   "user already exists",
 ];
 
-const isRlsViolation = (error: unknown) => {
+const _isRlsViolation = (error: unknown) => {
   const typed = error as { code?: string; details?: string; hint?: string };
   if (typed?.code === "42501") return true;
 

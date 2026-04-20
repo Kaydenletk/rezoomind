@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AgentSidebar } from "@/components/AgentSidebar";
 import { getServerSession } from "next-auth";

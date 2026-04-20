@@ -9,7 +9,7 @@ interface LandingFooterProps {
 export function LandingFooter({ lastSynced }: LandingFooterProps) {
   const ago = formatTimeAgo(lastSynced);
   const line = LANDING_COPY.footer.line(ago);
-  const [prefix, privacy, terms] = line.split(" · privacy · terms");
+  const [prefix] = line.split(" · privacy · terms");
 
   return (
     <footer className="max-w-[980px] mx-auto px-4 sm:px-7 mt-14 mb-10">

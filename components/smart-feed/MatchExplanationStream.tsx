@@ -119,7 +119,7 @@ export function MatchExplanationStream({
             Analyzing match...
           </div>
         ) : (
-          <div className="text-fg-muted">Click "Explain Match" to see AI analysis</div>
+          <div className="text-fg-muted">Click &quot;Explain Match&quot; to see AI analysis</div>
         )}
       </div>
 
