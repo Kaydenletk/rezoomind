@@ -125,6 +125,13 @@ export function SmartFeedHeader({ user }: SmartFeedHeaderProps) {
                     >
                       ~/preferences
                     </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setDropdownOpen(false)}
+                      className="block px-4 py-2.5 font-mono text-xs text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-900 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                    >
+                      ~/settings
+                    </Link>
                     <div className="border-t border-stone-200 dark:border-stone-800" />
                     <button
                       onClick={() => {
