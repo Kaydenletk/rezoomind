@@ -14,6 +14,7 @@ interface DetailPanelProps {
   match?: JobMatch | null;
   isSaved: boolean;
   isAuthenticated: boolean;
+  hasResume?: boolean;
   onToggleSave: (job: SmartFeedJob) => void;
   onTailorClick: (job: SmartFeedJob) => void;
   onApplyTrack?: (job: SmartFeedJob) => void;
@@ -43,6 +44,7 @@ export function DetailPanel({
   match,
   isSaved,
   isAuthenticated,
+  hasResume,
   onToggleSave,
   onTailorClick,
   onApplyTrack,
@@ -52,6 +54,9 @@ export function DetailPanel({
   jobDescription,
   savedResumeText,
 }: DetailPanelProps) {
+  // Match features are unlocked only when the user has uploaded a resume.
+  // We fall back to `savedResumeText` presence so the prop is optional.
+  const resumeReady = hasResume ?? !!savedResumeText;
   const [descExpanded, setDescExpanded] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
 
@@ -141,13 +146,24 @@ export function DetailPanel({
         </button>
 
         {isAuthenticated ? (
-          <button
-            type="button"
-            onClick={() => onTailorClick(job)}
-            className="border border-orange-600/50 bg-orange-600/10 text-orange-600 dark:text-orange-400 hover:bg-orange-600/20 font-mono text-sm px-4 py-2 transition-colors whitespace-nowrap"
-          >
-            ✦ Tailor
-          </button>
+          resumeReady ? (
+            <button
+              type="button"
+              onClick={() => onTailorClick(job)}
+              className="border border-orange-600/50 bg-orange-600/10 text-orange-600 dark:text-orange-400 hover:bg-orange-600/20 font-mono text-sm px-4 py-2 transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            >
+              ✦ Tailor
+            </button>
+          ) : (
+            <a
+              href="/resume"
+              title="Upload resume to unlock tailoring"
+              className="border border-line bg-surface-sunken font-mono text-xs px-3 py-2 text-fg-muted flex items-center gap-1 whitespace-nowrap hover:border-orange-400 hover:text-orange-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-600 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            >
+              <span aria-hidden="true">🔒</span>
+              <span>Upload resume →</span>
+            </a>
+          )
         ) : (
           <a
             href="/signup"
