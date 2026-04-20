@@ -148,18 +148,10 @@ export function SeoLandingPage({
             postings={jobs}
             priorities={priorities}
             fitBadges={fitBadges}
-            title={config.title.toLowerCase()}
-            subtitle="Public, crawlable inventory with direct apply links and AI previews."
-            emptyStateMessage="This slice is temporarily thin. Rezoomind only keeps pages that still have real inventory."
           />
 
           <div className="flex flex-col gap-3.5">
-            <MatchingPreviewCard
-              totalJobs={jobs.length}
-              freshToday={freshToday}
-              remoteCount={remoteCount}
-              newGradCount={newGradCount}
-            />
+            <MatchingPreviewCard />
           </div>
         </div>
 
