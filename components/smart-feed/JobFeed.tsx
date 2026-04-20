@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { JobCard } from "./JobCard";
+import type { PillStatus } from "./StatusPill";
 import type { SmartFeedJob, JobMatch } from "./types";
 
 interface JobFeedProps {
@@ -10,6 +11,7 @@ interface JobFeedProps {
   selectedJobId: string | null;
   savedJobIds: Set<string>;
   appliedJobIds?: Set<string>;
+  pipelineStatuses?: Record<string, PillStatus>;
   isAuthenticated: boolean;
   onSelectJob: (id: string) => void;
   onToggleSave: (job: SmartFeedJob) => void;
@@ -22,6 +24,7 @@ export function JobFeed({
   selectedJobId,
   savedJobIds,
   appliedJobIds,
+  pipelineStatuses,
   isAuthenticated,
   onSelectJob,
   onToggleSave,
@@ -99,6 +102,7 @@ export function JobFeed({
             isSelected={job.id === selectedJobId}
             isSaved={savedJobIds.has(job.id)}
             isApplied={appliedJobIds?.has(job.id) ?? false}
+            pipelineStatus={pipelineStatuses?.[job.id] ?? null}
             onSelect={onSelectJob}
             onToggleSave={onToggleSave}
             isAuthenticated={isAuthenticated}

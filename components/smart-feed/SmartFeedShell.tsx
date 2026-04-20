@@ -13,8 +13,10 @@ import { TrustStrip } from "./TrustStrip";
 import { QuickTailorPanel } from "@/components/dashboard/QuickTailorPanel";
 import { useSavedJobs } from "@/hooks/useSavedJobs";
 import { useFeedKeyboard } from "@/hooks/useFeedKeyboard";
+import { useJobPipeline, type PipelineStatus } from "@/hooks/useJobPipeline";
 import { KeyboardHelpOverlay } from "./KeyboardHelpOverlay";
 import { FEED_COPY } from "./copy";
+import type { PillStatus } from "./StatusPill";
 import type { SmartFeedJob, JobMatch } from "./types";
 import type { MarketInsights } from "@/lib/insights";
 
@@ -69,8 +71,26 @@ export function SmartFeedShell({
   const [savedResumeText, setSavedResumeText] = useState<string | null>(null);
 
   // Task 13: useSavedJobs hook
-  const { savedJobIds: savedJobIdsList, toggleSavedJob } = useSavedJobs();
+  const { savedJobIds: savedJobIdsList, toggleSavedJob, saveJobs } = useSavedJobs();
   const savedJobIds = useMemo(() => new Set(savedJobIdsList), [savedJobIdsList]);
+
+  // Phase 4/5: client-side pipeline state (DB migration deferred)
+  const {
+    entries: pipelineEntries,
+    appliedJobIds,
+    trackingJobIds,
+    getEntry,
+    updateStatus,
+    removeEntry,
+  } = useJobPipeline();
+
+  const pipelineStatuses = useMemo<Record<string, PillStatus>>(() => {
+    const map: Record<string, PillStatus> = {};
+    for (const [id, entry] of Object.entries(pipelineEntries)) {
+      map[id] = entry.status as PillStatus;
+    }
+    return map;
+  }, [pipelineEntries]);
 
   // Task 12: Fetch match data + resume when authenticated
   useEffect(() => {
@@ -162,13 +182,13 @@ export function SmartFeedShell({
 
   // ── Source jobs based on active tab ─────────────────────────────────────
   const sourceJobs = useMemo(() => {
+    const base = isAuth && authJobs.length > 0 ? authJobs : postings;
     if (activeTab === "for-you") return isAuth ? authJobs : postings;
-    if (activeTab === "saved") {
-      const base = isAuth && authJobs.length > 0 ? authJobs : postings;
-      return base.filter((j) => savedJobIds.has(j.id));
-    }
+    if (activeTab === "saved") return base.filter((j) => savedJobIds.has(j.id));
+    if (activeTab === "applied") return base.filter((j) => appliedJobIds.has(j.id));
+    if (activeTab === "tracking") return base.filter((j) => trackingJobIds.has(j.id));
     return postings; // "all-jobs"
-  }, [activeTab, isAuth, authJobs, postings, savedJobIds]);
+  }, [activeTab, isAuth, authJobs, postings, savedJobIds, appliedJobIds, trackingJobIds]);
 
   // ── Client-side filtering ────────────────────────────────────────────────
   const filteredJobs = useMemo(() => {
@@ -248,6 +268,50 @@ export function SmartFeedShell({
     setTailorJob(job);
   }, []);
 
+  // Phase 4: apply click auto-tracks (save if not saved + status=applied)
+  const handleApplyTrack = useCallback(
+    (job: SmartFeedJob) => {
+      if (!savedJobIds.has(job.id)) {
+        void saveJobs([
+          {
+            id: job.id,
+            company: job.company,
+            role: job.role,
+            location: job.location,
+            url: job.url,
+          },
+        ]);
+      }
+      updateStatus(job.id, "applied");
+    },
+    [savedJobIds, saveJobs, updateStatus]
+  );
+
+  const handleStatusChange = useCallback(
+    (job: SmartFeedJob, status: PipelineStatus) => {
+      if (!savedJobIds.has(job.id)) {
+        void saveJobs([
+          {
+            id: job.id,
+            company: job.company,
+            role: job.role,
+            location: job.location,
+            url: job.url,
+          },
+        ]);
+      }
+      updateStatus(job.id, status);
+    },
+    [savedJobIds, saveJobs, updateStatus]
+  );
+
+  const handleRemoveFromPipeline = useCallback(
+    (job: SmartFeedJob) => {
+      removeEntry(job.id);
+    },
+    [removeEntry]
+  );
+
   // ── Keyboard navigation ──────────────────────────────────────────────────
   useFeedKeyboard(
     {
@@ -285,8 +349,8 @@ export function SmartFeedShell({
   );
 
   // ── Render ───────────────────────────────────────────────────────────────
-  // Phase 3 placeholder — Phase 5 wires real appliedJobIds from useAppliedJobs.
-  const appliedJobIds = new Set<string>();
+  const selectedPipelineStatus =
+    selectedJob ? (getEntry(selectedJob.id)?.status as PipelineStatus | null) ?? null : null;
 
   return (
     <div className="min-h-screen bg-surface flex flex-col transition-colors">
@@ -312,6 +376,8 @@ export function SmartFeedShell({
             { id: "for-you", label: "For You" },
             { id: "all-jobs", label: "All Jobs" },
             { id: "saved", label: "Saved", count: savedJobIds.size },
+            { id: "applied", label: "Applied", count: appliedJobIds.size },
+            { id: "tracking", label: "Tracking", count: trackingJobIds.size },
           ]}
         />
       )}
@@ -342,6 +408,7 @@ export function SmartFeedShell({
             selectedJobId={selectedJobId}
             savedJobIds={savedJobIds}
             appliedJobIds={appliedJobIds}
+            pipelineStatuses={pipelineStatuses}
             isAuthenticated={isAuth}
             onSelectJob={setSelectedJobId}
             onToggleSave={handleToggleSave}
@@ -359,6 +426,10 @@ export function SmartFeedShell({
             isAuthenticated={isAuth}
             onToggleSave={handleToggleSave}
             onTailorClick={handleTailorClick}
+            onApplyTrack={handleApplyTrack}
+            onStatusChange={handleStatusChange}
+            onRemoveFromPipeline={handleRemoveFromPipeline}
+            pipelineStatus={selectedPipelineStatus}
             jobDescription={selectedJob?.description}
             savedResumeText={savedResumeText}
           />
