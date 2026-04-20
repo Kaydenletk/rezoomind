@@ -52,3 +52,6 @@ scripts/.last_commit_hash
 # Internal-only — keep out of GitHub
 CLAUDE.md
 docs/superpowers/
+
+# Claude Code — per-developer local permissions (not shared)
+.claude/settings.local.json
