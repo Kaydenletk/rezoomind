@@ -1,0 +1,39 @@
+name: Scrape Jobs (4h cron)
+
+# Vercel Hobby tier limits crons to once-daily, so the freshness loop runs
+# from GitHub Actions instead. The workflow hits the production cron endpoint,
+# which then runs the scraper pipeline against the live DB.
+
+on:
+  schedule:
+    # Every 4 hours, on the hour. Times in UTC.
+    - cron: "0 */4 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: scrape-jobs
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Hit /api/cron/scrape-jobs
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ENDPOINT: ${{ vars.SCRAPE_JOBS_URL || 'https://rezoomind.vercel.app/api/cron/scrape-jobs' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET repo secret is missing — set it in Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          status=$(curl -sS -o /tmp/body.txt -w "%{http_code}" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            --max-time 300 \
+            "$ENDPOINT")
+          echo "HTTP $status"
+          cat /tmp/body.txt
+          if [ "$status" != "200" ]; then
+            exit 1
+          fi
