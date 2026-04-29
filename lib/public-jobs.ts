@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 
+import { inferCategory } from "@/lib/job-category";
 import { parseDatePostedToAge } from "@/lib/job-priority";
 import { GitHubJobsScraper } from "@/lib/scrapers";
 
@@ -46,17 +47,6 @@ let inFlightInventoryPromise: Promise<PublicInventoryResult> | null = null;
 function formatDatePosted(date: Date | null) {
   if (!date) return "—";
   return `${MONTH_NAMES[date.getMonth()]} ${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function inferCategory(role: string, tags: string[]) {
-  const roleLower = role.toLowerCase();
-  const tagText = tags.join(" ").toLowerCase();
-
-  if (/product|program manager|\bpm\b/.test(roleLower) || /\bpm\b/.test(tagText)) return "pm";
-  if (/data|machine learning|\bml\b|\bai\b|analytics|scientist/.test(roleLower)) return "dsml";
-  if (/quant|trading|research/.test(roleLower) || tagText.includes("quant")) return "quant";
-  if (/hardware|embedded|firmware|electrical/.test(roleLower)) return "hardware";
-  return "swe";
 }
 
 function toPublicJobCounts(jobs: PublicJob[]): PublicJobCounts {

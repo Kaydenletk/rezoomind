@@ -16,11 +16,19 @@ const MONTH_NAMES = [
 ];
 
 /**
- * Parse SimplifyJobs date format ("Jun 03", "Dec 25") into age in days.
- * Returns null for unparseable dates.
+ * Parse posted-date string into age in days. Accepts ISO 8601 timestamps
+ * and the legacy "Mon DD" format ("Jun 03"). Returns null when unparseable.
  */
 export function parseDatePostedToAge(datePosted: string): number | null {
   if (!datePosted || datePosted === "—") return null;
+
+  // ISO 8601 (e.g. "2026-04-29T12:00:00.000Z").
+  if (/^\d{4}-\d{2}-\d{2}/.test(datePosted)) {
+    const iso = new Date(datePosted);
+    if (Number.isNaN(iso.getTime())) return null;
+    const diffMs = Date.now() - iso.getTime();
+    return Math.max(0, Math.floor(diffMs / 86400000));
+  }
 
   const parts = datePosted.trim().split(/\s+/);
   if (parts.length < 2) return null;
