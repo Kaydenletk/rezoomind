@@ -70,7 +70,7 @@ function HeroFrame({
 }) {
   return (
     <section
-      className="px-4 sm:px-7 pt-12 pb-10 sm:pt-20 sm:pb-14 max-w-[980px] mx-auto"
+      className="px-4 sm:px-7 pt-12 pb-4 sm:pt-20 sm:pb-6 max-w-[980px] mx-auto"
       aria-labelledby="hero-heading"
     >
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-fg-subtle mb-4">

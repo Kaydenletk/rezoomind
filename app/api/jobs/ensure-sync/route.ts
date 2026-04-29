@@ -1,7 +1,7 @@
 import { createHash, createHmac } from 'crypto';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { GitHubJobsScraper, ScrapedJob, enrichJobsWithPostedDate, enrichJobsWithDescription, toDbJob } from '@/lib/scrapers';
+import { GitHubJobsScraper, ScrapedJob, enrichJobsWithPostedDate, enrichJobsWithDescription } from '@/lib/scrapers';
 import { sendJobAlertEmail } from '@/lib/email/resend';
 
 export const dynamic = 'force-dynamic';

@@ -126,7 +126,7 @@ export function CoverLetterStream({
           </div>
         ) : (
           <div className="text-stone-400">
-            Select a tone and click "Generate" to create a tailored cover letter
+            Select a tone and click &quot;Generate&quot; to create a tailored cover letter
           </div>
         )}
       </div>

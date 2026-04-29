@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function parseFiltersParam(raw: string | null): Set<string> {
   if (!raw) return new Set();
@@ -26,53 +26,48 @@ interface UseSearchFiltersResult {
 }
 
 export function useSearchFilters(): UseSearchFiltersResult {
-  const [query, setQueryState] = useState<string>("");
+  const [query, setQuery] = useState<string>("");
   const [filters, setFilters] = useState<Set<string>>(new Set());
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
+    // Hydrate state from URL once on mount. setState-in-effect is intentional here:
+    // window.location is unavailable during SSR, so reading URL params has to happen
+    // post-mount.
     const params = new URLSearchParams(window.location.search);
-    setQueryState(params.get("q") ?? "");
+    setQuery(params.get("q") ?? "");
     setFilters(parseFiltersParam(params.get("filters")));
+    hydratedRef.current = true;
   }, []);
 
-  const syncUrl = useCallback((q: string, f: Set<string>) => {
+  // URL sync runs after commit — never during render — so the Next.js
+  // router never observes a history mutation while React is rendering.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
     const url = new URL(window.location.href);
-    if (q) url.searchParams.set("q", q);
+    if (query) url.searchParams.set("q", query);
     else url.searchParams.delete("q");
-    const serialized = serializeFilters(f);
+    const serialized = serializeFilters(filters);
     if (serialized) url.searchParams.set("filters", serialized);
     else url.searchParams.delete("filters");
     window.history.replaceState({}, "", url.toString());
+  }, [query, filters]);
+
+  const toggleFilter = useCallback((f: string) => {
+    setFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(f)) next.delete(f);
+      else next.add(f);
+      return next;
+    });
   }, []);
-
-  const setQuery = useCallback(
-    (q: string) => {
-      setQueryState(q);
-      syncUrl(q, filters);
-    },
-    [filters, syncUrl]
-  );
-
-  const toggleFilter = useCallback(
-    (f: string) => {
-      setFilters((prev) => {
-        const next = new Set(prev);
-        if (next.has(f)) next.delete(f);
-        else next.add(f);
-        syncUrl(query, next);
-        return next;
-      });
-    },
-    [query, syncUrl]
-  );
 
   const clearFilters = useCallback(() => {
     setFilters(new Set());
-    syncUrl(query, new Set());
-  }, [query, syncUrl]);
+  }, []);
 
   return useMemo(
     () => ({ query, setQuery, filters, toggleFilter, clearFilters }),
-    [query, setQuery, filters, toggleFilter, clearFilters]
+    [query, filters, toggleFilter, clearFilters]
   );
 }

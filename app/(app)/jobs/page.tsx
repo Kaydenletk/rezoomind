@@ -64,7 +64,7 @@ export default function JobsPage() {
   const [savedOnly, setSavedOnly] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(40);
-  const [totalCount, setTotalCount] = useState(0);
+  const [_totalCount, setTotalCount] = useState(0);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [fallbackLoaded, setFallbackLoaded] = useState(false);
   const [copilotAction, setCopilotAction] = useState<CopilotActionRequest | null>(null);

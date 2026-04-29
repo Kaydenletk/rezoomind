@@ -45,7 +45,7 @@ export function DailyDigestStrip({ trustData }: DailyDigestStripProps) {
   return (
     <section
       aria-labelledby="digest-heading"
-      className="max-w-[980px] mx-auto px-4 sm:px-7 mt-2 mb-10 sm:mb-14"
+      className="max-w-[980px] mx-auto px-4 sm:px-7 mt-8 sm:mt-10 mb-10 sm:mb-14"
     >
       <h2 id="digest-heading" className="sr-only">
         Daily digest

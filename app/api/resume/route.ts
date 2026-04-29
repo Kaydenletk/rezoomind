@@ -132,7 +132,7 @@ export async function POST(request: Request) {
       keywords: [],
     };
 
-    const matches = rankJobMatches(
+    const _matches = rankJobMatches(
       (jobs ?? []) as {
         id: string;
         role: string;
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
       30
     );
 
-    const now = new Date().toISOString();
+    const _now = new Date().toISOString();
 
     // Skipping Job Match Persistence since job_matches model wasn't ported yet.
 

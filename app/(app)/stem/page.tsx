@@ -57,7 +57,7 @@ export default async function StemJobsPage() {
               RezoomAI Resume Analysis
             </h2>
             <p className="mt-1 text-sm text-stone-400">
-              Get ATS-friendly bullets + match score for roles you're applying to.
+              Get ATS-friendly bullets + match score for roles you&apos;re applying to.
             </p>
           </div>
           <Button href="/resume/analysis">Analyze my resume</Button>

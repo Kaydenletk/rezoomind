@@ -12,6 +12,25 @@ function matchesQuery(role: LandingRole, q: string): boolean {
   return haystack.includes(q.trim().toLowerCase());
 }
 
+const FILTER_LABELS: Record<string, string> = {
+  swe: LANDING_COPY.filters.role.swe,
+  pm: LANDING_COPY.filters.role.pm,
+  dsml: LANDING_COPY.filters.role.dsml,
+  quant: LANDING_COPY.filters.role.quant,
+  hardware: LANDING_COPY.filters.role.hardware,
+  internship: LANDING_COPY.filters.level.internship,
+  newGrad: LANDING_COPY.filters.level.newGrad,
+  remote: LANDING_COPY.filters.location.remote,
+  usa: LANDING_COPY.filters.location.usa,
+  intl: LANDING_COPY.filters.location.intl,
+  fresh24h: LANDING_COPY.filters.fresh.last24h,
+  freshWeek: LANDING_COPY.filters.fresh.week,
+};
+
+function filterLabel(key: string): string {
+  return FILTER_LABELS[key] ?? key;
+}
+
 interface RoleListProps {
   jobs: LandingRole[];
   scores: Record<string, number | null>;
@@ -91,7 +110,7 @@ export function RoleList({
                 variant="active"
                 onClick={() => onClearFilter(f)}
               >
-                × remove {f}
+                × remove {filterLabel(f)}
               </Chip>
             ))}
             {filters.size === 0 && (

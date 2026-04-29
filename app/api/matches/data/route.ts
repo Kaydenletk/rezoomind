@@ -13,7 +13,7 @@ export async function GET() {
      const userId = (session.user as any).id;
 
      try {
-          const [resumeData, preferencesData, matchesData] = await Promise.all([
+          const [_resumeData, preferencesData, _matchesData] = await Promise.all([
                // Assuming a resume model will eventually exist. Empty for now.
                prisma.$queryRaw`SELECT 1 as dummy`,
                prisma.interest.findUnique({
